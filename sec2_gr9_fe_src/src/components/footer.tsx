@@ -10,8 +10,8 @@ import { faFacebook, faInstagram, faPinterest } from '@fortawesome/free-brands-s
 export default function Footer() {
     return (
         <div>
-            <main>
-                <div className="footer bg-[#1A0041] w-full h-50  text-white px-10 py-8 flex justify-between">
+            <main className="w-full flex flex-col justify-center items-center bg-[#1A0041]">
+                <div className="footer bg-[#1A0041] w-full h-50  text-white px-10 py-8 flex justify-between max-w-[90rem]">
                     
                     <div className='flex'>
                         <Image alt="logo" src={Logo} width='150' />
@@ -36,10 +36,10 @@ export default function Footer() {
 
                     <div className="flex flex-col items-center justify-center px-6 ">
                         <h2 className="font-semibold text-xl text-[#A599ED] footer-title" >Social</h2>
-                        <div className="flex space-x-2 items-center justify-between">
-                            <a href="https://www.pinterest.com/"> <FontAwesomeIcon icon={faPinterest} size="xl" className="text-[#A599ED]" /> </a>
-                            <a href="https://www.facebook.com/"> <FontAwesomeIcon icon={faFacebook} size="xl" className=" text-[#A599ED]" /> </a>
-                            <a href="https://www.instagram.com/"> <FontAwesomeIcon icon={faInstagram} size="xl" className="text-[#A599ED]" /> </a>
+                        <div className="flex space-x-2 items-center justify-between text-[#A599ED]">
+                            <Link href="https://www.pinterest.com/"> <FontAwesomeIcon icon={faPinterest} size="xl" /> </Link>
+                            <Link href="https://www.facebook.com/"> <FontAwesomeIcon icon={faFacebook} size="xl" /> </Link>
+                            <Link href="https://www.instagram.com/"> <FontAwesomeIcon icon={faInstagram} size="xl"  /> </Link>
                         </div>
                     </div>
 
