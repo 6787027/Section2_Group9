@@ -20,50 +20,49 @@ export default function AboutUs() {
         <div className=" grid grid-cols-2  gap-12">
         {/* 6787027 */}
         <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg ">
-          <div >
+          <div className="w-60 flex-shrink-0">
             <Image alt="logo" src={Member27} width='240' className="rounded-lg"/>
           </div>
-          <div className="flex flex-col  px-4   ">
-            <SparklesText>Nattanon Ngamkham</SparklesText>
-            <span>Student ID : 6787027</span>
-            <Link href="https://www.instagram.com/pr3merp" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> pr3merp </Link>
+          <div className="flex flex-col px-4 flex-1 min-w-0 ">
+            <SparklesText className="break-words leading-tight">Nattanon Ngamkham</SparklesText>
+            <span className="pt-2 text-2xl">Student ID : 6787027</span>
+            <Link href="https://www.instagram.com/pr3merp" className="hover:text-[#A599ED] active:text-black pt-2 text-2xl" > <FontAwesomeIcon icon={faInstagram} size="xl" /> pr3merp </Link>
           </div>
         </div>
 
         {/* 6787034 */}
         <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg  ">
-          <div >
+          <div className="w-60 flex-shrink-0">
             <Image alt="logo" src={Member34} width='240' className="rounded-lg"/>
           </div>
-          <div className="flex flex-col px-4 ">
-            <SparklesText>Thita</SparklesText>
-            <span>Name : Thita</span>
-            <span>Student ID : 6787034</span>
-            <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
+          <div className="flex flex-col px-4 flex-1 min-w-0">
+            <SparklesText className="break-words leading-tight">Thita</SparklesText>
+            <span className="pt-2 text-2xl">Student ID : 6787034</span>
+            <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black pt-2 text-2xl" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
           </div>
         </div>
         {/* 6787042*/}
         <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg ">
-          <div >
-            <Image alt="logo" src={Member27} width='240' className="rounded-lg"/>
+          <div className="w-60 flex-shrink-0">
+            <Image alt="logo" src={Member42} width='240' className="rounded-lg"/>
           </div>
-          <div className="flex flex-col  px-4   ">
-            <SparklesText >Thananchanok Chuensang</SparklesText>
-            <span>Student ID : 6787042</span>
-            <Link href="https://www.instagram.com/pr3merp" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> pr3merp </Link>
+          <div className="flex flex-col px-4 flex-1 min-w-0 ">
+            <SparklesText className="break-words leading-tight ">Thananchanok Chuensang</SparklesText>
+            <span className="pt-2 text-2xl">Student ID : 6787042</span>
+            <Link href="https://www.instagram.com/pr3merp" className="hover:text-[#A599ED] active:text-black pt-2 text-2xl " > <FontAwesomeIcon icon={faInstagram} size="xl" /> pr3merp </Link>
           </div>
         </div>
 
         {/* 6787062 */}
         <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg  ">
-          <div >
+          <div className="w-60 flex-shrink-0" >
             <Image alt="logo" src={Member62} width='240' className="rounded-lg"/>
           </div>
-          <div className="flex flex-col px-4 ">
-            <SparklesText>Pimthida Butsra</SparklesText>
-            <span>Name : </span>
-            <span>Student ID : 6787062</span>
-            <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
+          <div className="flex flex-col px-4 flex-1 min-w-0">
+            <SparklesText className="break-words leading-tight">Pimthida Butsra</SparklesText>
+ 
+            <span className="pt-2 text-2xl">Student ID : 6787062</span>
+            <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black pt-2 text-2xl" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
           </div>
         </div>
         
