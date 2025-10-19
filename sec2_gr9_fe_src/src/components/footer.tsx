@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import Logo from '../assets/logo.svg'
+import Logo from '../assets/logo.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faInstagram, faPinterest } from '@fortawesome/free-brands-svg-icons'
 
