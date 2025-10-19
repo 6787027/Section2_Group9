@@ -49,7 +49,7 @@ export default function AboutUs() {
           </div>
           <div className="flex flex-col  px-4   ">
             <SparklesText >Thananchanok Chuensang</SparklesText>
-            <span>Student ID : 6787027</span>
+            <span>Student ID : 6787042</span>
             <Link href="https://www.instagram.com/pr3merp" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> pr3merp </Link>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function AboutUs() {
           <div className="flex flex-col px-4 ">
             <SparklesText>Pimthida Butsra</SparklesText>
             <span>Name : Thita</span>
-            <span>Student ID : 6787034</span>
+            <span>Student ID : 6787062</span>
             <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
           </div>
         </div>
