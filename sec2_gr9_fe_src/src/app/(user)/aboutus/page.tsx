@@ -61,7 +61,7 @@ export default function AboutUs() {
           </div>
           <div className="flex flex-col px-4 ">
             <SparklesText>Pimthida Butsra</SparklesText>
-            <span>Name : Thita</span>
+            <span>Name : </span>
             <span>Student ID : 6787062</span>
             <Link href="https://www.instagram.com/a.atiht" className="hover:text-[#A599ED] active:text-black" > <FontAwesomeIcon icon={faInstagram} size="xl" /> a.atiht </Link>
           </div>
