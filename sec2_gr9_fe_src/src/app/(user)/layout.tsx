@@ -7,7 +7,7 @@ export const metadata = { title: "CelesteCrat", description: "Next.js App" };
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
+      <body className="min-h-screen ">
         <Navbar />
         
         {children}

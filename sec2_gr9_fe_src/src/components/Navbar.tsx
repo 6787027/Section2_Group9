@@ -43,7 +43,7 @@ export default function Navbar() {
     
         
           {/* {
-            true ? (
+            true ?  (
               <span>true</span>
             ) : (
               <span>false</span>
