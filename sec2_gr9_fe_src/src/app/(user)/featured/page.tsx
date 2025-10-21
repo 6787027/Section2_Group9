@@ -1,14 +1,32 @@
-
-
-
-
+import { AuroraText } from "@/components/ui/aurora-text"
+import Image from "next/image";
+import image1 from "@/assets/FeaturedPage.svg"
+import image2 from "@/assets/ImageFeature2.svg"
+import Link from "next/link";
 export default function Featured() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-      <h1 className="text-3xl font-bold mb-4">Featured</h1>
-      <p className="text-lg max-w-2xl text-gray-700 dark:text-gray-300">
-        Welcome to our website. We build modern webenfewbfuewhifheoife applications using Next.js and Tailwind CSS.
-      </p>
+    <div className="bg-[#282151] flex flex-col  min-h-screen  text-center">
+      <main>
+        <div>
+          <div className="pt-8">
+            <AuroraText className="text-6xl font-bold" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"]}>FEATURED</AuroraText>
+          </div>
+          {/* image1 */}
+          <div className="min-h-screen w-screen mt-8 content-end" style={{ backgroundImage: `url(${image1.src})` }}>
+            <div className="pb-6 ">
+              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show now</button> </Link>
+              
+            </div>
+
+          </div>
+
+          <div>
+            {/* <Image alt="image2" src={image2} /> */}
+          </div>
+        </div>
+
+      </main>
+
     </div>
   );
 }
