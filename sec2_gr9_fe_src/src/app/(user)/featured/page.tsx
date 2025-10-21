@@ -3,6 +3,7 @@ import Image from "next/image";
 import image1 from "@/assets/FeaturedPage.svg"
 import image2 from "@/assets/ImageFeature2.svg"
 import Link from "next/link";
+
 export default function Featured() {
   return (
     <div className="bg-[#282151] flex flex-col  min-h-screen  text-center">
@@ -13,15 +14,16 @@ export default function Featured() {
           </div>
           {/* image1 */}
           <div className="min-h-screen w-screen mt-8 content-end" style={{ backgroundImage: `url(${image1.src})` }}>
-            <div className="pb-6 ">
+            <div className="pb-20">
               <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show now</button> </Link>
-              
             </div>
-
           </div>
 
-          <div>
-            {/* <Image alt="image2" src={image2} /> */}
+          {/* image2 */}
+          <div className="min-h-screen w-screen content-end" style={{ backgroundImage: `url(${image2.src})` }}>
+            <div className="pb-20">
+              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show now</button> </Link>
+            </div>
           </div>
         </div>
 
