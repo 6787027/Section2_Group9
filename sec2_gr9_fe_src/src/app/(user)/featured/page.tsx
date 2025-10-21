@@ -15,14 +15,14 @@ export default function Featured() {
           {/* image1 */}
           <div className="min-h-screen w-screen mt-8 content-end" style={{ backgroundImage: `url(${image1.src})` }}>
             <div className="pb-20">
-              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show now</button> </Link>
+              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black rounded-xl">Show now</button> </Link>
             </div>
           </div>
 
           {/* image2 */}
-          <div className="min-h-screen w-screen content-end" style={{ backgroundImage: `url(${image2.src})` }}>
-            <div>
-              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show nowww</button> </Link>
+          <div className="min-h-screen w-screen flex justify-items-start items-end " style={{ backgroundImage: `url(${image2.src})` }}>
+            <div className="p-40">
+              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black rounded-xl">Show now</button> </Link>
             </div>
           </div>
         </div>
