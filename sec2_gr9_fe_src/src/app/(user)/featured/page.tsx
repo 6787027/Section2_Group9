@@ -21,8 +21,8 @@ export default function Featured() {
 
           {/* image2 */}
           <div className="min-h-screen w-screen content-end" style={{ backgroundImage: `url(${image2.src})` }}>
-            <div className="pb-20">
-              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show now</button> </Link>
+            <div>
+              <Link href={"/product"}><button className="btn hover:bg-[#A599ED] active:bg-black ">Show nowww</button> </Link>
             </div>
           </div>
         </div>
