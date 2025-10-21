@@ -1,6 +1,6 @@
 
 
-export default function Payment() 
+export default function Payment() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
       <h1 className="text-3xl font-bold mb-4">Log in</h1>
