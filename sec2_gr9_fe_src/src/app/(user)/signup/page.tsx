@@ -1,7 +1,7 @@
 import Image from "next/image";
 import bgsignin from "../../../assets/bgsignin2.jpg"
 import { AuroraText } from "@/components/ui/aurora-text"
-export default function Signin() {
+export default function Signup() {
   return (
    <div style={{ backgroundImage: `url(${bgsignin.src})` }} className="h-svh bg-cover bg-center flex  justify-center items-center">
     <form>
