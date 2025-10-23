@@ -6,7 +6,7 @@ export default function Signup() {
    <div style={{ backgroundImage: `url(${bgsignin.src})` }} className="h-svh bg-cover bg-center flex  justify-center items-center">
     <form>
       <fieldset>
-        <legend className="fieldset border-base-300 rounded-box w-xs border p-4 bg-fuchsia-200">
+        <legend className="fieldset border-base-300 rounded-box w-xs border p-4 bg-fuchsia-200/75 backdrop-blur-sm">
           <div className="text-center pt-5">
             <AuroraText className="text-4xl font-bold tracking-tighter md:text-5xl lg:text-7xl  pb-8" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"] } speed = {2}>SIGN UP</AuroraText>
           </div>
