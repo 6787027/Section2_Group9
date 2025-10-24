@@ -2,11 +2,18 @@
 
 export default function Ad_account() {
   return (
-   <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-      <h1 className="text-3xl font-bold mb-4">Admin</h1>
-      <p className="text-lg max-w-2xl text-gray-700 dark:text-gray-300">
-        Admin using Next.js and Tailwind CSS.
-      </p>
-    </div>
+   <div className="bg-[#F1F0F4] h-svh">
+      <div className="flex-col h-full">
+        <div className="flex h-full gap-20 justify-between">
+          <div className="bg-white flex justify-center items-center px-25 border-solid border-4 border-red-500">
+            <div className="">nav</div>
+          </div>
+          <div className="bg-white justify-items-center">
+            <div>search+table</div>
+          </div>
+          <div className=""></div>
+        </div>
+      </div>
+   </div>
   );
 }
