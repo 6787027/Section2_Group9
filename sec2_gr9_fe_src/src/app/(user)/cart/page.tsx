@@ -1,6 +1,7 @@
 import { AuroraText } from "@/components/ui/aurora-text"
 import Image from "next/image";
 import ImgOrder from "@/assets/ImageOrder.png"
+import { Minus, Plus } from "lucide-react";
 export default function Cart() {
   return (
     <div className="flex-col flex items-center min-h-screen p-8 text-ce bg-[#282151]">
@@ -15,9 +16,24 @@ export default function Cart() {
               <h3>TOTAL</h3>
             </div>
           </div>
-          <hr className="my-4 border-t-2 border-gray-300 w-auto" />
-          <div className="flex">
-            <Image src={ImgOrder} alt="ProductImg" />
+          <hr className="my-4 border-t-2 border-gray-300 w-200" />
+          <div className="flex gap-10 text-gray-400">
+            <div className="flex gap-5">
+              <Image src={ImgOrder} alt="ProductImg" />
+              <h2>Hutao Doll</h2>
+            </div>
+            <h2 className="ml-5">฿590.00</h2>
+            <div className="flex gap-5 ml-22 ">
+              <button className="border justify-center items-center flex w-4 h-4 ">
+                <Minus className="" />
+              </button>
+              <span>1</span>
+              <button className="border flex items-center justify-center w-4 h-4">
+                <Plus className="" />
+              </button>
+            </div>
+            
+
           </div>
           
         </div>
