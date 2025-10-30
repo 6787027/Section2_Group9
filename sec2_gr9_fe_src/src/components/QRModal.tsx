@@ -1,7 +1,12 @@
 import QrPayment from "@/assets/QrPayment.png"
 import Image from "next/image"
-import { useEffect, useState } from "react"
-export default function QRModal() {
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+
+interface Props {
+    setModalShown: Dispatch<SetStateAction<'qr' | 'visa' | null>>
+}
+
+export default function QRModal({ setModalShown }: Props) {
     const [time, setTime] = useState('03:00')
 
     useEffect(() => {
@@ -27,10 +32,15 @@ export default function QRModal() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center">
-            <span className="font-bold text-4xl p-4 text-[#282151]">PAYMENT</span>
-            <Image src={QrPayment} alt="QR" />
-            <span className="mt-2">{time}</span>
+        <div className="absolute top-0 left-0 w-full h-full bg-black/70 backdrop-blur-sm flex items-center justify-center">
+            <div className="bg-white p-4 px-20 rounded-2xl relative">
+                <div className="flex flex-col items-center justify-center">
+                    <span className="absolute top-4 right-8 cursor-pointer p-2" onClick={() => setModalShown(null)}>x</span>
+                    <span className="font-bold text-4xl p-4 text-[#282151]">PAYMENT</span>
+                    <Image src={QrPayment} alt="QR" />
+                    <span className="mt-2">{time}</span>
+                </div>
+            </div>
         </div>
     )
 }

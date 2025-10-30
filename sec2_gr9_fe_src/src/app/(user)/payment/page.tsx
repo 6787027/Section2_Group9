@@ -9,7 +9,12 @@ import { useState } from "react";
 import QRModal from "@/components/QRModal";
 
 export default function Payment() {
-  const [showModal, setShowModal] = useState(false)
+  const [method, setMethod] = useState<'qr' | 'visa' | null>(null)
+  const [modalShown, setShowModalShown] = useState<'qr' | 'visa' | null>(null)
+
+  const handleBtn = () => {
+    setShowModalShown(method)
+  }
 
   return (
     <div className="bg-[#282151] flex flex-col items-center justify-center min-h-screen p-8 relative">
@@ -65,8 +70,8 @@ export default function Payment() {
                 <div className="flex flex-col gap-2 pt-2">
                   <span className="text-[#9A9A9A] font-semibold font-instrument-sans">PAYMENT DETAILS</span>
                   <div className="flex">
-                    <Image src={Visa} alt="visa" />
-                    <Image src={QR} alt="qr" />
+                    <Image className="cursor-pointer" onClick={() => setMethod('visa')} src={Visa} alt="visa" />
+                    <Image className="cursor-pointer" onClick={() => setMethod('qr')} src={QR} alt="qr" />
                   </div>
                 </div>
                 <label className="label text-[#7469B6] font-instrument-sans">Name on Card</label>
@@ -84,20 +89,15 @@ export default function Payment() {
                     <input type="number" className="input rounded-2xl border" required />
                   </div>
                 </div>
-                <button type="button" onClick={() => setShowModal(true)} className="mt-4 cursor-pointer bg-[#7469B6] rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
+                <button type="button" onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#7469B6] rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
               </legend>
             </fieldset>
           </form>
         </div>
       </div>
-      {showModal && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black/70 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white p-4 px-20 rounded-2xl">
-        <QRModal />
-        </div>
-        </div>
+      {modalShown === 'qr' && (
+            <QRModal setModalShown={setShowModalShown} />
       )}
-
     </div>
   );
 }
