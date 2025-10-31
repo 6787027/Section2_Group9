@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 
+
 export const metadata = { title: "CelesteCrat", description: "Next.js App" };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
