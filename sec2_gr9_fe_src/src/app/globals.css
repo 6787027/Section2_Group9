@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 @plugin "daisyui";
+@plugin 'tailwind-scrollbar';
 
 @theme inline {
   --color-background: var(--background);
@@ -213,4 +214,36 @@
     -webkit-appearance: none;
     margin: 0;
   }
+}
+
+/* ไฟล์: app/globals.css
+  เพิ่มโค้ดนี้เข้าไปเพื่อสร้างสไตล์ Scrollbar แบบกำหนดเอง
+*/
+
+/* --- สำหรับเบราว์เซอร์ Firefox --- */
+.custom-scrollbar {
+  scrollbar-color: #c084fc #282151; 
+  scrollbar-width: thin;
+}
+
+/* --- สำหรับเบราว์เซอร์กลุ่ม WebKit (Chrome, Safari, Edge) --- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 15px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #282151; /* สีของราง (สีเดียวกับพื้นหลัง) */
+  border-radius: 5px;
+  
+}
+
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #c084fc; 
+  border-radius: 5px;
+  border: 2px solid #282151; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #d8b4fe; /* สีเมื่อเมาส์ชี้ (สี purple-300) */
 }

@@ -6,8 +6,15 @@ import ImgOrder from "@/assets/ImageOrder.png"
 const ALL_PRODUCTS = [
   { id: 1, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
   { id: 2, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
-  { id: 3, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder }
+  { id: 3, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder },
+  { id: 4, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
+  { id: 5, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
+  { id: 6, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder },
+  { id: 7, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
+  { id: 8, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
+  { id: 9, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder }
 ];
+
 export default function Product() {
   const [products_list, setshowproduct] = useState(ALL_PRODUCTS)
   const [product_name, setproductname] = useState('')
@@ -46,7 +53,7 @@ export default function Product() {
 
 
   return (
-    <div className="page-container flex w-full p-4 gap-4 bg-[#282151]">
+    <div className="page-container flex p-4 gap-4 bg-[#282151]">
 
       <aside className="sidebar w-1/4 p-4 rounded-lg flex flex-col gap-3 bg-[#4a3c6b] text-white">
         <label>Product name</label>
@@ -106,14 +113,14 @@ export default function Product() {
         </button>
       </aside>
 
-      <main className="main-content flex-1">
-        <div className="product-grid grid grid-cols-3 gap-4">
+      <main className="main-content flex-1 h-screen overflow-y-auto custom-scrollbar pr-4 ">
+        <div className="product-grid grid grid-cols-3 gap-4 ">
           {products_list.map(product => (
             <ProductCard
               key={product.id}
               name={product.name}
               price={product.price}
-              imageUrl={product.url.src} />
+              imageUrl={product.url.src} type={product.type} genre={product.genre} />
           ))}
         </div>
       </main>

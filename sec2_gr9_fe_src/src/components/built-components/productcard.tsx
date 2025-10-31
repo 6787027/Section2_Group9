@@ -1,21 +1,30 @@
 type ProductCardProps = {
   name: string;
   price: number;
-  imageUrl: string 
+  imageUrl: string,
+  type : string,
+  genre : string
 };
-export default function ProductCard({ name, price, imageUrl }: ProductCardProps) {
+export default function ProductCard({ name, price, imageUrl, type, genre }: ProductCardProps) {
   return (
-    <div className="bg-white             
-      rounded-lg           
-      p-4                  
-      flex                 
-      flex-col                          
-      overflow-hidden      
-      hover:shadow-lg      
-      transition-shadow">
-      <img src={imageUrl} alt={name} className="items-center w-50 h-50" />
-      <h3 className="font-bold items-start">{name}</h3>
-      <p>$ {price}</p>
+    <div className="card bg-base-100  shadow-sm">
+      <figure>
+        <img
+          src={imageUrl}
+          alt={name} />
+      </figure>
+      <div className="card-body">
+        <h2 className="card-title">
+          {name}
+        </h2>
+        <p>{price}</p>
+        <div className="card-actions justify-end">
+          <div className="badge badge-outline">{type}</div>
+          <div className="badge badge-outline">{genre}</div>
+        </div>
+      </div>
     </div>
+
+
   );
 }
