@@ -55,43 +55,43 @@ export default function Product() {
   return (
     <div className="page-container flex p-4 gap-4 bg-[#282151]">
 
-      <aside className="sidebar w-1/4 p-4 rounded-lg flex flex-col gap-3 bg-[#4a3c6b] text-white">
-        <label>Product name</label>
+      <aside className="sidebar w-1/4 p-4 rounded-lg flex flex-col gap-3 bg-gradient-to-b from-[#7469B6] to-[#332E50] text-white">
+        <label className="font-semibold pt-5">Product name</label>
         <input
           type="text"
           value={product_name}
           onChange={e => setproductname(e.target.value)}
           placeholder="Search"
-          className="text-black p-2 rounded bg-white" 
+          className="text-[#D0D0D0] p-2  bg-white rounded-xl" 
         />
 
-        <label>Type</label>
+        <label className="font-semibold">Type</label>
         <select
           value={product_type}
           onChange={e => setproducttype(e.target.value)}
-          className="text-black p-2 rounded bg-white"
+          className="text-[#D0D0D0] p-2  bg-white rounded-xl"
         >
           <option value="">Select a Type</option>
           <option value="Love">Love</option>
           <option value="Luck">Luck</option>
         </select>
 
-        <label>Genre</label>
+        <label className="font-semibold">Genre</label>
         <select
           value={product_genre}
           onChange={e => setproductgenre(e.target.value)}
-          className="text-black p-2 rounded bg-white"
+          className="text-[#D0D0D0] p-2 rounded-xl bg-white"
         >
           <option value="">Select a Genre</option>
           <option value="Game">Game</option>
           <option value="Anime">Anime</option>
         </select>
 
-        <label>Character</label>
+        <label className="font-semibold">Character</label>
         <select
           value={product_character}
           onChange={e => setproductcharacter(e.target.value)}
-          className="text-black p-2 rounded bg-white"
+          className="text-[#D0D0D0] p-2 rounded-xl bg-white"
         >
           <option value="">Select a Character</option>
           <option value="hutao">Hutao</option>
