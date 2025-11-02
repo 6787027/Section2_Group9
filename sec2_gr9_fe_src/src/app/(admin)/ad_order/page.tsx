@@ -45,7 +45,6 @@ export default function Ad_order() {
                     <label className="text-[#7469B6] mr-2">Order Status</label>
                     <select id="or_select" defaultValue="Select" className="select pl-3 text-grey-200 bg-white border-solid border-1 border-white rounded-xl shadow-xl">
                         <option disabled={true}>Select</option>
-                        <option>Pending</option>
                         <option>Paid</option>
                         <option>Sent</option>
                     </select>
@@ -96,8 +95,8 @@ export default function Ad_order() {
                                     <td>590</td>
                                     <td>
                                         <div id="statusborder">
-                                            <div id="pending"></div>
-                                            <div>Pending</div>
+                                            <div id="sent"></div>
+                                            <div>Sent</div>
                                         </div>
                                     </td>
                                     <td className="flex flex-nowrap">

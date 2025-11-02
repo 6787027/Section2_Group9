@@ -16,18 +16,6 @@ table, h2, th {
     height: calc(var(--spacing) * 2.5);
 }
 
-#pending{
-    margin-top: calc(var(--spacing) * 1.5);
-    margin-left: calc(var(--spacing) * 2);
-    margin-right: calc(var(--spacing) * 1);
-    background: #E00303;
-    border-radius: var(--radius-xl);
-    border-style: solid;
-    border-width: 1px;
-    border-color: #E00303;
-    width: calc(var(--spacing) * 2.5);
-    height: calc(var(--spacing) * 2.5);
-}
 
 #sent{
     margin-top: calc(var(--spacing) * 1.5);
