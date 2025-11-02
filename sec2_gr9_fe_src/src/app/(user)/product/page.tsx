@@ -4,15 +4,15 @@ import { useState } from "react";
 import ImgOrder from "@/assets/ImageOrder.png"
 
 const ALL_PRODUCTS = [
-  { id: 1, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
-  { id: 2, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
-  { id: 3, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder },
-  { id: 4, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
-  { id: 5, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
-  { id: 6, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder },
-  { id: 7, name: "Hutao Doll", price: 500, genre: "Game", type: "Love", character: "hutao", url: ImgOrder },
-  { id: 8, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Luck", character: "Stelle", url: ImgOrder },
-  { id: 9, name: "Another Doll", price: 200, genre: "Anime", type: "Love", character: "annabell", url: ImgOrder }
+  { id: 1, name: "Hutao Doll", price: 500, genre: "Game", type: "Doll", character: "hutao", url: ImgOrder },
+  { id: 2, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Accessory", character: "Stelle", url: ImgOrder },
+  { id: 3, name: "Another Doll", price: 200, genre: "Anime", type: "Doll", character: "annabell", url: ImgOrder },
+  { id: 4, name: "Hutao Doll", price: 500, genre: "Game", type: "Accessory", character: "hutao", url: ImgOrder },
+  { id: 5, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Doll", character: "Stelle", url: ImgOrder },
+  { id: 6, name: "Another Doll", price: 200, genre: "Anime", type: "Accessory", character: "annabell", url: ImgOrder },
+  { id: 7, name: "Hutao Doll", price: 500, genre: "Game", type: "Doll", character: "hutao", url: ImgOrder },
+  { id: 8, name: "Stelle - Star Collection", price: 500, genre: "Game", type: "Accessory", character: "Stelle", url: ImgOrder },
+  { id: 9, name: "Another Doll", price: 200, genre: "Anime", type: "Doll", character: "annabell", url: ImgOrder }
 ];
 
 export default function Product() {
@@ -56,44 +56,44 @@ export default function Product() {
     <div className="page-container flex p-4 gap-4 bg-[#282151]">
 
       <aside className="sidebar w-1/4 p-4 rounded-lg flex flex-col gap-3 bg-gradient-to-b from-[#7469B6] to-[#332E50] text-white">
-        <label className="font-semibold pt-5">Product name</label>
+        <label className="font-semibold pt-5 text-xl">Product name</label>
         <input
           type="text"
           value={product_name}
           onChange={e => setproductname(e.target.value)}
           placeholder="Search"
-          className="text-[#D0D0D0] p-2  bg-white rounded-xl" 
+          className="text-black p-2  bg-white rounded-xl" 
         />
 
-        <label className="font-semibold">Type</label>
+        <label className="font-semibold text-xl">Type</label>
         <select
           value={product_type}
           onChange={e => setproducttype(e.target.value)}
-          className="text-[#D0D0D0] p-2  bg-white rounded-xl"
+          className="text-black p-2  bg-white rounded-xl"
         >
           <option value="">Select a Type</option>
-          <option value="Love">Love</option>
-          <option value="Luck">Luck</option>
+          <option value="Love">Doll</option>
+          <option value="Luck">Accessory</option>
         </select>
 
-        <label className="font-semibold">Genre</label>
+        <label className="font-semibold text-xl">Genre</label>
         <select
           value={product_genre}
           onChange={e => setproductgenre(e.target.value)}
-          className="text-[#D0D0D0] p-2 rounded-xl bg-white"
+          className="text-black p-2 rounded-xl bg-white"
         >
           <option value="">Select a Genre</option>
           <option value="Game">Game</option>
           <option value="Anime">Anime</option>
         </select>
 
-        <label className="font-semibold">Character</label>
+        <label className="font-semibold text-xl">Character</label>
         <select
           value={product_character}
           onChange={e => setproductcharacter(e.target.value)}
-          className="text-[#D0D0D0] p-2 rounded-xl bg-white"
+          className="text-black p-2 rounded-xl bg-white"
         >
-          <option value="">Select a Character</option>
+          <option value="" >Select a Character</option>
           <option value="hutao">Hutao</option>
           <option value="Stelle">Stelle</option>
           <option value="annabell">Annabell</option>
@@ -101,13 +101,13 @@ export default function Product() {
 
         <button
           onClick={handlesearch}
-          className="bg-purple-400 p-2 rounded hover:bg-purple-300"
+          className="bg-[#BBC0FF] p-2  hover:bg-purple-300 mt-20 text-[#282151] font-bold rounded-lg"
         >
           Search
         </button>
         <button
           onClick={handleClear}
-          className="bg-gray-300 text-black p-2 rounded hover:bg-gray-400"
+          className="bg-none  p-2 rounded hover:bg-gray-400 text-white font-bold"
         >
           Clear
         </button>

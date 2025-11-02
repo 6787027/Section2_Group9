@@ -216,23 +216,20 @@
   }
 }
 
-/* ไฟล์: app/globals.css
-  เพิ่มโค้ดนี้เข้าไปเพื่อสร้างสไตล์ Scrollbar แบบกำหนดเอง
-*/
 
-/* --- สำหรับเบราว์เซอร์ Firefox --- */
+
 .custom-scrollbar {
-  scrollbar-color: #c084fc #282151; 
+  scrollbar-color: white #282151; 
   scrollbar-width: thin;
 }
 
-/* --- สำหรับเบราว์เซอร์กลุ่ม WebKit (Chrome, Safari, Edge) --- */
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 15px; 
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #282151; /* สีของราง (สีเดียวกับพื้นหลัง) */
+  background: #282151; 
   border-radius: 5px;
   
 }
@@ -245,5 +242,5 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #d8b4fe; /* สีเมื่อเมาส์ชี้ (สี purple-300) */
+  background-color: #d8b4fe; 
 }

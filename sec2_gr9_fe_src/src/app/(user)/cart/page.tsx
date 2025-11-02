@@ -77,7 +77,7 @@ export default function Cart() {
 
             <table className="w-2/3 text-center mt-10">
               <thead>
-                <tr className="border-b text-[#282151]">
+                <tr className="border-b-2 text-[#282151]">
                   <th className="py-2">PRODUCT</th>
                   <th className="py-2">PRICE</th>
                   <th className="py-2">QTY</th>
@@ -97,10 +97,9 @@ export default function Cart() {
             </table>
 
             <div className="w-1/3 pr-10 sticky top-10">
-              <div className=" border border-gray-400 rounded-4xl">
-                <div className="pb-4 text-center">
+              <div className="  border-gray-200 border-2 rounded-4xl">
+                <div className="pb-4 text-center border-b-2">
                   <h2 className="text-[#240046] font-bold pt-10">ORDER SUMMARY</h2>
-                  <hr className="mt-4" />
                 </div>
                 <div className="space-y-1 text-[#7469B6]">
                   
@@ -116,10 +115,11 @@ export default function Cart() {
                     <p>Total</p>
                     <p>{formatCurrency(total)}</p>
                   </div>
-
-                  <button className="bg-[#775AC4] text-white p-30 py-3 rounded-xl ml-5 mb-5 font-semibold hover:bg-opacity-90 transition-opacity">
-                    Pay Now
-                  </button>
+                  <a href="/payment">
+                    <button className="bg-[#775AC4] text-white p-30 py-3 rounded-xl ml-5 mb-5 font-semibold hover:bg-opacity-90 transition-opacity">
+                      Pay Now
+                    </button>
+                  </a>
                 </div>
               </div>
             </div>

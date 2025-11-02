@@ -30,6 +30,7 @@ export default function Signup() {
           <label className="label font-bold ml-5">Password</label>
           <input type="password" className="input rounded-2xl w-auto mx-5" value={password} onChange={(e) =>setPassword(e.target.value)} placeholder="Your Password" required />
           <button type="submit" className="h-10 mt-4 mx-5 rounded-2xl bg-fuchsia-900 text-white">Sign Up</button>
+          
 
         
         </legend>
