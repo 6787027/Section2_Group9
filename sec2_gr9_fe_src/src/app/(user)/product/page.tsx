@@ -72,8 +72,8 @@ export default function Product() {
           className="text-black p-2  bg-white rounded-xl"
         >
           <option value="">Select a Type</option>
-          <option value="Love">Doll</option>
-          <option value="Luck">Accessory</option>
+          <option value="Doll">Doll</option>
+          <option value="Accessory">Accessory</option>
         </select>
 
         <label className="font-semibold text-xl">Genre</label>
