@@ -40,7 +40,7 @@ export default function Ad_order() {
                     </button>
                 </div>
             </div>
-            <div className="border-1 border-white rounded-2xl shadow-xl bg-white w-250 h-105">
+            <div className="border-1 border-white rounded-t-2xl shadow-xl bg-white w-250 h-fit">
                 <div className="mt-3 ml-5 mb-2">
                     <label className="text-[#7469B6] mr-2">Order Status</label>
                     <select id="or_select" defaultValue="Select" className="select pl-3 text-grey-200 bg-white border-solid border-1 border-white rounded-xl shadow-xl">
@@ -50,6 +50,8 @@ export default function Ad_order() {
                     </select>
                 </div>
                 <div className="border-b-1 border-[#D9D9D9]"></div>
+            </div>
+            <div className="overflow-auto border-1 border-white rounded-b-2xl shadow-xl bg-white w-250 h-110">
                 <div>
                     <div className="overflow-auto">
                         <table className="table table-pin-rows table-pin-cols">
