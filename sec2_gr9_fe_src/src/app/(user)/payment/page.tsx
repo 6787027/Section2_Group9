@@ -21,7 +21,7 @@ export default function Payment() {
       <div className="bg-white flex flex-1 w-full rounded-4xl">
         <div className="p-8 flex flex-col flex-1">
 
-          <span className="text-[#9A9A9A] font-semibold font-instrument-sans">YOUR ORDER</span>
+          <span className="text-[#240046] text-2xl font-bold font-instrument-sans">YOUR ORDER</span>
           {/*Order Product*/}
           <div className="pt-4 flex gap-8">
             <Image src={ImgOrder} alt="ProductImg" />
@@ -60,7 +60,7 @@ export default function Payment() {
           <form className="flex">
             <fieldset className="flex flex-1">
               <legend className="border-base-300 rounded-box p-4 flex flex-col gap-2 ">
-                <span className="text-[#9A9A9A] font-semibold font-instrument-sans">SHIPPING DETAILS</span>
+                <span className="text-[#240046] font-semibold font-instrument-sans">SHIPPING DETAILS</span>
                 <label className="label text-[#7469B6] font-instrument-sans">Name</label>
                 <input type="text" className="input rounded-2xl border w-full" required />
                 <label className="label text-[#7469B6] font-instrument-sans">Phone Number</label>
@@ -68,7 +68,7 @@ export default function Payment() {
                 <label className="label text-[#7469B6] font-instrument-sans">Address Details</label>
                 <input type="text" className="input rounded-2xl border w-full" required />
                 <div className="flex flex-col gap-2 pt-2">
-                  <span className="text-[#9A9A9A] font-semibold font-instrument-sans">PAYMENT DETAILS</span>
+                  <span className="text-[#240046] font-semibold font-instrument-sans">PAYMENT DETAILS</span>
                   <div className="flex">
                     <Image className="cursor-pointer" onClick={() => setMethod('visa')} src={Visa} alt="visa" />
                     <Image className="cursor-pointer" onClick={() => setMethod('qr')} src={QR} alt="qr" />
@@ -89,7 +89,7 @@ export default function Payment() {
                     <input type="number" className="input rounded-2xl border" required />
                   </div>
                 </div>
-                <button type="button" onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#7469B6] rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
+                <button type="button" onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#6759b9] hover:bg-[#7469B6] hover:text-white rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
               </legend>
             </fieldset>
           </form>
