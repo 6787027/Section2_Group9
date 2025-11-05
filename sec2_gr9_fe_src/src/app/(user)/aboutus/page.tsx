@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faInstagram, faPinterest } from '@fortawesome/free-brands-svg-icons'
 import Link from "next/link";
 import { SparklesText } from "@/components/ui/sparkles-text"
-import { MagicCard } from "@/components/ui/magic-card";
+
 
 
 export default function AboutUs() {
