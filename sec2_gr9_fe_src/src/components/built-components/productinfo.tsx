@@ -1,55 +1,49 @@
-"use client"
-import { Minus, Plus } from "lucide-react";
+interface ProductInfo {
+  name: string;
+  price: number;
+  imageUrl: string,
+  type : string,
+  genre : string
+};
 
-import ProductInfo from "@/components/built-components/productcard"
-import { useState } from "react";
-import ImgOrder from "@/assets/ImageOrder.png"
-
-
-export default function Product_info() {
-    const [products_list, setshowproduct] = useState('')
-    const [product_name, setproductname] = useState('')
-    const [product_type, setproducttype] = useState('')
-    const [product_genre, setproductgenre] = useState('')
-    const [product_character, setproductcharacter] = useState('')
-    
-    
-
-
-
-
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('th-TH', {
+    style: 'currency',
+    currency: 'THB',
+    minimumFractionDigits: 2,
+  }).format(amount);
+};
+export default function ProductInfo({ name, price, imageUrl, type, genre }: ProductInfo) {
   return (
-    <div className="bg-[#282151]  min-h-screen  text-center px-8">
-        <main className="main-content flex-1 h-screen overflow-y-auto custom-scrollbar pr-4 ">
-            <div className="product-grid grid grid-cols-3 gap-4 ">
-                <ProductInfo
-                  key={product.id}
-                  name={product.name}
-                  price={product.price}
-                  imageUrl={product.url.src} type={product.type} genre={product.genre} />
-            </div>
-        </main>
-      {/* <main className="flex flex-col">
+    <main className="flex flex-col">
         <div className="mt-10 flex flex-row justify-center">
             <div className="flex">
                 <div>
-                    <div className="bg-white p-10 my-5 mr-2 rounded-sm"></div>
-                    <div className="bg-white p-10 my-5 mr-2 rounded-sm"></div>
+                    <img className="bg-white p-10 my-5 mr-2 rounded-sm"
+                        src={imageUrl}
+                        width={250}
+                        alt={name} />
+                    <img className="bg-white p-10 my-5 mr-2 rounded-sm"
+                        src={imageUrl}
+                        width={250}
+                        alt={name} />
                 </div>
                 
             </div>
             <div className="">
-                <div className="bg-white p-40 my-5 ml-5 rounded-sm"></div>
-                
+                <img className="bg-white p-40 my-5 ml-5 rounded-sm"
+                    src={imageUrl}
+                    width={250}
+                    alt={name} />
             </div>
             
             <div className=" justify-items-start mt-5 ml-10 flex flex-col text-left">
                 <div className="text-3xl mb-8 text-white">
-                    Hutao Doll
+                    {name}
                 </div>
                 <div className="flex flex-row mb-20 text-[#C8C4EE]">
                     <div className="text-2xl self-end">
-                        ฿ 590.00 
+                        {price}
                     </div>
                     <div className="px-5 text-2xl self-end">|</div>
                     <div className="text-l self-end">
@@ -60,11 +54,10 @@ export default function Product_info() {
                     <div className="mb-2">Quantity</div>
                     <div className="flex justify-start items-center gap-5 h-fit">
                         <button type="button" className="border-1 border-solid border-[#E8E6FB] justify-center items-center flex w-4 h-4">
-                            <Minus className="" />
+                            
                         </button>
                         <span>1</span>
                         <button type="button" className="border-1 border-solid border-[#E8E6FB] justify-center items-center flex w-4 h-4">
-                            <Plus className="" />
                         </button>
                     </div>
                 </div>
@@ -89,7 +82,8 @@ export default function Product_info() {
                 </div>
         </div>
         
-      </main> */}
-    </div>
+      </main>
+
+
   );
 }
