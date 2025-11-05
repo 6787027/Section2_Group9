@@ -2,6 +2,7 @@
 import ProductCard from "@/components/built-components/productcard"
 import { useState } from "react";
 import ImgOrder from "@/assets/ImageOrder.png"
+import Link from 'next/link';
 
 const ALL_PRODUCTS = [
   { id: 1, name: "Hutao Doll", price: 500, genre: "Game", type: "Doll", character: "hutao", url: ImgOrder },
@@ -38,7 +39,7 @@ export default function Product() {
       filtered = filtered.filter(p => p.character === product_character)
     }
 
-  
+
 
     setshowproduct(filtered);
   }
@@ -48,7 +49,7 @@ export default function Product() {
     setproducttype('');
     setproductgenre('');
     setproductcharacter('');
-    setshowproduct(ALL_PRODUCTS); 
+    setshowproduct(ALL_PRODUCTS);
   }
 
 
@@ -62,7 +63,7 @@ export default function Product() {
           value={product_name}
           onChange={e => setproductname(e.target.value)}
           placeholder="Search"
-          className="text-black p-2  bg-white rounded-xl" 
+          className="text-black p-2  bg-white rounded-xl"
         />
 
         <label className="font-semibold text-xl">Type</label>
@@ -116,11 +117,15 @@ export default function Product() {
       <main className="main-content flex-1 h-screen overflow-y-auto custom-scrollbar pr-4 ">
         <div className="product-grid grid grid-cols-3 gap-4 ">
           {products_list.map(product => (
-            <ProductCard
-              key={product.id}
-              name={product.name}
-              price={product.price}
-              imageUrl={product.url.src} type={product.type} genre={product.genre} />
+            <Link key={product.id} href={`/product/${product.id}`}>
+              <ProductCard
+                name={product.name}
+                price={product.price}
+                imageUrl={product.url.src}
+                type={product.type}
+                genre={product.genre}
+              />
+            </Link>
           ))}
         </div>
       </main>
