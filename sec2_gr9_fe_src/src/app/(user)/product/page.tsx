@@ -79,7 +79,7 @@ export default function Product() {
             <input type="text"
               value={product_name}
               onChange={e => setproductname(e.target.value)}
-              placeholder="Search Type"
+              placeholder="Search Name"
               className="text-black p-2 bg-white rounded-xl w-full" />
           </div>
 
@@ -88,7 +88,7 @@ export default function Product() {
             <input type="text"
               value={product_type}
               onChange={e => setproducttype(e.target.value)}
-              placeholder="Type Search"
+              placeholder="Search Type"
               className="text-black p-2 bg-white rounded-xl w-full" />
           </div>
           <div> 
