@@ -1,5 +1,6 @@
-import Image from 'next/image';
+
 import { Minus, Plus } from 'lucide-react'; 
+import Image, { StaticImageData } from "next/image";
 
 type CartItem = {
   id: number;
@@ -8,7 +9,7 @@ type CartItem = {
   collection: string;
   type: string;
   character: string;
-  imageSrc: string; 
+  imageSrc: StaticImageData | string; 
   selectedItem: number;
   check: boolean;
 };
