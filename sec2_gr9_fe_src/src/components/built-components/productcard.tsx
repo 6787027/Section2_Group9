@@ -3,7 +3,7 @@ interface ProductCardProps {
   price: number;
   imageUrl: string,
   type : string,
-  genre : string
+  collection : string
 };
 
 const formatCurrency = (amount: number) => {
@@ -13,7 +13,7 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 2,
   }).format(amount);
 };
-export default function ProductCard({ name, price, imageUrl, type, genre }: ProductCardProps) {
+export default function ProductCard({ name, price, imageUrl, type, collection }: ProductCardProps) {
   return (
     <div className="card bg-base-100  shadow-sm">
       <figure>
@@ -29,7 +29,7 @@ export default function ProductCard({ name, price, imageUrl, type, genre }: Prod
         <h2 className="text-[#7469B6] font-semibold">{formatCurrency(price)}</h2>
         <div className="card-actions justify-end">
           <div className="badge badge-outline bg-pink-200 px-4">{type}</div>
-          <div className="badge badge-outline bg-purple-200 px-3">{genre}</div>
+          <div className="badge badge-outline bg-purple-200 px-3">{collection}</div>
         </div>
       </div>
     </div>

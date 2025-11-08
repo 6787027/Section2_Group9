@@ -6,13 +6,13 @@ type CartItem = {
   imageSrc: string 
   name: string;
   price: number;
-  quantity: number;
+  selectedItem: number;
   check: boolean;
 };
 
 type CartItemRowProps = {
   item: CartItem; 
-  onUpdateQuantity: (id: number, newQuantity: number) => void
+  onUpdateSelect: (id: number, newSelectedItem: number) => void
   onToggleItem: (id: number) => void; // 
 };
 
@@ -24,8 +24,8 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default function CartItemRow({item, onUpdateQuantity, onToggleItem}: CartItemRowProps) {
-  const subtotal = item.price * item.quantity;
+export default function CartItemRow({item, onUpdateSelect, onToggleItem}: CartItemRowProps) {
+  const subtotal = item.price * item.selectedItem;
 
   return (
     <tr className="text-[#7469B6] align-middle border-b"> 
@@ -50,17 +50,17 @@ export default function CartItemRow({item, onUpdateQuantity, onToggleItem}: Cart
         <div className="flex text-center items-center gap-3">
           <button
             className="text-[#7469B6] pl-10"
-            onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-            disabled={item.quantity <= 1} 
+            onClick={() => onUpdateSelect(item.id, item.selectedItem - 1)}
+            disabled={item.selectedItem <= 1} 
           >
             <Minus size={16} />
           </button>
           
-          <span className="text-[#7469B6] w-8 text-center">{item.quantity}</span> 
+          <span className="text-[#7469B6] w-8 text-center">{item.selectedItem}</span> 
 
           <button
             className="text-[#7469B6] "
-            onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+            onClick={() => onUpdateSelect(item.id, item.selectedItem + 1)}
           >
             <Plus size={16} />
           </button>
