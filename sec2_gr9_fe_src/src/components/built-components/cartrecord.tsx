@@ -8,7 +8,7 @@ type CartItem = {
   collection: string;
   type: string;
   character: string;
-  imageSrc: StaticImageData | string; // 5. แก้ Type ให้ตรงกัน
+  imageSrc: string; 
   selectedItem: number;
   check: boolean;
 };
