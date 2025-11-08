@@ -16,6 +16,8 @@ const ALL_PRODUCTS = [
   { id: 9, name: "Another Doll", price: 200, genre: "Anime", type: "Doll", character: "annabell", url: ImgOrder }
 ];
 
+const genre =[{id: 1,ch}]
+
 export default function Product() {
   const [products_list, setshowproduct] = useState(ALL_PRODUCTS)
   const [product_name, setproductname] = useState('')
