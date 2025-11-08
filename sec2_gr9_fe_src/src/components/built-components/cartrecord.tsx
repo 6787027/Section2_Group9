@@ -2,13 +2,17 @@ import Image from 'next/image';
 import { Minus, Plus } from 'lucide-react'; 
 
 type CartItem = {
-  id: number; 
-  imageSrc: string 
+  id: number;
   name: string;
   price: number;
+  collection: string;
+  type: string;
+  character: string;
+  imageSrc: StaticImageData | string; // 5. แก้ Type ให้ตรงกัน
   selectedItem: number;
   check: boolean;
 };
+
 
 type CartItemRowProps = {
   item: CartItem; 

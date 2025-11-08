@@ -18,6 +18,8 @@ type CartItemType = {
   check: boolean;
 };
 
+
+
 const MOCK_PRODUCTS: CartItemType[] = [
   { id: 1, name: "Hutao Doll", price: 500, collection: "Game", type: "Doll", character: "hutao", imageSrc: ImgOrder, selectedItem: 1, check: true },
   { id: 2, name: "Stelle Doll", price: 200, collection: "Game", type: "Doll", character: "stelle", imageSrc: ImgOrder, selectedItem: 2, check: false }
@@ -34,7 +36,6 @@ function formatCurrency(amount: number): string {
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItemType[]>(MOCK_PRODUCTS);
-
   const [summary, setSummary] = useState({
     subtotal: 0,
     shipping: 0,
