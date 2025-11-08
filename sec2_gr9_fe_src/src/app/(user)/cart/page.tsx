@@ -10,7 +10,7 @@ type CartItemType = {
   id: number;
   name: string;
   price: number;
-  genre: string;
+  collection: string;
   type: string;
   character: string;
   imageSrc: StaticImageData | string;
@@ -19,8 +19,8 @@ type CartItemType = {
 };
 
 const MOCK_PRODUCTS: CartItemType[] = [
-  { id: 1, name: "Hutao Doll", price: 500, genre: "Game", type: "Doll", character: "hutao", imageSrc: ImgOrder, selectedItem: 1, check: true },
-  { id: 2, name: "Stelle Doll", price: 200, genre: "Game", type: "Doll", character: "stelle", imageSrc: ImgOrder, selectedItem: 2, check: false }
+  { id: 1, name: "Hutao Doll", price: 500, collection: "Game", type: "Doll", character: "hutao", imageSrc: ImgOrder, selectedItem: 1, check: true },
+  { id: 2, name: "Stelle Doll", price: 200, collection: "Game", type: "Doll", character: "stelle", imageSrc: ImgOrder, selectedItem: 2, check: false }
 ];
 
 function formatCurrency(amount: number): string {
