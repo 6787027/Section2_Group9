@@ -106,12 +106,12 @@ insert Product (Pro_ID,Pro_Name,Pro_Description,Pro_Price,Pro_Type,Pro_Quantity,
 
 create table ProductPicture (
 	Pic_id varchar(255) not null primary key,
-	Pro_ID varchar(255) not null,
+	Pic_ProID varchar(255) not null,
     Pro_Picture varchar(255) not null
 );
 
 -- add doll picture (f,b,s in each product)
-insert into ProductPicture(Pic_id,Pro_ID,Pro_Picture) values
+insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
 ("DS00001f","DS00001","https://www.pinterest.com/pin/870039221771948950/"),
 ("DS00001b","DS00001","https://www.pinterest.com/pin/870039221771948971/"),
 ("DS00001s","DS00001","https://www.pinterest.com/pin/870039221771949003/"),
@@ -155,7 +155,7 @@ insert into ProductPicture(Pic_id,Pro_ID,Pro_Picture) values
 
 
 -- add accessory picture (f,b,s in each product)
-insert into ProductPicture(Pic_id,Pro_ID,Pro_Picture) values
+insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
 ("AC00001f","AC00001","https://i.pinimg.com/736x/11/d2/32/11d232b0d75bab55eb7fbd6afa53f798.jpg"),
 ("AC00001b","AC00001","https://i.pinimg.com/736x/d6/43/ac/d643ac8e2d88641662299865291ac18f.jpg"),
 ("AC00001s","AC00001","https://i.pinimg.com/736x/13/0a/60/130a605a7def100700ff230412631c0e.jpg"),
@@ -218,8 +218,8 @@ insert into ProductPicture(Pic_id,Pro_ID,Pro_Picture) values
 
 
 create table Cart (
-	Acc_Email varchar(255) not null,
-    Pro_ID varchar(255) not null,
+	Cart_AccEmail varchar(255) not null,
+    Cart_ProID varchar(255) not null,
     Cart_Quantity double not null,
     Cart_ID varchar(255) not null primary key
 );
@@ -227,7 +227,7 @@ create table Cart (
 create table User_Order(
 	Or_Num varchar(255) not null primary key,
     Or_Time DATETIME not null,
-    Cart_ID varchar(255) not null
+    Or_CartID varchar(255) not null
 );
 
 alter table Product
@@ -236,22 +236,22 @@ references Collection(Col_ID)
 on update cascade;
 
 alter table ProductPicture
-add foreign key (Pro_ID)
+add foreign key (Pic_ProID)
 references Product (Pro_ID)
 ON Update Cascade;
 
 
 alter table Cart
-add foreign key (Pro_ID)
+add foreign key (Cart_ProID)
 references Product (Pro_ID)
 ON Update Cascade;
 
 alter table Cart
-add foreign key (Acc_Email)
+add foreign key (Cart_AccEmail)
 references User_Account (Acc_Email)
 ON Update Cascade;
 
 alter table User_Order
-add foreign key (Cart_ID)
+add foreign key (Or_CartID)
 references Cart (Cart_ID)
 ON Update Cascade;
