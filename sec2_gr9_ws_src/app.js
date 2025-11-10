@@ -72,6 +72,38 @@ router.post("/v1/signup", function(req, res) {
     
 });
 
+/*wait for login */
+router.get("/user_profile", function(req, res) {
+    /*input section */
+    
+
+    /*select section*/
+    let fname = document.getElementById("fname")
+    let lname = document.getElementById("lname")
+    let email = document.getElementById("email")
+    let phone = document.getElementById("phone")
+    connection.query("SELECT Acc_Email, Acc_FName, Acc_LNam,Acc_PhoneNum WHERE Acc_Email = ?",email, function(error,result){
+        return res.send({error: false, data: result[0], meesage:"Fail to send the information"})
+    });
+
+    fname.innerHTML = Acc_Fname;
+    lname.innerHTML = Acc_Lname;
+    email.innerHTML = Acc_Email;
+    phone.innerHTML = Acc_PhoneNum;
+});
+
+router.put("/user_profile", function(req, res) {
+    let email = req.body.User_Account.Acc_Email;
+    let info = req.body.User_Account;
+
+    //dont know what to put
+    /*sql*/
+    connection.query("UPDATE User_Account SET ? WHERE Acc_Email = ?",[info,email],function(error,result){
+        if(error) throw error;
+        return res.send({error:false, data: result.affectedRows, meesage:"Change user info successfully"});
+    });
+});
+
 router.get("/v1/products", function(req,res){
    let sql ="SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
     "FROM Product AS p " +
