@@ -3,6 +3,7 @@ import { ChangeEvent, FormEvent, FormEventHandler, useState } from "react";
 import Image from "next/image";
 import bgsignin from "../../../assets/bgsignin2.jpg"
 import { AuroraText } from "@/components/ui/aurora-text"
+import { useRouter } from 'next/navigation';
 export default function Signup() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -11,44 +12,48 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const dataToSend = {
     firstName,
     lastName,
     email,
     phone,
-    password
+    password,
+    type: "User"
   };
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const fetchURL = 'http://localhost:3001/v1/signup';
 
-    function fetchSignup() {
-      const fetchURL = 'http://localhost:3001/v1/signup'
-      fetch(fetchURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dataToSend)
+    fetch(fetchURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dataToSend)
+    })
+      .then(async response => { 
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({})); 
+          const message = errorData.message
+          throw new Error(message);
+        }
+        return response.json();
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json(); // Or response.text() if the server sends plain text
-        })
-        .then(data => {
-          console.log("Success:", data);
-        })
-        .catch(error => {
-          console.error("Error:", error);
-
-        })
-    }
-
-
+      .then(data => {
+        console.log("Success:", data);
+        router.push('/login')
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        setError(error instanceof Error ? error.message : "An unknown error occurred");
+      })
+      .finally(() => {
+        setLoading(false); 
+      });
   }
   return (
     <div style={{ backgroundImage: `url(${bgsignin.src})` }} className="h-svh bg-cover bg-center flex  justify-center items-center">
