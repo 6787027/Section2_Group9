@@ -1,12 +1,5 @@
-// !-----Do not edit in here-----!
-
-// how to do in individual
-// 1. create new file (.js)
-// 2. Edit package.js at script -> "start": "nodemon <yourfilename>.js"
-// 3. npm run dev on frontend side first then npm start in sec2_gr9_ws_scr to run backend
+// npm run dev on frontend side first then npm start in sec2_gr9_ws_scr to run backend
 // Note: backend use for working with database only so you don't have to do "get page" method (sendFile)
-
-//test branch
 
 
 const express = require("express");
