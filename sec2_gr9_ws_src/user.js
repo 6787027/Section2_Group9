@@ -18,11 +18,16 @@ var connection = mysql.createConnection({
     password : process.env.DB_password,
     database : process.env.DB_name
 });
+ router.post("/v1/signup")
 
 connection.connect(function(err){
     if(err) throw err;
     console.log(`Connected DB: ${process.env.DB_name}`);
 })
+
+
+app.listen(process.env.PORT, () => 
+    { console.log(`Server listening on port: ${process.env.PORT}`); })
 
 
 
