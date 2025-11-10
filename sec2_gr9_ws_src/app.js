@@ -80,6 +80,43 @@ router.post("/v1/signup", function(req, res) {
     
 });
 
+router.get("/v1/products", function(req,res){
+   let sql ="SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
+    "FROM Product AS p " +
+    "LEFT JOIN Collection AS c ON p.Pro_ColID = c.Col_ID " +
+    "LEFT JOIN ProductPicture AS pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_id LIKE '%f' " +
+    "WHERE 1=1 ";
+
+    const {name,type,collection} = req.query
+
+    const searchvari = []
+
+    if(name) {
+        sql += " AND p.Pro_Name LIKE ?"; 
+        searchvari.push(`%${name}%`);
+        
+    }
+    if(type){
+        sql += " AND p.Pro_Type LIKE ?";
+        searchvari.push(`%${type}%`);
+
+    }
+    if(collection){
+        sql += "AND c.Col_Name LIKE ?";
+        searchvari.push(`%${collection}%`)
+    }
+
+    connection.query(sql,searchvari, function(err,results){
+        if(err) {
+            console.error("Database query error:", err);
+            return res.status(500).json([])
+        }
+
+        res.json(results)
+
+    })
+})
+
 connection.connect(function(err) {
     console.log(`Connected DB: ${process.env.DB_name}`);
 });
