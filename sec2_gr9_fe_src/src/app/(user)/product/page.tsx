@@ -11,6 +11,12 @@ export default function Product() {
     collection?: string;
   }
   interface Product {
+    Col_Name: string;
+    Pro_Type: string;
+    Pro_Picture: string;
+    Pro_Price: number;
+    Pro_Name: string;
+    Pro_ID: any;
     id: number;
     name: string;
     price: number;
@@ -117,13 +123,13 @@ export default function Product() {
       <main className="main-content flex-1 h-screen overflow-y-auto custom-scrollbar pr-4 ">
         <div className="product-grid grid grid-cols-3 gap-4 ">
           {products_list.map(product => (
-            <Link key={product.id} href={`/product/${product.id}`}>
+            <Link key={product.Pro_ID} href={`/product/${product.Pro_ID}`}>
               <ProductCard
-                name={product.name}
-                price={product.price}
-                imageUrl={product.url}
-                type={product.type}
-                collection={product.collection}
+                name={product.Pro_Name}
+                price={product.Pro_Price}
+                imageUrl={product.Pro_Picture}
+                type={product.Pro_Type}
+                collection={product.Col_Name}
               />
             </Link>
           ))}
