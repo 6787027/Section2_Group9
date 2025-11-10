@@ -17,10 +17,13 @@ export default function ProductCard({ name, price, imageUrl, type, collection }:
   return (
     <div className="card bg-base-100  shadow-sm">
       <figure>
+        <div className="w-full aspect-square bg-gray-200"> 
         <img
           src={imageUrl}
-          width={250}
-          alt={name} />
+          alt={name}
+          className="w-full h-full object-cover object-center" 
+        />
+      </div>
       </figure>
       <div className="card-body">
         <h2 className="card-title text-[#282151] font-bold">
