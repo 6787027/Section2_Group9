@@ -6,6 +6,7 @@
 // 3. npm run dev on frontend side first then npm start in sec2_gr9_ws_scr to run backend
 // Note: backend use for working with database only so you don't have to do "get page" method (sendFile)
 
+// friend's code
 
 const express = require("express");
 const path = require("path");
