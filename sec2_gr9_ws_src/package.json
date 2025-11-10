@@ -2,7 +2,7 @@
   "name": "sec2_gr9_ws_src",
   "version": "1.0.0",
   "description": "temping text",
-  "main": "user.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js"

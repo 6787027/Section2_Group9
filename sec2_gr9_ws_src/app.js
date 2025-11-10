@@ -1,3 +1,12 @@
+// !-----Do not edit in here-----!
+
+// how to do in individual
+// 1. create new file (.js)
+// 2. Edit package.js at script -> "start": "nodemon <yourfilename>.js"
+// 3. npm run dev on frontend side first then npm start in sec2_gr9_ws_scr to run backend
+// Note: backend use for working with database only so you don't have to do "get page" method (sendFile)
+
+
 const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
@@ -23,8 +32,11 @@ var connection = mysql.createConnection({
     database: process.env.DB_name
 });
 
+
+// post: create user for signup
 router.post("/v1/signup", function(req, res) {
-    
+    console.log("Create the user")
+
     connection.query("SELECT Acc_Email FROM User_Account WHERE Acc_Email = ?", req.body.email, (err, result) => {
         
         if (err) {
