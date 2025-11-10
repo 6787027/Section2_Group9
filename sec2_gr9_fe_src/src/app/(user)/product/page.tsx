@@ -11,10 +11,16 @@ export default function Product() {
     collection?: string;
   }
   interface Product {
+    Col_Name: string;
+    Pro_Type: string;
+    Pro_Picture: string;
+    Pro_Price: number;
+    Pro_Name: string;
+    Pro_ID: any;
     id: number;
     name: string;
     price: number;
-    url: string; // API ส่ง url เป็น string
+    url: string; 
     type: string;
     collection: string;
   }
@@ -25,7 +31,7 @@ export default function Product() {
 
   function fetchProducts(params = {}) {
     let query = new URLSearchParams(params).toString();
-    let fetchURL = `http://localhost:3001/api/products?${query}`
+    let fetchURL = `http://localhost:3001/v1/products?${query}`
     fetch(fetchURL)
       .then(res => res.json())
       .then(data => setshowproduct(data))
@@ -117,13 +123,13 @@ export default function Product() {
       <main className="main-content flex-1 h-screen overflow-y-auto custom-scrollbar pr-4 ">
         <div className="product-grid grid grid-cols-3 gap-4 ">
           {products_list.map(product => (
-            <Link key={product.id} href={`/product/${product.id}`}>
+            <Link key={product.Pro_ID} href={`/product/${product.Pro_ID}`}>
               <ProductCard
-                name={product.name}
-                price={product.price}
-                imageUrl={product.url}
-                type={product.type}
-                collection={product.collection}
+                name={product.Pro_Name}
+                price={product.Pro_Price}
+                imageUrl={product.Pro_Picture}
+                type={product.Pro_Type}
+                collection={product.Col_Name}
               />
             </Link>
           ))}
