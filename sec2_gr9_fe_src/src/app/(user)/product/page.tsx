@@ -14,7 +14,7 @@ export default function Product() {
     id: number;
     name: string;
     price: number;
-    url: string; // API ส่ง url เป็น string
+    url: string; 
     type: string;
     collection: string;
   }
@@ -25,7 +25,7 @@ export default function Product() {
 
   function fetchProducts(params = {}) {
     let query = new URLSearchParams(params).toString();
-    let fetchURL = `http://localhost:3001/api/products?${query}`
+    let fetchURL = `http://localhost:3001/v1/products?${query}`
     fetch(fetchURL)
       .then(res => res.json())
       .then(data => setshowproduct(data))
