@@ -202,6 +202,25 @@ router.get("/v1/products", function(req,res){
     })
 })
 
+router.get("/v1/products/:id", (req, res) => {
+  const id = req.params.id;
+
+  const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
+  connection.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
+  });
+});
+
+
+
+
+
+
 connection.connect(function(err) {
     console.log(`Connected DB: ${process.env.DB_name}`);
 });

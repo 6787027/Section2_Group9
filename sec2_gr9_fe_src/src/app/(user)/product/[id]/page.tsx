@@ -1,49 +1,49 @@
-"use client"
-import { Minus, Plus } from "lucide-react";
-import ProductInfo from "@/components/built-components/productinfo"
-import ImgOrder from "@/assets/ImageOrder.png"
-import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+"use client";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import ProductInfo from "@/components/built-components/productinfo";
 
-const ALL_PRODUCTS = [
-  { id: 1, name: "Hutao Doll", price: 500.00, genre: "Game", type: "Doll", character: "hutao", url: ImgOrder, quantity: 705, desc:"I am groot" },
-  { id: 2, name: "Stelle - Star Collection", price: 500.00, genre: "Game", type: "Accessory", character: "Stelle", url: ImgOrder, quantity: 70, desc:"I am groot" },
-  { id: 3, name: "Another Doll", price: 200.00, genre: "Anime", type: "Doll", character: "annabell", url: ImgOrder, quantity: 159, desc:"I am groot"  },
-  { id: 4, name: "Hutao Doll", price: 500.00, genre: "Game", type: "Accessory", character: "hutao", url: ImgOrder, quantity: 60, desc:"I am groot"  },
-  { id: 5, name: "Stelle - Star Collection", price: 500.00, genre: "Game", type: "Doll", character: "Stelle", url: ImgOrder, quantity: 25, desc:"I am groot" },
-  { id: 6, name: "Another Doll", price: 200.00, genre: "Anime", type: "Accessory", character: "annabell", url: ImgOrder, quantity: 23, desc:"I am groot" },
-  { id: 7, name: "Hutao Doll", price: 500.00, genre: "Game", type: "Doll", character: "hutao", url: ImgOrder, quantity: 2, desc:"I am groot" },
-  { id: 8, name: "Stelle - Star Collection", price: 500.00, genre: "Game", type: "Accessory", character: "Stelle", url: ImgOrder, quantity: 150, desc:"I am groot"},
-  { id: 9, name: "Another Doll", price: 200.00, genre: "Anime", type: "Doll", character: "annabell", url: ImgOrder, quantity: 200, desc:"I am groot" }
-];
+interface Product {
+  Pic_f: string;
+  Pic_b: string;
+  Pic_s: string;
+  Pro_ID: number;
+  Pro_Name: string;
+  Pro_Price: number;
+  Pro_Type: string;
+  Col_Name: string;
+  Pro_Description: string;
+  Pro_Quantity: number;
+}
 
-export default function Product() {
-    const { id } = useParams<{id: string}>();
+export default function ProductPage() {
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
 
-    const numericId = parseInt(id, 10);
-    const product = ALL_PRODUCTS.find(p => p.id === numericId);
+  useEffect(() => {
+    fetch(`http://localhost:3001/v1/products/${id}`)
+      .then(res => res.json())
+      .then(data => setProduct(data))
+      .catch(err => console.log(err));
+  }, [id]);
 
-    if (!product) {
-        notFound();
-
-    }
+  if (!product) return <div className="text-white p-10">Loading...</div>;
 
   return (
-    <div className="bg-[#282151]  min-h-screen  text-center px-8">
-        <main className="flex-1 h-screen">
-            <div>
-                <ProductInfo
-                  key={product.id}
-                  name={product.name}
-                  price={product.price}
-                  imageUrl={product.url.src}
-                  type={product.type}
-                  genre={product.genre}
-                  quantity={product.quantity}
-                  desc={product.desc}
-                />
-            </div>
-        </main>
+    <div className="bg-[#282151] min-h-screen text-center px-8">
+      <main className="flex-1 h-full">
+        <ProductInfo
+          name={product.Pro_Name}
+          price={product.Pro_Price}
+          type={product.Pro_Type}
+          genre={product.Col_Name}
+          quantity={product.Pro_Quantity}
+          desc={product.Pro_Description}
+          img1={product.Pic_s}
+          img2={product.Pic_b}
+          img3={product.Pic_f}
+        />
+      </main>
     </div>
   );
 }
