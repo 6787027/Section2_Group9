@@ -112,45 +112,45 @@ create table ProductPicture (
 
 -- add doll picture (f,b,s in each product)
 insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
-("DS00001f","DS00001","https://www.pinterest.com/pin/870039221771948950/"),
-("DS00001b","DS00001","https://www.pinterest.com/pin/870039221771948971/"),
-("DS00001s","DS00001","https://www.pinterest.com/pin/870039221771949003/"),
+("DS00001f","DS00001","https://i.pinimg.com/736x/eb/63/dd/eb63ddb0fb4c04a9c7bad03671130f18.jpg"),
+("DS00001b","DS00001","https://i.pinimg.com/736x/fd/06/a4/fd06a4043d4b8a9b9d9bd53a1b28a8ad.jpg"),
+("DS00001s","DS00001","https://i.pinimg.com/736x/8b/98/aa/8b98aa795a811f734eb37b1278561add.jpg"),
 
-("DS00002f","DS00002","https://www.pinterest.com/pin/870039221771948160/"),
-("DS00002b","DS00002","https://www.pinterest.com/pin/870039221771948165/"),
-("DS00002s","DS00002","https://www.pinterest.com/pin/870039221771948171/"),
+("DS00002f","DS00002","https://i.pinimg.com/736x/ae/65/84/ae658404afb4e3954e3b10172a3968df.jpg"),
+("DS00002b","DS00002","https://i.pinimg.com/736x/1c/fc/6f/1cfc6f4277b07056b3e6bf33c3d9f780.jpg"),
+("DS00002s","DS00002","https://i.pinimg.com/736x/56/58/62/56586246ecf8e3f232dd99043de986de.jpg"),
 
-("DS00003f","DS00003","https://www.pinterest.com/pin/870039221771947845/"),
-("DS00003b","DS00003","https://www.pinterest.com/pin/870039221771947853/"),
-("DS00003s","DS00003","https://www.pinterest.com/pin/870039221771947858/"),
+("DS00003f","DS00003","https://i.pinimg.com/736x/57/24/7f/57247fb4206d5a5a209ccdb26f469462.jpg"),
+("DS00003b","DS00003","https://i.pinimg.com/736x/b3/d9/ec/b3d9ec78f82fc67658125b98c8cb4776.jpg"),
+("DS00003s","DS00003","https://i.pinimg.com/736x/ef/3a/7e/ef3a7efe7e1c38278418dd90fb13c9f5.jpg"),
 
-("DS00004f","DS00004","https://www.pinterest.com/pin/870039221771947736/"),
-("DS00004b","DS00004","https://www.pinterest.com/pin/870039221771947750/"),
-("DS00004s","DS00004","https://www.pinterest.com/pin/870039221771947770/"),
+("DS00004f","DS00004","https://i.pinimg.com/736x/ae/90/4f/ae904fc3ad48a021990eab74bcf34f14.jpg"),
+("DS00004b","DS00004","https://i.pinimg.com/736x/08/fe/5a/08fe5a7f2933778db624699633c904ef.jpg"),
+("DS00004s","DS00004","https://i.pinimg.com/736x/19/76/2b/19762ba4ea9774a68eb290523fc5eaf4.jpg"),
 
-("DS00005f","DS00005","https://www.pinterest.com/pin/870039221771947872/"),
-("DS00005b","DS00005","https://www.pinterest.com/pin/870039221771947884/"),
-("DS00005s","DS00005","https://www.pinterest.com/pin/870039221771947892/"),
+("DS00005f","DS00005","https://i.pinimg.com/736x/fb/b0/95/fbb095e222842702e3eda5bd48d8109c.jpg"),
+("DS00005b","DS00005","https://i.pinimg.com/736x/51/26/25/5126256610a3e3d2e8902983b0db12e7.jpg"),
+("DS00005s","DS00005","https://i.pinimg.com/736x/13/7d/69/137d691e6063da0bb0a62d0a93eb073b.jpg"),
 
-("DS00006f","DS00006","https://www.pinterest.com/pin/870039221771949357/"),
-("DS00006b","DS00006","https://www.pinterest.com/pin/870039221771949812/"),
-("DS00006s","DS00006","https://www.pinterest.com/pin/870039221771949832/"),
+("DS00006f","DS00006","https://i.pinimg.com/736x/4f/74/4f/4f744f6dab471c1ee10f596338d6d94b.jpg"),
+("DS00006b","DS00006","https://i.pinimg.com/736x/b0/39/60/b03960a576a1c402ff358ad3e62146d0.jpg"),
+("DS00006s","DS00006","https://i.pinimg.com/736x/bf/05/eb/bf05ebaa9077dab86c6a19b9a44005c9.jpg"),
 
-("DS00007f","DS00007","https://www.pinterest.com/pin/870039221771949220/"),
-("DS00007b","DS00007","https://www.pinterest.com/pin/870039221771949246/"),
-("DS00007s","DS00007","https://www.pinterest.com/pin/870039221771949303/"),
+("DS00007f","DS00007","https://i.pinimg.com/736x/f0/ff/77/f0ff7791d1b75ef6d05c06bd396e55bd.jpg"),
+("DS00007b","DS00007","https://i.pinimg.com/736x/56/1c/fe/561cfe23260b0fcc628963fc329952b9.jpg"),
+("DS00007s","DS00007","https://i.pinimg.com/736x/e2/b2/b5/e2b2b5dddade14d8748492e2286351b4.jpg"),
 
-("DS00008f","DS00008","https://www.pinterest.com/pin/870039221771949849/"),
-("DS00008b","DS00008","https://www.pinterest.com/pin/870039221771949862/"),
-("DS00008s","DS00008","https://www.pinterest.com/pin/870039221771949875/"),
+("DS00008f","DS00008","https://i.pinimg.com/736x/fb/eb/fd/fbebfd0ae7caafcc1b4eda14008822dc.jpg"),
+("DS00008b","DS00008","https://i.pinimg.com/736x/c6/02/9c/c6029cc6ef9918f5ce0e682e749608d2.jpg"),
+("DS00008s","DS00008","https://i.pinimg.com/736x/a9/b8/66/a9b866d790cb19b20e13ac1b4525813f.jpg"),
 
-("DS00009f","DS00009","https://www.pinterest.com/pin/870039221771949074/"),
-("DS00009b","DS00009","https://www.pinterest.com/pin/870039221771949091/"),
-("DS00009s","DS00009","https://www.pinterest.com/pin/870039221771949115/"),
+("DS00009f","DS00009","https://i.pinimg.com/736x/9e/a6/82/9ea682c88a9b21c612453814777e39c7.jpg"),
+("DS00009b","DS00009","https://i.pinimg.com/736x/d8/96/7c/d8967cf67ae9927ff07763ffab3b8567.jpg"),
+("DS00009s","DS00009","https://i.pinimg.com/736x/ad/1b/90/ad1b90f0820372909da67ba4ad02c0cf.jpg"),
 
-("DS00010f","DS00010","https://www.pinterest.com/pin/870039221771949143/"),
-("DS00010b","DS00010","https://www.pinterest.com/pin/870039221771949173/"),
-("DS00010s","DS00010","https://www.pinterest.com/pin/870039221771949196/");
+("DS00010f","DS00010","https://i.pinimg.com/736x/33/66/a6/3366a6d33472b8a6ad86d5c4cd5e1c05.jpg"),
+("DS00010b","DS00010","https://i.pinimg.com/736x/78/fd/a9/78fda93492a560867332cd764763d717.jpg"),
+("DS00010s","DS00010","https://i.pinimg.com/736x/2b/b6/37/2bb63755fbee2778a8f865b727f0b477.jpg");
 
 
 
