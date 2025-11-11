@@ -13,6 +13,7 @@ const port = 3001;
 const app = express();
 const router = express.Router();
 
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -103,6 +104,66 @@ router.put("/user_profile", function(req, res) {
         return res.send({error:false, data: result.affectedRows, meesage:"Change user info successfully"});
     });
 });
+
+router.get("/ad_product", (req, res) => {
+    const search = (req.query.search || "").toLowerCase();
+    const type = req.query.type || "all";
+
+    let sql = `
+        SELECT 
+            Pro_ID,
+            Pro_Picture,
+            Pro_Name,
+            Pro_Quantity,
+            Pro_Type,
+            Col_Name,
+            Pro_Price,
+            Pro_Description
+        FROM Product
+        INNER JOIN Collection ON Pro_ColID = Col_ID
+        INNER JOIN ProductPicture ON Pro_ID = Pic_ProID
+        WHERE Pic_ID LIKE "%f"
+    `;
+
+    const params = [];
+
+    // Filter by type
+    if (type !== "all") {
+        sql += ` AND Pro_Type = ?`;
+        params.push(type);
+    }
+
+    // Search ทุก field
+    if (search) {
+        sql += ` AND (
+            LOWER(Pro_ID) LIKE ? OR
+            LOWER(Pro_Name) LIKE ? OR
+            LOWER(Pro_Type) LIKE ? OR
+            LOWER(Pro_Quantity) LIKE ? OR
+            LOWER(Col_Name) LIKE ? OR
+            LOWER(Pro_Price) LIKE ? OR
+            LOWER(Pro_Description) LIKE ?
+        )`;
+
+        for (let i = 0; i < 7; i++) {
+            params.push(`%${search}%`);
+        }
+    }
+
+    sql += " ORDER BY Pro_ID";
+
+    connection.query(sql, params, (err, results) => {
+        if (err) {
+            console.error("DB Error:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        res.json(results);
+    });
+});
+
+
+
 
 router.get("/v1/products", function(req,res){
    let sql ="SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
