@@ -1,6 +1,8 @@
 create database celestecraft;
 use celestecraft;
 
+
+
 create table User_Account (
 	Acc_Email varchar(255) not null primary key,
     Acc_FName varchar(255) not null,
@@ -219,16 +221,39 @@ insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
 
 create table Cart (
 	Cart_AccEmail varchar(255) not null,
-    Cart_ProID varchar(255) not null,
     Cart_Quantity double not null,
-    Cart_ID varchar(255) not null primary key
+    Cart_ID int not null AUTO_INCREMENT primary key
 );
+
+insert into Cart(Cart_AccEmail, Cart_Quantity, Cart_ID) values
+("matsukos128@gmail.com",2,1),
+("matsukos128@gmail.com",5,2);
+
+create table CartPro(
+	CartPro_key int not null AUTO_INCREMENT primary key,
+	ProCart_ID int not null,
+    Cart_ProID varchar(255) not null
+);
+
+insert into CartPro(CartPro_key,ProCart_ID,Cart_ProID) values
+(1,1,"AC00001"),
+(2,1,"DS00001"),
+(3,2,"AC00005"),
+(4,2,"AC00007"),
+(5,2,"AC00007"),
+(6,2,"DS00002"),
+(7,2,"DS00010");
+
 
 create table User_Order(
 	Or_Num varchar(255) not null primary key,
     Or_Time DATETIME not null,
-    Or_CartID varchar(255) not null
+    Or_CartID int not null
 );
+
+insert into user_order(Or_Num, Or_Time, Or_CartID) values
+("OR00001","2025-11-11 21:20:54",1);
+
 
 alter table Product
 add foreign key (Pro_ColID)
@@ -240,15 +265,19 @@ add foreign key (Pic_ProID)
 references Product (Pro_ID)
 ON Update Cascade;
 
-
 alter table Cart
+add foreign key (Cart_AccEmail)
+references User_Account (Acc_Email)
+ON Update Cascade;
+
+alter table Cartpro
 add foreign key (Cart_ProID)
 references Product (Pro_ID)
 ON Update Cascade;
 
-alter table Cart
-add foreign key (Cart_AccEmail)
-references User_Account (Acc_Email)
+alter table Cartpro
+add foreign key (ProCart_ID)
+references Cart (Cart_ID)
 ON Update Cascade;
 
 alter table User_Order
