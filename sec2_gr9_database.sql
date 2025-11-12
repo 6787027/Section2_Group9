@@ -18,6 +18,7 @@ insert into user_account (Acc_Email, Acc_FName, Acc_LName,Acc_Password,Acc_Phone
 ("pimthida1117@gmail.com","Admin Noey", "Naja", "$2b$10$YaIQGH77hME30zoRigl6Hu3M00dkH8v0y6CaHtHDsiUqwdHt5t5vy", "0848798796", "Admin");
 
 
+
 create table Collection(
 	Col_ID varchar(255) not null primary key,
     Col_Name varchar(255) not null
@@ -219,31 +220,17 @@ insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
 ("AC00015s","AC00015","https://i.pinimg.com/736x/98/2e/d7/982ed752c2204be063f8ef07abc03951.jpg");
 
 
-create table Cart (
-	Cart_AccEmail varchar(255) not null,
-    Cart_Quantity double not null,
-    Cart_ID int not null AUTO_INCREMENT primary key
+create table CartItem (
+    CartItem_ID int not null AUTO_INCREMENT primary key,
+    Cart_AccEmail varchar(255) not null, 
+    Cart_ProID varchar(24) not null,
+    Cart_Quantity int not null
 );
 
-insert into Cart(Cart_AccEmail, Cart_Quantity, Cart_ID) values
-("matsukos128@gmail.com",2,1),
-("matsukos128@gmail.com",5,2);
-
-create table CartPro(
-	CartPro_key int not null AUTO_INCREMENT primary key,
-	ProCart_ID int not null,
-    Cart_ProID varchar(255) not null
-);
-
-insert into CartPro(CartPro_key,ProCart_ID,Cart_ProID) values
-(1,1,"AC00001"),
-(2,1,"DS00001"),
-(3,2,"AC00005"),
-(4,2,"AC00007"),
-(5,2,"AC00007"),
-(6,2,"DS00002"),
-(7,2,"DS00010");
-
+insert into CartItem(Cart_AccEmail, Cart_ProID, Cart_Quantity) values
+('matsukos128@gmail.com', 'DS00001', 1), 
+('matsukos128@gmail.com', 'DS00005', 2), 
+('matsukos128@gmail.com', 'AC00001', 1);
 
 create table User_Order(
 	Or_Num varchar(255) not null primary key,
@@ -251,8 +238,8 @@ create table User_Order(
     Or_CartID int not null
 );
 
-insert into user_order(Or_Num, Or_Time, Or_CartID) values
-("OR00001","2025-11-11 21:20:54",1);
+insert into user_order(Or_Num, Or_Time) values
+("OR00001","2025-11-11 21:20:54");
 
 
 alter table Product
@@ -263,24 +250,23 @@ on update cascade;
 alter table ProductPicture
 add foreign key (Pic_ProID)
 references Product (Pro_ID)
-ON Update Cascade;
+on Update Cascade;
 
-alter table Cart
+
+alter table CartItem
 add foreign key (Cart_AccEmail)
-references User_Account (Acc_Email)
-ON Update Cascade;
+references User_Account(Acc_Email)
+on update CASCADE on delete CASCADE;
 
-alter table Cartpro
+alter table CartItem
 add foreign key (Cart_ProID)
-references Product (Pro_ID)
-ON Update Cascade;
+references Product(Pro_ID)
+on update CASCADE on delete CASCADE;
 
-alter table Cartpro
-add foreign key (ProCart_ID)
-references Cart (Cart_ID)
-ON Update Cascade;
+alter table CartItem
+add unique key (Cart_AccEmail, Cart_ProID);
 
 alter table User_Order
 add foreign key (Or_CartID)
-references Cart (Cart_ID)
+references CartItem (CartItem_ID)
 ON Update Cascade;

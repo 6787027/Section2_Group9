@@ -1,3 +1,4 @@
+'use client' ;
 import { Minus, Plus } from "lucide-react";
 import Link from 'next/link';
 import { useState } from "react";
@@ -14,9 +15,11 @@ interface ProductInfo {
     img1: string
     img2: string
     img3: string
+    onAddToCart: (selectedQuantity: number) => void;
+    onBuyNow: (selectedQuantity: number) => void;
 };
 
-export default function ProductInfo({ name, price, type, genre, quantity, desc, img1, img2, img3 }: ProductInfo) {
+export default function ProductInfo({ name, price, type, genre, quantity, desc, img1, img2, img3, onAddToCart, onBuyNow }: ProductInfo) {
     const [count, setCount] = useState(1);
 
     return (
@@ -105,9 +108,14 @@ export default function ProductInfo({ name, price, type, genre, quantity, desc, 
                             </div>
                         </div>
                         <div className="flex justify-start">
-                            <button type="button" className="border-white bg-white text-[#282151] rounded-xl p-3 shadow-xl font-bold text-lg">Add to Cart</button>
+                            <button type="button" 
+                                className="border-white bg-white text-[#282151] rounded-xl p-3 shadow-xl font-bold text-lg disabled:opacity-50"
+                                onClick={() => onAddToCart(count)}
+                                disabled={quantity === 0}>Add to Cart</button>
                             <div className="m-4"></div>
-                            <button type="button" className="border-[#E00303] bg-[#E00303] text-white rounded-xl py-3 px-6 shadow-xl font-bold text-lg">Buy Now</button>
+                            <button type="button" className="border-[#E00303] bg-[#E00303] text-white rounded-xl py-3 px-6 shadow-xl font-bold text-lg"
+                            onClick={() => onBuyNow(count)}
+                            disabled={quantity === 0}>Buy Now</button>
                         </div>
                     </div>
                     <div className="m-15"></div>

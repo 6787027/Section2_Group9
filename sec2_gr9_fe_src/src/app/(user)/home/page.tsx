@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { AuroraText } from "@/components/ui/aurora-text";
@@ -18,6 +18,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   const handleRandomCard = async () => {
     setIsLoading(true);

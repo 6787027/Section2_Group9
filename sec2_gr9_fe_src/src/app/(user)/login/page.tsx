@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 
 export default function Login() {
@@ -15,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const auth = useAuth();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,9 +37,9 @@ export default function Login() {
         throw new Error(data.message || 'Login failed');
       }
 
-      localStorage.setItem('token', data.token);
+      auth.login(data.token, data.user);
 
-      router.push('/home');
+      router.push('/cart');
     } catch (error: any) {
       setError(error.message);
     } finally {

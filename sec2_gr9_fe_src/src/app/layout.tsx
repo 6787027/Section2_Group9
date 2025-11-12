@@ -1,22 +1,28 @@
 import "@/app/globals.css";
+import { AuthProvider } from '@/app/context/AuthContext';
+import { CartProvider } from '@/app/context/CartContext';
 
+// 1. Import ฟอนต์จาก next/font/google
+import { Instrument_Sans } from 'next/font/google';
 
-export const metadata = { title: "CelesteCrat", description: "Next.js App" };
+// 2. ตั้งค่าฟอนต์
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'], // (เลือก subset ที่คุณต้องการ)
+  display: 'swap',
+  variable: '--font-instrument-sans' // (ทางเลือก: ถ้าคุณอยากใช้เป็น CSS Variable)
+});
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+// 3. ย้าย metadata ของคุณมาไว้ที่นี่
+export const metadata = { title: "CelesteCraft", description: "Next.js App" };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
-    </head>
-      <body className="min-h-screen ">
-        
-        {children}
-
-      </body>
-       
-    </html>
+    // 4. ใส่ className ของฟอนต์ที่ <html>
+      
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
   );
 }

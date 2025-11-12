@@ -2,12 +2,14 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProductInfo from "@/components/built-components/productinfo";
+import { useCart } from "@/app/context/CartContext";
+import { useRouter } from 'next/navigation';
 
 interface Product {
   Pic_f: string;
   Pic_b: string;
   Pic_s: string;
-  Pro_ID: number;
+  Pro_ID: string;
   Pro_Name: string;
   Pro_Price: number;
   Pro_Type: string;
@@ -19,6 +21,8 @@ interface Product {
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
+  const { addToCart } = useCart();
+  const router = useRouter();
 
   useEffect(() => {
     fetch(`http://localhost:3001/v1/products/${id}`)
@@ -26,6 +30,20 @@ export default function ProductPage() {
       .then(data => setProduct(data))
       .catch(err => console.log(err));
   }, [id]);
+
+  const handleAddToCart = (selectedQuantity: number) => {
+    if (product) {
+      addToCart(product, selectedQuantity);
+      alert(`${selectedQuantity} x ${product.Pro_Name} ถูกเพิ่มลงในตะกร้าแล้ว!`);
+    }
+  };
+
+  const handleBuyNow = async (selectedQuantity: number) => {
+    if (product) {
+      await addToCart(product, selectedQuantity);
+      router.push('/payment');
+    }
+  };
 
   if (!product) return <div className="text-white p-10">Loading...</div>;
 
@@ -42,7 +60,11 @@ export default function ProductPage() {
           img1={product.Pic_s}
           img2={product.Pic_b}
           img3={product.Pic_f}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
         />
+        
+        
       </main>
     </div>
   );

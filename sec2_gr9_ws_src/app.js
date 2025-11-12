@@ -83,7 +83,7 @@ router.post("/v1/login", function (req, res) {
         }
 
         const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
-        
+
         connection.query(sql, [req.body.email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
@@ -96,12 +96,12 @@ router.post("/v1/login", function (req, res) {
             }
 
             const user = result[0];
-            
+
             console.log(req.body.password)
             console.log(user.Acc_Password)
             bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
-                
-                // bcrypt error
+
+                // A. จัดการกรณี bcrypt error
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
@@ -111,8 +111,8 @@ router.post("/v1/login", function (req, res) {
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
-                
-                // สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
+
+                // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
                 const payload = {
                     email: user.Acc_Email,
                     type: user.Acc_Type
@@ -124,14 +124,20 @@ router.post("/v1/login", function (req, res) {
                     { expiresIn: '1h' } // Set expire time
                 );
 
-                // send Token back to Frontend
-                return res.status(200).json({
+                res.json({
                     message: "Login successful",
-                    token: token
+                    token: token,
+                    user: {
+                        id: user.Acc_Email, 
+                        email: user.Acc_Email,
+                        firstName: user.Acc_FName,
+                        lastName: user.Acc_LName
+                    }
                 });
-            }); // End bcrypt.compare
-        }); // End connection.query
-    
+
+            }); // สิ้นสุด bcrypt.compare
+        }); // สิ้นสุด connection.query
+
     } catch (e) {
         console.error("Sync error:", e);
         res.status(500).json({ message: "Internal server error" });
@@ -268,17 +274,111 @@ router.get("/v1/products", function (req, res) {
 })
 
 router.get("/v1/products/:id", (req, res) => {
-  const id = req.params.id;
+    const id = req.params.id;
 
-  const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
-  connection.query(sql, [id], (err, result) => {
-    if (err) return res.status(500).json(err);
+    const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
+    connection.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).json(err);
 
-    if (result.length === 0) {
-      return res.status(404).json({ message: "Product not found" });
+        if (result.length === 0) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
+    });
+});
+
+router.get("/v1/cart/:userEmail", (req, res) => {
+    const userEmail = decodeURIComponent(req.params.userEmail);
+    const sql = `
+        SELECT 
+            ci.Cart_ProID AS id,
+            p.Pro_Name AS name,
+            p.Pro_Price AS price,
+            c.Col_Name AS collection,
+            p.Pro_Type AS type,
+            pp.Pro_Picture AS imageSrc,
+            ci.Cart_Quantity AS selectedItem
+        FROM CartItem ci
+        JOIN Product p ON ci.Cart_ProID = p.Pro_ID
+        JOIN Collection c ON p.Pro_ColID = c.Col_ID
+        LEFT JOIN ProductPicture pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_ID LIKE '%f'
+        WHERE ci.Cart_AccEmail = ? 
+    `;
+    connection.query(sql, [userEmail], (err, results) => {
+        if (err) {
+            console.error("Error fetching cart:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
+    });
+});
+
+router.post("/v1/cart/add", (req, res) => {
+    const { email, productId, quantity } = req.body;
+
+    const checkSql = "SELECT * FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(checkSql, [email, productId], (err, results) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+
+        if (results.length > 0) {
+            const newQuantity = results[0].Cart_Quantity + quantity;
+            const updateSql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+            connection.query(updateSql, [newQuantity, email, productId], (err) => {
+                if (err) return res.status(500).json({ error: "DB error" });
+                res.status(200).json({ message: "Item quantity updated" });
+            });
+        } else {
+            const insertSql = "INSERT INTO CartItem (Cart_AccEmail, Cart_ProID, Cart_Quantity) VALUES (?, ?, ?)";
+            connection.query(insertSql, [email, productId, quantity], (err) => {
+                if (err) return res.status(500).json({ error: "DB error" });
+                res.status(201).json({ message: "Item added to cart" });
+            });
+        }
+    });
+});
+
+router.put("/v1/cart/update/quantity", (req, res) => {
+    const { email, productId, newQuantity } = req.body;
+    const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(sql, [newQuantity, email, productId], (err, result) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Item not found in cart" });
+        }
+        res.status(200).json({ message: "Quantity updated" });
+    });
+});
+
+router.delete("/v1/cart/remove", (req, res) => {
+    const { email, productId } = req.body;
+    const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(sql, [email, productId], (err, result) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Item not found in cart" });
+        }
+        res.status(200).json({ message: "Item removed" });
+    });
+});
+
+router.post("/v1/cart/calculate", (req, res) => {
+    const items = req.body;
+    if (!Array.isArray(items)) {
+        return res.status(400).json({ error: "Invalid payload." });
     }
-    res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
-  });
+    let subtotal = 0;
+    try {
+        items.forEach(item => {
+            if (item.check) {
+                subtotal += item.price * item.selectedItem;
+            }
+        });
+        const shipping = subtotal > 0 ? 50 : 0;
+        const total = subtotal + shipping;
+        res.json({ subtotal, shipping, total });
+    } catch (err) {
+        res.status(500).json({ error: "Error calculating summary." });
+    }
 });
 
 
