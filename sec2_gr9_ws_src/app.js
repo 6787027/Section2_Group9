@@ -82,7 +82,6 @@ router.post("/v1/login", function (req, res) {
             return res.status(400).json({ message: "Please fill out the form completely" })
         }
 
-        // ต้อง SELECT คอลัมน์ที่จำเป็น (ID และ Password) มาด้วย
         const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
         
         connection.query(sql, [req.body.email], (err, result) => {
@@ -91,9 +90,7 @@ router.post("/v1/login", function (req, res) {
                 return res.status(500).json({ message: "Database query error" });
             }
 
-
-            // 2. --- FIXED (Security) ---
-            // ถ้าไม่พบผู้ใช้ ให้ส่ง Error 401 (Unauthorized)
+            // Not found send Error 401 (Unauthorized)
             if (result.length === 0) {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
@@ -102,33 +99,29 @@ router.post("/v1/login", function (req, res) {
             
             console.log(req.body.password)
             console.log(user.Acc_Password)
-            // 3. --- IMPLEMENTED ---
-            // เปรียบเทียบรหัสผ่านที่ส่งมา กับ Hash ในฐานข้อมูล
             bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
                 
-                // A. จัดการกรณี bcrypt error
+                // bcrypt error
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
                 }
 
-                // B. จัดการกรณีรหัสผ่านไม่ถูกต้อง
+                //password wrong
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
                 
-                // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
+                // สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
                 const payload = {
                     email: user.Acc_Email,
                     type: user.Acc_Type
-                    // คุณสามารถเพิ่ม role หรือสิทธิ์อื่นๆ ได้ที่นี่
                 };
 
-                // 2. เซ็น Token ด้วยกุญแจลับ
                 const token = jwt.sign(
                     payload,
                     process.env.JWT_SECRET,
-                    { expiresIn: '1h' } // ตั้งเวลาหมดอายุ (ตัวอย่างคือ 1 ชั่วโมง)
+                    { expiresIn: '1h' } // Set expire time
                 );
 
                 // send Token back to Frontend
@@ -136,8 +129,8 @@ router.post("/v1/login", function (req, res) {
                     message: "Login successful",
                     token: token
                 });
-            }); // สิ้นสุด bcrypt.compare
-        }); // สิ้นสุด connection.query
+            }); // End bcrypt.compare
+        }); // End connection.query
     
     } catch (e) {
         console.error("Sync error:", e);

@@ -37,7 +37,7 @@ export default function Login() {
 
       localStorage.setItem('token', data.token);
 
-      router.push('/dashboard');
+      router.push('/home');
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -54,11 +54,17 @@ export default function Login() {
               <AuroraText className="text-6xl font-bold tracking-tighter md:text-5xl lg:text-7xl  pb-8" colors={["#FFA6A6", "#7469B6"]} speed={2}>Login</AuroraText>
             </div>
             <label className="label font-bold">Email</label>
-            <input type="email" className="input rounded-2xl" placeholder="Your Email" required value={email}
-              onChange={(e) => setEmail(e.target.value)}/>
+            <input type="email"
+              className="input rounded-2xl"
+              placeholder="Your Email"
+              required value={email}
+              onChange={(e) => setEmail(e.target.value)} />
             <label className="label font-bold">Password</label>
-            <input type="password" className="input rounded-2xl" placeholder="Your Password" required value={password}
-              onChange={(e) => setPassword(e.target.value)}/>
+            <input type="password"
+              className="input rounded-2xl"
+              placeholder="Your Password"
+              required value={password}
+              onChange={(e) => setPassword(e.target.value)} />
             {error && (
               <div className="text-center text-red-700 font-bold mt-3">
                 {error}

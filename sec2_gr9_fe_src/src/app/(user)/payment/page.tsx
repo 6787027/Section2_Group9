@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import ImgOrder from "@/assets/ImageOrder.png"
-import Visa from "@/assets/PaymentOption1.png"
-import QR from "@/assets/PaymentOption2.png"
+import Visa from "@/assets/visa.svg"
+import QR from "@/assets/qr.png"
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import QRModal from "@/components/QRModal";
@@ -11,6 +11,7 @@ import QRModal from "@/components/QRModal";
 export default function Payment() {
   const [method, setMethod] = useState<'qr' | 'visa' | null>(null)
   const [modalShown, setShowModalShown] = useState<'qr' | 'visa' | null>(null)
+  const [count, setCount] = useState(1)
 
   const handleBtn = () => {
     setShowModalShown(method)
@@ -29,13 +30,23 @@ export default function Payment() {
               <span className="text-[#7469B6] font-bold font-instrument-sans">Hutao Doll</span><br />
               <span className="text-[#9A9A9A]">$ 590.00</span>
             </div>
-            <div className="flex justify-center items-center gap-2 h-fit">
-              <button className="border justify-center items-center flex w-4 h-4">
-                <Minus className="" />
+            <div className="flex justify-center items-center gap-4 h-fit">
+              <button
+                type="button"
+                className="border border-solid border-[#E8E6FB] justify-center items-center flex w-4 h-4"
+                onClick={() => setCount(prev => Math.max(1, prev - 1))}
+              >
+                <Minus />
               </button>
-              <span>1</span>
-              <button className="border flex items-center justify-center w-4 h-4">
-                <Plus className="" />
+
+              <span id="quan">{count}</span>
+
+              <button
+                type="button"
+                className="border border-solid border-[#E8E6FB] justify-center items-center flex w-4 h-4"
+                onClick={() => setCount(prev => prev + 1)}
+              >
+                <Plus />
               </button>
 
             </div>
@@ -59,7 +70,7 @@ export default function Payment() {
         <div className="p-8 flex flex-col flex-1">
           <form className="flex">
             <fieldset className="flex flex-1">
-              <legend className="border-base-300 rounded-box p-4 flex flex-col gap-2 ">
+              <legend className="border-base-300 rounded-box p-4 flex flex-col gap-2 w-full max-w-[24rem]">
                 <span className="text-[#240046] font-semibold font-instrument-sans">SHIPPING DETAILS</span>
                 <label className="label text-[#7469B6] font-instrument-sans">Name</label>
                 <input type="text" className="input rounded-2xl border w-full" required />
@@ -67,36 +78,47 @@ export default function Payment() {
                 <input type="tel" className="input rounded-2xl border w-full" required />
                 <label className="label text-[#7469B6] font-instrument-sans">Address Details</label>
                 <input type="text" className="input rounded-2xl border w-full" required />
-                <div className="flex flex-col gap-2 pt-2">
+                <div className="flex flex-col gap-2 pt-2 mb-4">
                   <span className="text-[#240046] font-semibold font-instrument-sans">PAYMENT DETAILS</span>
-                  <div className="flex">
-                    <Image className="cursor-pointer" onClick={() => setMethod('visa')} src={Visa} alt="visa" />
-                    <Image className="cursor-pointer" onClick={() => setMethod('qr')} src={QR} alt="qr" />
+                  <div className="flex gap-2">
+                    <button className="cursor-pointer h-12 py-1 px-8 rounded-full border shadow-2xl flex items-center justify-center hover:bg-neutral-200 transition-all duration-200" onClick={() => setMethod('visa')}>
+                      <Image src={Visa} width={48} alt="visa" />
+                    </button>
+                    <button className="cursor-pointer h-12 py-1 px-8 rounded-full border shadow-2xl flex items-center justify-center hover:bg-neutral-200 transition-all duration-200" onClick={() => setMethod('qr')}>
+                      <Image src={QR} width={48} alt="qr" />
+                      </button>
                   </div>
                 </div>
-                <label className="label text-[#7469B6] font-instrument-sans">Name on Card</label>
-                <input type="text" className="input rounded-2xl border w-full" required />
-                <label className="label text-[#7469B6] font-instrument-sans">Card Number</label>
-                <input type="number" className="input rounded-2xl border w-full" required />
-                <div className="flex gap-2">
-                  <div>
-                    <label className="label text-[#7469B6] font-instrument-sans">Valid Through</label>
-                    <input type="date" className="input rounded-2xl border" required />
-                  </div>
 
-                  <div>
-                    <label className="label text-[#7469B6] font-instrument-sans">CVV</label>
-                    <input type="number" className="input rounded-2xl border" required />
-                  </div>
-                </div>
-                <button type="button" onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#6759b9] hover:bg-[#7469B6] hover:text-white rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
+                {method === 'visa' && (
+                  <>
+                    <label className="label text-[#7469B6] font-instrument-sans">Name on Card</label>
+                    <input type="text" className="input rounded-2xl border w-full" required />
+                    <label className="label text-[#7469B6] font-instrument-sans">Card Number</label>
+                    <input type="number" className="input rounded-2xl border w-full" required />
+                    <div className="flex gap-2">
+                      <div>
+                        <label className="label text-[#7469B6] font-instrument-sans">Valid Through</label>
+                        <input type="date" className="input rounded-2xl border" required />
+                      </div>
+
+                      <div>
+                        <label className="label text-[#7469B6] font-instrument-sans">CVV</label>
+                        <input type="number" className="input rounded-2xl border" required />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <button type="button" onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#7b6fe6] hover:bg-[#7469B6] hover:text-white rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
               </legend>
             </fieldset>
           </form>
         </div>
       </div>
+
       {modalShown === 'qr' && (
-            <QRModal setModalShown={setShowModalShown} />
+        <QRModal setModalShown={setShowModalShown} />
       )}
     </div>
   );
