@@ -183,38 +183,40 @@ router.get("/ad_product", (req, res) => {
 
     let sql = `
         SELECT 
-            Pro_ID,
-            Pro_Picture,
-            Pro_Name,
-            Pro_Quantity,
-            Pro_Type,
-            Col_Name,
-            Pro_Price,
-            Pro_Description
-        FROM Product
-        INNER JOIN Collection ON Pro_ColID = Col_ID
-        INNER JOIN ProductPicture ON Pro_ID = Pic_ProID
-        WHERE Pic_ID LIKE "%f"
+            p.Pro_ID,
+            p.Pro_Name,
+            p.Pro_Price,
+            p.Pro_Type,
+            c.Col_Name,
+            p.Pro_Quantity,
+            p.Pro_Description,
+            MAX(CASE WHEN pic.Pic_ID LIKE '%f' THEN pic.Pro_Picture END) AS Pic_f,
+            MAX(CASE WHEN pic.Pic_ID LIKE '%b' THEN pic.Pro_Picture END) AS Pic_b,
+            MAX(CASE WHEN pic.Pic_ID LIKE '%s' THEN pic.Pro_Picture END) AS Pic_s
+        FROM Product p
+        INNER JOIN ProductPicture pic ON p.Pro_ID = pic.Pic_ProID
+        INNER JOIN Collection c ON p.Pro_ColID = c.Col_ID
+        WHERE 1=1
     `;
 
     const params = [];
 
     // Filter by type
     if (type !== "all") {
-        sql += ` AND Pro_Type = ?`;
+        sql += " AND p.Pro_Type = ?";
         params.push(type);
     }
 
-    // Search ทุก field
+    // Search (ทุก field)
     if (search) {
         sql += ` AND (
-            LOWER(Pro_ID) LIKE ? OR
-            LOWER(Pro_Name) LIKE ? OR
-            LOWER(Pro_Type) LIKE ? OR
-            LOWER(Pro_Quantity) LIKE ? OR
-            LOWER(Col_Name) LIKE ? OR
-            LOWER(Pro_Price) LIKE ? OR
-            LOWER(Pro_Description) LIKE ?
+            LOWER(p.Pro_ID) LIKE ? OR
+            LOWER(p.Pro_Name) LIKE ? OR
+            LOWER(p.Pro_Type) LIKE ? OR
+            LOWER(p.Pro_Quantity) LIKE ? OR
+            LOWER(c.Col_Name) LIKE ? OR
+            LOWER(p.Pro_Price) LIKE ? OR
+            LOWER(p.Pro_Description) LIKE ?
         )`;
 
         for (let i = 0; i < 7; i++) {
@@ -222,7 +224,12 @@ router.get("/ad_product", (req, res) => {
         }
     }
 
-    sql += " ORDER BY Pro_ID";
+    sql += `
+        GROUP BY 
+            p.Pro_ID, p.Pro_Name, p.Pro_Price, p.Pro_Type, 
+            c.Col_Name, p.Pro_Quantity, p.Pro_Description
+        ORDER BY p.Pro_ID
+    `;
 
     connection.query(sql, params, (err, results) => {
         if (err) {
@@ -233,6 +240,7 @@ router.get("/ad_product", (req, res) => {
         res.json(results);
     });
 });
+
 
 
 
