@@ -152,7 +152,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                         <div className="flex justify-between">
                             <button
                                 type="submit"
-                                className="bg-[#7469B6] text-white px-4 py-2 rounded hover:bg-green-700"
+                                className="bg-[#7469B6] text-white px-4 py-2 rounded hover:bg-[#7469B6]"
                             >
                                 Add Product
                             </button>

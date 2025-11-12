@@ -138,12 +138,7 @@ export default function Ad_product() {
                     {showAddModal && (
                         <AddProductModal
                             onClose={() => setShowAddModal(false)}
-                            onSuccess={() => {
-                                // reload data after add
-                                fetch("http://localhost:3001/v1/products")
-                                    .then((res) => res.json())
-                                    .then((data) => setProducts(data));
-                            }}
+                            onSuccess={() => {window.location.reload()}}
                         />
                     )}
                 </div>

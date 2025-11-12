@@ -11,31 +11,33 @@ interface Account {
     Acc_Email: string;
 }
 
-
-
 export default function Ad_account() {
    const [accounts, setAccounts] = useState<Account[]>([]);
     const [filterType, setFilterType] = useState<string>("all");
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        const fetchAccounts = async (data: any) => {
-            try {
-                const query = new URLSearchParams({
-                    type: filterType,
-                    search: searchTerm,
-                }).toString();
+    const fetchAccounts = async () => {
+        try {
+            const query = new URLSearchParams({
+                type: filterType,
+                search: searchTerm,
+            }).toString();
 
-                const res = await fetch(`http://localhost:3001/ad_account?${query}`);
-                const data = await res.json();
-                setAccounts(data);
-            } catch (err) {
-                console.error("Error fetching accounts:", err);
-            }
-        };
+            const res = await fetch(`http://localhost:3001/ad_account?${query}`);
+            if (!res.ok) throw new Error("Failed to fetch");
+            
+            const result = await res.json();
+            setAccounts(result);
+        } catch (err) {
+            console.error("Error fetching accounts:", err);
+        }
+    };
 
-        fetchAccounts();
-    }, [filterType, searchTerm]);
+    fetchAccounts();
+}, [filterType, searchTerm]);
+
+
 
     return (
         <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
@@ -77,7 +79,7 @@ export default function Ad_account() {
                         <button type="button" className="flex flex-nowrap font-bold text-[#282151] bg-[#E8E6FB] p-2 border-solid border-1 border-[#E8E6FB] rounded-2xl">
                             <svg className="mr-2 w-6 h-6 text-[#282151] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
-                            </svg> Add Product
+                            </svg> Add Account
                         </button>
                     </div>
                 </div>

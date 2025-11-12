@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "@/components/footer";
 
-export const metadata = { title: "CelesteCrat", description: "Next.js App" };
+export const metadata = { title: "CelesteCraft", description: "Next.js App" };
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   return (

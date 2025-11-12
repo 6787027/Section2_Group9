@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import React from 'react'
 import "./ad.css";
 
-export const metadata = { title: "CelesteCrat", description: "Next.js App" };
+export const metadata = { title: "CelesteCraft", description: "Next.js App" };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

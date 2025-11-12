@@ -243,7 +243,7 @@ router.get("/ad_product", (req, res) => {
 router.get("/ad_account", (req, res) => {
     const { type, search } = req.query;
 
-    let query = "SELECT * FROM user_account";
+    let query = "SELECT * FROM User_Account";
     let conditions = [];
     let params = [];
 
@@ -273,6 +273,24 @@ router.get("/ad_account", (req, res) => {
         res.json(results);
     })
 });
+
+router.put("/ad_account", (req, res) => {
+  const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
+
+  const sql = `
+    UPDATE User_Account
+    SET Acc_FName = ?, Acc_LName = ?, Acc_PhoneNum = ?, Acc_Type = ?
+    WHERE Acc_Email = ?`;
+
+  connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
+    if (err) {
+      console.error("Error updating account:", err);
+      return res.status(500).send("Database update error");
+    }
+    res.sendStatus(200);
+  });
+});
+
 
 
 
