@@ -14,8 +14,8 @@ create table User_Account (
 );
 
 insert into user_account (Acc_Email, Acc_FName, Acc_LName,Acc_Password,Acc_PhoneNum,Acc_Type) values
-("matsukos128@gmail.com", "Nongnoey", "EiEi", "maibok","0814668796","User"),
-("pimthida1117@gmail.com","Admin Noey", "Naja", "Admin123", "0848798796", "Admin");
+("matsukos128@gmail.com", "Nongnoey", "EiEi", "$2b$10$1bvtBnxEQ8OiteCm.Nk3Ae9qRstL9qZIH.fDYR4gdWXxCUy6y6YbG","0814668796","User"),
+("pimthida1117@gmail.com","Admin Noey", "Naja", "$2b$10$YaIQGH77hME30zoRigl6Hu3M00dkH8v0y6CaHtHDsiUqwdHt5t5vy", "0848798796", "Admin");
 
 
 create table Collection(
