@@ -2,6 +2,7 @@
 
 import Adpro from "@/components/built-components/protable";
 import { useEffect, useState } from "react";
+import AddProductModal from "@/components/built-components/AddProductModal";
 
 interface Product {
     Pic_f: any;
@@ -20,6 +21,7 @@ export default function Ad_product() {
     const [products, setProducts] = useState<Product[]>([]);
     const [filterType, setFilterType] = useState<string>("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [showAddModal, setShowAddModal] = useState(false);
 
     // โหลดข้อมูลจาก backend ทุกครั้ง search/filter เปลี่ยน
     useEffect(() => {
@@ -66,8 +68,10 @@ export default function Ad_product() {
                     </div>
 
                     <div className="mr-5">
-                        <button className="flex font-bold text-[#282151] bg-[#E8E6FB] p-2 border-1 rounded-2xl">
-                            Add Product
+                        <button onClick={() => setShowAddModal(true)} className="flex font-bold text-[#282151] bg-[#E8E6FB] p-2 border-1 rounded-2xl">
+                            <svg className="mr-2 w-6 h-6 text-[#282151] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
+                            </svg> Add Product
                         </button>
                     </div>
                 </div>
@@ -117,7 +121,7 @@ export default function Ad_product() {
                                 products.map(p => (
                                     <Adpro
                                         key={p.Pro_ID}
-                                        id={p.Pro_ID}   
+                                        id={p.Pro_ID}
                                         name={p.Pro_Name}
                                         price={p.Pro_Price}
                                         type={p.Pro_Type}
@@ -126,11 +130,22 @@ export default function Ad_product() {
                                         desc={p.Pro_Description}
                                         img1={p.Pic_f}
                                         img2={p.Pic_s}
-                                        img3={p.Pic_b}                                  />
+                                        img3={p.Pic_b} />
                                 ))
                             )}
                         </tbody>
                     </table>
+                    {showAddModal && (
+                        <AddProductModal
+                            onClose={() => setShowAddModal(false)}
+                            onSuccess={() => {
+                                // reload data after add
+                                fetch("http://localhost:3001/v1/products")
+                                    .then((res) => res.json())
+                                    .then((data) => setProducts(data));
+                            }}
+                        />
+                    )}
                 </div>
             </main>
         </div>

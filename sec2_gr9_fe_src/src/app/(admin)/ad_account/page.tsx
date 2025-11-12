@@ -1,39 +1,41 @@
 "use client"
 import Adacc from "@/components/built-components/acctable"
-import ImgOrder from "@/assets/ImageOrder.png"
-import { notFound, useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface Account {
+    Acc_Type: string;
+    Acc_Password: string;
+    Acc_PhoneNum: string;
+    Acc_LName: string;
+    Acc_FName: string;
+    Acc_Email: string;
+}
 
 
-const ALL_ACCOUNTS = [
-    { email: "thananchanok@gmail.com", fname: "thananchanok", lname: "chuensaeng", type: "User", pass: "1234", phonenum: "0812222222" },
-    { email: "Admin123@gmail.com", fname: "admin123", lname: "naja", type: "Admin", pass: "ict555", phonenum: "0444444444" },
-    { email: "celestecraft@gmail.com", fname: "NongNoey", lname: "EangKub", type: "Admin", pass: "ilovemyjob", phonenum: "0132456848" },
-    { email: "maewnamQ@outlook.co.th", fname: "MaewNam", lname: "Oung Oung", type: "User", pass: "mafiahadyai123", phonenum: "0789541213" }
-];
 
 export default function Ad_account() {
-    const [accounts] = useState(ALL_ACCOUNTS)
+   const [accounts, setAccounts] = useState<Account[]>([]);
     const [filterType, setFilterType] = useState<string>("all");
     const [searchTerm, setSearchTerm] = useState("");
 
-    const filteredByType =
-        filterType === "all"
-            ? accounts
-            : accounts.filter((a) => a.type === filterType);
+    useEffect(() => {
+        const fetchAccounts = async (data: any) => {
+            try {
+                const query = new URLSearchParams({
+                    type: filterType,
+                    search: searchTerm,
+                }).toString();
 
+                const res = await fetch(`http://localhost:3001/ad_account?${query}`);
+                const data = await res.json();
+                setAccounts(data);
+            } catch (err) {
+                console.error("Error fetching accounts:", err);
+            }
+        };
 
-    const filteredAccount = filteredByType.filter((a) => {
-        const keyword = searchTerm.toLowerCase();
-        return (
-            a.fname.toLowerCase().toString().includes(keyword) ||
-            a.lname.toLowerCase().includes(keyword) ||
-            a.email.toString().includes(keyword)
-        );
-    });
-
-
-
+        fetchAccounts();
+    }, [filterType, searchTerm]);
 
     return (
         <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
@@ -109,19 +111,19 @@ export default function Ad_account() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredAccount.length === 0 ? (
-                                        <p className="text-gray-500 text-center">No products found</p>
+                                    {accounts.length === 0 ? (
+                                        <tr><td colSpan={5} className="text-center text-gray-500">No accounts found</td></tr>
                                     ) : (
-                                        filteredAccount.map((a) => (
-                                            <Adacc key={a.email}
-                                                email = {a.email}
-                                                fname = {a.fname}
-                                                lname = {a.lname}
-                                                phonenum = {a.phonenum}
-                                                pass = {a.pass}
-                                                type = {a.type}
-                                            >
-                                            </Adacc>
+                                        accounts.map((a) => (
+                                            <Adacc
+                                                key={a.Acc_Email}
+                                                email={a.Acc_Email}
+                                                fname={a.Acc_FName}
+                                                lname={a.Acc_LName}
+                                                phonenum={a.Acc_PhoneNum}
+                                                pass={a.Acc_Password}
+                                                type={a.Acc_Type}
+                                            />
                                         ))
                                     )}
                                 </tbody>

@@ -128,7 +128,7 @@ router.post("/v1/login", function (req, res) {
                     message: "Login successful",
                     token: token,
                     user: {
-                        id: user.Acc_Email, 
+                        id: user.Acc_Email,
                         email: user.Acc_Email,
                         firstName: user.Acc_FName,
                         lastName: user.Acc_LName
@@ -240,7 +240,39 @@ router.get("/ad_product", (req, res) => {
     });
 });
 
+router.get("/ad_account", (req, res) => {
+    const { type, search } = req.query;
 
+    let query = "SELECT * FROM user_account";
+    let conditions = [];
+    let params = [];
+
+    // 🔹 กรองตามประเภท (Admin/User)
+    if (type && type !== "all") {
+        conditions.push("Acc_Type = ?");
+        params.push(type);
+    }
+
+    // 🔹 ค้นหาจากคำค้น (ชื่อ, นามสกุล, อีเมล)
+    if (search && search.trim() !== "") {
+        conditions.push("(Acc_FName LIKE ? OR Acc_LName LIKE ? OR Acc_Email LIKE ?)");
+        const keyword = `%${search}%`;
+        params.push(keyword, keyword, keyword);
+    }
+
+    // 🔹 รวมเงื่อนไขเข้า SQL
+    if (conditions.length > 0) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            console.error("Error fetching accounts:", err);
+            return res.status(500).json({ error: "Database query failed" });
+        }
+        res.json(results);
+    })
+});
 
 
 
@@ -294,6 +326,197 @@ router.get("/v1/products/:id", (req, res) => {
         res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
     });
 });
+
+// PUT: update product by ID
+router.put("/v1/products/:id", (req, res) => {
+    const id = req.params.id;
+    const {
+        name,
+        price,
+        type,
+        quantity,
+        desc,
+        colname,
+        img1,
+        img2,
+        img3
+    } = req.body;
+
+
+    if (!name || !price || !type) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const updateProductSQL = `
+        UPDATE Product p
+        INNER JOIN Collection c ON p.Pro_ColID = c.Col_ID
+        SET 
+            p.Pro_Name = ?,
+            p.Pro_Price = ?,
+            p.Pro_Type = ?,
+            p.Pro_Quantity = ?,
+            p.Pro_Description = ?,
+            p.Pro_ColID = c.Col_ID
+        WHERE p.Pro_ID = ? AND c.Col_Name = ?
+    `;
+
+    connection.query(
+        updateProductSQL,
+        [name, price, type, quantity, desc, id, colname],
+        (err, result) => {
+            if (err) {
+                console.error("Error updating Product:", err);
+                return res.status(500).json({ message: "Database error updating product" });
+            }
+
+            const updatePicturesSQL = `
+                UPDATE ProductPicture
+                SET Pro_Picture = CASE
+                    WHEN Pic_ID LIKE '%f' THEN ?
+                    WHEN Pic_ID LIKE '%s' THEN ?
+                    WHEN Pic_ID LIKE '%b' THEN ?
+                END
+                WHERE Pic_ProID = ?
+            `;
+
+            connection.query(updatePicturesSQL, [img1, img2, img3, id], (picErr) => {
+                if (picErr) {
+                    console.error("Error updating ProductPicture:", picErr);
+                    return res.status(500).json({ message: "Error updating product pictures" });
+                }
+
+                console.log(`Product ${id} updated successfully`);
+                res.json({ message: "Product updated successfully" });
+            });
+        }
+    );
+});
+
+router.delete("/v1/products/:id", (req, res) => {
+    const id = req.params.id;
+
+    const deletePicsSQL = "DELETE FROM ProductPicture WHERE Pic_ProID = ?";
+
+    connection.query(deletePicsSQL, [id], (picErr) => {
+        if (picErr) {
+            console.error("Error deleting product pictures:", picErr);
+            return res.status(500).json({ message: "Error deleting product pictures" });
+        }
+
+        const deleteProductSQL = "DELETE FROM Product WHERE Pro_ID = ?";
+
+        connection.query(deleteProductSQL, [id], (prodErr, result) => {
+            if (prodErr) {
+                console.error("Error deleting product:", prodErr);
+                return res.status(500).json({ message: "Error deleting product" });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: "Product not found" });
+            }
+
+            console.log(`Deleted product ID: ${id}`);
+            res.json({ message: "Product deleted successfully" });
+        });
+    });
+});
+
+// POST: add new product
+router.post("/v1/products", (req, res) => {
+  const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
+
+  if (!name || !price || !type || !colname) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  // 1. ตรวจสอบว่า collection มีอยู่แล้วหรือไม่
+  connection.query(
+    "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
+    [colname],
+    (colErr, colResults) => {
+      if (colErr) {
+        console.error(colErr);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      const handleInsertProduct = (colID) => {
+        // 2. สร้าง Pro_ID อัตโนมัติ
+        const prefix = type === "Doll" ? "DS" : "AC";
+        const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
+
+        connection.query(newIDSQL, (idErr, idResults) => {
+          if (idErr) return res.status(500).json({ message: "Error generating product ID" });
+
+          let nextNum = 1;
+          if (idResults.length > 0) {
+            const lastID = idResults[0].Pro_ID;
+            nextNum = parseInt(lastID.substring(2)) + 1;
+          }
+          const newID = prefix + nextNum.toString().padStart(5, "0");
+
+          // 3. เพิ่มสินค้า
+          const insertSQL = `
+            INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          `;
+          connection.query(
+            insertSQL,
+            [newID, name, desc, price, type, quantity, colID],
+            (insertErr) => {
+              if (insertErr) {
+                console.error(insertErr);
+                return res.status(500).json({ message: "Error inserting product" });
+              }
+
+              // 4. เพิ่มรูปภาพ
+              const insertPics = `
+                INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture)
+                VALUES 
+                (?, ?, ?),
+                (?, ?, ?),
+                (?, ?, ?)
+              `;
+              connection.query(
+                insertPics,
+                [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
+                (picErr) => {
+                  if (picErr) {
+                    console.error(picErr);
+                    return res.status(500).json({ message: "Error inserting pictures" });
+                  }
+                  res.json({ message: "Product added successfully", Pro_ID: newID });
+                }
+              );
+            }
+          );
+        });
+      };
+
+      // ถ้ามี collection อยู่แล้ว
+      if (colResults.length > 0) {
+        handleInsertProduct(colResults[0].Col_ID);
+      } else {
+        // สร้าง Col_ID ใหม่
+        const newColID = "COL" + Date.now();
+        connection.query(
+          "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
+          [newColID, colname],
+          (insertColErr) => {
+            if (insertColErr) {
+              console.error(insertColErr);
+              return res.status(500).json({ message: "Error creating collection" });
+            }
+            handleInsertProduct(newColID);
+          }
+        );
+        console.log("Add new product successfully");
+      }
+    }
+  );
+});
+
+
+
 
 router.get("/v1/cart/:userEmail", (req, res) => {
     const userEmail = decodeURIComponent(req.params.userEmail);
