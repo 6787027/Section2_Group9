@@ -5,6 +5,7 @@ import home from "@/assets/Home.svg"
 
 
 export default function Home() {
+  
   return (
     <div className="bg-[#282151]  min-h-screen  text-center ">
       <main>
