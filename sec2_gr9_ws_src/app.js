@@ -83,13 +83,14 @@ router.post("/v1/login", function (req, res) {
         }
 
         // ต้อง SELECT คอลัมน์ที่จำเป็น (ID และ Password) มาด้วย
-        const sql = "SELECT Acc_ID, Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
+        const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
         
         connection.query(sql, [req.body.email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
+
 
             // 2. --- FIXED (Security) ---
             // ถ้าไม่พบผู้ใช้ ให้ส่ง Error 401 (Unauthorized)
@@ -98,7 +99,9 @@ router.post("/v1/login", function (req, res) {
             }
 
             const user = result[0];
-
+            
+            console.log(req.body.password)
+            console.log(user.Acc_Password)
             // 3. --- IMPLEMENTED ---
             // เปรียบเทียบรหัสผ่านที่ส่งมา กับ Hash ในฐานข้อมูล
             bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
@@ -116,8 +119,8 @@ router.post("/v1/login", function (req, res) {
                 
                 // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
                 const payload = {
-                    userId: user.Acc_ID,
-                    email: user.Acc_Email
+                    email: user.Acc_Email,
+                    type: user.Acc_Type
                     // คุณสามารถเพิ่ม role หรือสิทธิ์อื่นๆ ได้ที่นี่
                 };
 
