@@ -4,15 +4,16 @@ import Adpro from "@/components/built-components/protable";
 import { useEffect, useState } from "react";
 
 interface Product {
+    Pic_f: any;
+    Pic_b: any;
+    Pic_s: any;
     Col_Name: string;
-    Pro_Picture: string;
     Pro_Description: string;
     Pro_Quantity: number;
     Pro_Type: string;
     Pro_Price: number;
     Pro_Name: string;
-    Pro_ID:any;
-    imageUrl: string;
+    Pro_ID: any;
 }
 
 export default function Ad_product() {
@@ -116,15 +117,16 @@ export default function Ad_product() {
                                 products.map(p => (
                                     <Adpro
                                         key={p.Pro_ID}
-                                        id={p.Pro_ID}
+                                        id={p.Pro_ID}   
                                         name={p.Pro_Name}
                                         price={p.Pro_Price}
                                         type={p.Pro_Type}
+                                        colname={p.Col_Name}
                                         quantity={p.Pro_Quantity}
                                         desc={p.Pro_Description}
-                                        colname={p.Col_Name}
-                                        imageUrl={p.Pro_Picture}
-                                    />
+                                        img1={p.Pic_f}
+                                        img2={p.Pic_s}
+                                        img3={p.Pic_b}                                  />
                                 ))
                             )}
                         </tbody>
