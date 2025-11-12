@@ -127,7 +127,7 @@ router.post("/v1/login", function (req, res) {
                 // 2. เซ็น Token ด้วยกุญแจลับ
                 const token = jwt.sign(
                     payload,
-                    process.env.JWT_SECRET,
+                    process.env.JWT_SECRET || 'THIS_IS_A_TEMPORARY_SECRET_KEY',
                     { expiresIn: '1h' } // ตั้งเวลาหมดอายุ (ตัวอย่างคือ 1 ชั่วโมง)
                 );
 
@@ -286,6 +286,99 @@ router.get("/v1/products/:id", (req, res) => {
     }
     res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
   });
+});
+
+router.get("/v1/cart/:userEmail", (req, res) => {
+    const userEmail = decodeURIComponent(req.params.userEmail); 
+    const sql = `
+        SELECT 
+            ci.Cart_ProID AS id,
+            p.Pro_Name AS name,
+            p.Pro_Price AS price,
+            c.Col_Name AS collection,
+            p.Pro_Type AS type,
+            pp.Pro_Picture AS imageSrc,
+            ci.Cart_Quantity AS selectedItem
+        FROM CartItem ci
+        JOIN Product p ON ci.Cart_ProID = p.Pro_ID
+        JOIN Collection c ON p.Pro_ColID = c.Col_ID
+        LEFT JOIN ProductPicture pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_ID LIKE '%f'
+        WHERE ci.Cart_AccEmail = ? 
+    `;
+    connection.query(sql, [userEmail], (err, results) => {
+        if (err) {
+            console.error("Error fetching cart:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(results);
+    });
+});
+
+router.post("/v1/cart/add", (req, res) => {
+    const { email, productId, quantity } = req.body;
+
+    const checkSql = "SELECT * FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(checkSql, [email, productId], (err, results) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+
+        if (results.length > 0) {
+            const newQuantity = results[0].Cart_Quantity + quantity;
+            const updateSql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+            connection.query(updateSql, [newQuantity, email, productId], (err) => {
+                if (err) return res.status(500).json({ error: "DB error" });
+                res.status(200).json({ message: "Item quantity updated" });
+            });
+        } else {
+            connection.query(insertSql, [email, productId, quantity], (err) => {
+                if (err) return res.status(500).json({ error: "DB error" });
+                res.status(201).json({ message: "Item added to cart" });
+            });
+        }
+    });
+});
+
+router.put("/v1/cart/update/quantity", (req, res) => {
+    const { email, productId, newQuantity } = req.body;
+    const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(sql, [newQuantity, email, productId], (err, result) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Item not found in cart" });
+        }
+        res.status(200).json({ message: "Quantity updated" });
+    });
+});
+
+router.delete("/v1/cart/remove", (req, res) => {
+    const { email, productId } = req.body;
+    const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
+    connection.query(sql, [email, productId], (err, result) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Item not found in cart" });
+        }
+        res.status(200).json({ message: "Item removed" });
+    });
+});
+
+router.post("/v1/cart/calculate", (req, res) => {
+    const items = req.body;
+    if (!Array.isArray(items)) {
+        return res.status(400).json({ error: "Invalid payload." });
+    }
+    let subtotal = 0;
+    try {
+        items.forEach(item => {
+            if (item.check) { 
+                subtotal += item.price * item.selectedItem;
+            }
+        });
+        const shipping = subtotal > 0 ? 50 : 0; 
+        const total = subtotal + shipping;
+        res.json({ subtotal, shipping, total });
+    } catch (err) {
+        res.status(500).json({ error: "Error calculating summary." });
+    }
 });
 
 
