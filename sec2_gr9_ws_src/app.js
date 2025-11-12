@@ -84,7 +84,7 @@ router.post("/v1/login", function (req, res) {
 
         // ต้อง SELECT คอลัมน์ที่จำเป็น (ID และ Password) มาด้วย
         const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
-        
+
         connection.query(sql, [req.body.email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
@@ -99,13 +99,13 @@ router.post("/v1/login", function (req, res) {
             }
 
             const user = result[0];
-            
+
             console.log(req.body.password)
             console.log(user.Acc_Password)
             // 3. --- IMPLEMENTED ---
             // เปรียบเทียบรหัสผ่านที่ส่งมา กับ Hash ในฐานข้อมูล
             bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
-                
+
                 // A. จัดการกรณี bcrypt error
                 if (err) {
                     console.error("Bcrypt compare error:", err);
@@ -116,7 +116,7 @@ router.post("/v1/login", function (req, res) {
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
-                
+
                 // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
                 const payload = {
                     email: user.Acc_Email,
@@ -127,18 +127,24 @@ router.post("/v1/login", function (req, res) {
                 // 2. เซ็น Token ด้วยกุญแจลับ
                 const token = jwt.sign(
                     payload,
-                    process.env.JWT_SECRET || 'THIS_IS_A_TEMPORARY_SECRET_KEY',
+                    process.env.JWT_SECRET,
                     { expiresIn: '1h' } // ตั้งเวลาหมดอายุ (ตัวอย่างคือ 1 ชั่วโมง)
                 );
 
-                // send Token back to Frontend
-                return res.status(200).json({
+                res.json({
                     message: "Login successful",
-                    token: token
+                    token: token,
+                    user: {
+                        id: user.Acc_Email, 
+                        email: user.Acc_Email,
+                        firstName: user.Acc_FName,
+                        lastName: user.Acc_LName
+                    }
                 });
+
             }); // สิ้นสุด bcrypt.compare
         }); // สิ้นสุด connection.query
-    
+
     } catch (e) {
         console.error("Sync error:", e);
         res.status(500).json({ message: "Internal server error" });
@@ -275,21 +281,21 @@ router.get("/v1/products", function (req, res) {
 })
 
 router.get("/v1/products/:id", (req, res) => {
-  const id = req.params.id;
+    const id = req.params.id;
 
-  const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
-  connection.query(sql, [id], (err, result) => {
-    if (err) return res.status(500).json(err);
+    const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
+    connection.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).json(err);
 
-    if (result.length === 0) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
-  });
+        if (result.length === 0) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
+    });
 });
 
 router.get("/v1/cart/:userEmail", (req, res) => {
-    const userEmail = decodeURIComponent(req.params.userEmail); 
+    const userEmail = decodeURIComponent(req.params.userEmail);
     const sql = `
         SELECT 
             ci.Cart_ProID AS id,
@@ -329,6 +335,7 @@ router.post("/v1/cart/add", (req, res) => {
                 res.status(200).json({ message: "Item quantity updated" });
             });
         } else {
+            const insertSql = "INSERT INTO CartItem (Cart_AccEmail, Cart_ProID, Cart_Quantity) VALUES (?, ?, ?)";
             connection.query(insertSql, [email, productId, quantity], (err) => {
                 if (err) return res.status(500).json({ error: "DB error" });
                 res.status(201).json({ message: "Item added to cart" });
@@ -369,11 +376,11 @@ router.post("/v1/cart/calculate", (req, res) => {
     let subtotal = 0;
     try {
         items.forEach(item => {
-            if (item.check) { 
+            if (item.check) {
                 subtotal += item.price * item.selectedItem;
             }
         });
-        const shipping = subtotal > 0 ? 50 : 0; 
+        const shipping = subtotal > 0 ? 50 : 0;
         const total = subtotal + shipping;
         res.json({ subtotal, shipping, total });
     } catch (err) {

@@ -39,7 +39,7 @@ export default function Login() {
 
       auth.login(data.token, data.user);
 
-      router.push('/home');
+      router.push('/cart');
     } catch (error: any) {
       setError(error.message);
     } finally {

@@ -1,87 +1,92 @@
+'use client'
+import Image from "next/image";
+import { CartItemType, formatCurrency } from "@/app/context/CartContext";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
-import { Minus, Plus } from 'lucide-react'; 
-import Image, { StaticImageData } from "next/image";
-
-type CartItem = {
-  id: number;
-  name: string;
-  price: number;
-  collection: string;
-  type: string;
-  character: string;
-  imageSrc: StaticImageData | string; 
-  selectedItem: number;
-  check: boolean;
-};
-
-
+// 1. กำหนด Props ที่จะรับมาจาก Cart.tsx
 type CartItemRowProps = {
-  item: CartItem; 
-  onUpdateSelect: (id: number, newSelectedItem: number) => void
-  onToggleItem: (id: number) => void; // 
+  item: CartItemType;
+  onUpdateSelect: (id: string, newQuantity: number) => void;
+  onToggleItem: (id: string) => void;
+  onRemoveItem: (id: string) => void;
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('th-TH', {
-    style: 'currency',
-    currency: 'THB',
-    minimumFractionDigits: 2,
-  }).format(amount);
-};
+export default function CartItemRow({ 
+  item, 
+  onUpdateSelect, 
+  onToggleItem, 
+  onRemoveItem 
+}: CartItemRowProps) {
 
-export default function CartItemRow({item, onUpdateSelect, onToggleItem}: CartItemRowProps) {
-  const subtotal = item.price * item.selectedItem;
+  // (สร้าง handler เพื่อป้องกันการยิง API รัวๆ)
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1 && newQuantity !== item.selectedItem) {
+      onUpdateSelect(item.id, newQuantity);
+    }
+  };
 
   return (
-    <tr className="text-[#7469B6] align-middle border-b"> 
-      <td className="py-4">
-        <div className="flex items-center gap-4 ">
-          <Image 
-            src={item.imageSrc} 
-            alt={item.name}     
-            width={80}          
-            height={80}         
-            className="rounded-lg object-cover" 
+    <tr className="border-b">
+      {/* 1. PRODUCT (Checkbox + Image + Name) */}
+      <td className="py-4 px-2">
+        <div className="flex items-center justify-start gap-3">
+          <input
+            type="checkbox"
+            checked={item.check}
+            onChange={() => onToggleItem(item.id)} // 👈 ใช้ onToggleItem
+            className="checkbox checkbox-primary" 
           />
-          <p className="font-medium ">{item.name}</p> 
+          <Image
+            src={item.imageSrc}
+            alt={item.name}
+            width={80}
+            height={80}
+            className="rounded-lg object-cover"
+          />
+          <span className="font-semibold text-left">{item.name}</span>
         </div>
       </td>
 
-      <td className="py-4 text-center text-[#7469B6]">
-        <p>{formatCurrency(item.price)}</p> 
+      {/* 2. PRICE */}
+      <td className="py-4 px-2">
+        {formatCurrency(item.price)}
       </td>
 
-      <td className="py-4 text-[#7469B6]">
-        <div className="flex text-center items-center gap-3">
+      {/* 3. QTY (Quantity Selector) */}
+      <td className="py-4 px-2">
+        <div className="flex items-center justify-center gap-2">
           <button
-            className="text-[#7469B6] pl-10"
-            onClick={() => onUpdateSelect(item.id, item.selectedItem - 1)}
-            disabled={item.selectedItem <= 1} 
+            onClick={() => handleQuantityChange(item.selectedItem - 1)} // 👈 ใช้ handler
+            className="p-1 rounded-full hover:bg-gray-200 disabled:opacity-30"
+            disabled={item.selectedItem <= 1}
           >
             <Minus size={16} />
           </button>
-          
-          <span className="text-[#7469B6] w-8 text-center">{item.selectedItem}</span> 
-
+          <span className="font-bold w-10 text-center">
+            {item.selectedItem}
+          </span>
           <button
-            className="text-[#7469B6] "
-            onClick={() => onUpdateSelect(item.id, item.selectedItem + 1)}
+            onClick={() => handleQuantityChange(item.selectedItem + 1)} // 👈 ใช้ handler
+            className="p-1 rounded-full hover:bg-gray-200"
           >
             <Plus size={16} />
           </button>
         </div>
       </td>
 
-      <td className="py-4">
-        <div className="flex items-center justify-between  text-[#7469B6] pl-15"> 
-          <p className="font-medium">{formatCurrency(subtotal)}</p> 
-          <input
-            type="checkbox"
-            checked={item.check} 
-            onChange={() => onToggleItem(item.id)}
-            className="form-checkbox h-5 w-5 rounded text-[#775AC4] focus:ring-[#775AC4]"
-          />
-        </div>
+      {/* 4. TOTAL */}
+      <td className="py-4 px-2 font-semibold">
+        {formatCurrency(item.price * item.selectedItem)}
+      </td>
+      
+      {/* 5. REMOVE */}
+      <td className="py-4 px-2">
+        <button
+          onClick={() => onRemoveItem(item.id)} // 👈 ใช้ onRemoveItem
+          className="text-red-500 hover:text-red-700"
+        >
+          <Trash2 size={20} />
+        </button>
       </td>
     </tr>
   );
