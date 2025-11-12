@@ -8,6 +8,7 @@ dotenv.config();
 const mysql = require("mysql2");
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 
 const port = 3001;
 const app = express();
@@ -29,11 +30,11 @@ var connection = mysql.createConnection({
 
 
 // post: create user for signup
-router.post("/v1/signup", function(req, res) {
+router.post("/v1/signup", function (req, res) {
     console.log("Create the user")
 
     connection.query("SELECT Acc_Email FROM User_Account WHERE Acc_Email = ?", req.body.email, (err, result) => {
-        
+
         if (err) {
             console.error("Database query error:", err);
             return res.status(500).json({ message: "Database query error" });
@@ -44,7 +45,7 @@ router.post("/v1/signup", function(req, res) {
         }
 
         bcrypt.hash(req.body.password, 10, (hashErr, hashedPassword) => {
-            
+
             if (hashErr) {
                 console.error("Hashing error:", hashErr);
                 return res.status(500).json({ message: "Error password" });
@@ -70,21 +71,89 @@ router.post("/v1/signup", function(req, res) {
             });
         });
     });
+
+});
+
+// Login Acc
+router.post("/v1/login", function (req, res) {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: "Please fill out the form completely" })
+        }
+
+        // ต้อง SELECT คอลัมน์ที่จำเป็น (ID และ Password) มาด้วย
+        const sql = "SELECT Acc_ID, Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
+        
+        connection.query(sql, [req.body.email], (err, result) => {
+            if (err) {
+                console.error("Database query error:", err);
+                return res.status(500).json({ message: "Database query error" });
+            }
+
+            // 2. --- FIXED (Security) ---
+            // ถ้าไม่พบผู้ใช้ ให้ส่ง Error 401 (Unauthorized)
+            if (result.length === 0) {
+                return res.status(401).json({ message: "Invalid email or password" });
+            }
+
+            const user = result[0];
+
+            // 3. --- IMPLEMENTED ---
+            // เปรียบเทียบรหัสผ่านที่ส่งมา กับ Hash ในฐานข้อมูล
+            bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
+                
+                // A. จัดการกรณี bcrypt error
+                if (err) {
+                    console.error("Bcrypt compare error:", err);
+                    return res.status(500).json({ message: "Internal server error" });
+                }
+
+                // B. จัดการกรณีรหัสผ่านไม่ถูกต้อง
+                if (!correct) {
+                    return res.status(401).json({ message: "Invalid email or password" });
+                }
+                
+                // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
+                const payload = {
+                    userId: user.Acc_ID,
+                    email: user.Acc_Email
+                    // คุณสามารถเพิ่ม role หรือสิทธิ์อื่นๆ ได้ที่นี่
+                };
+
+                // 2. เซ็น Token ด้วยกุญแจลับ
+                const token = jwt.sign(
+                    payload,
+                    process.env.JWT_SECRET,
+                    { expiresIn: '1h' } // ตั้งเวลาหมดอายุ (ตัวอย่างคือ 1 ชั่วโมง)
+                );
+
+                // send Token back to Frontend
+                return res.status(200).json({
+                    message: "Login successful",
+                    token: token
+                });
+            }); // สิ้นสุด bcrypt.compare
+        }); // สิ้นสุด connection.query
     
+    } catch (e) {
+        console.error("Sync error:", e);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
 
 /*wait for login */
-router.get("/user_profile", function(req, res) {
+router.get("/user_profile", function (req, res) {
     /*input section */
-    
+
 
     /*select section*/
     let fname = document.getElementById("fname")
     let lname = document.getElementById("lname")
     let email = document.getElementById("email")
     let phone = document.getElementById("phone")
-    connection.query("SELECT Acc_Email, Acc_FName, Acc_LNam,Acc_PhoneNum WHERE Acc_Email = ?",email, function(error,result){
-        return res.send({error: false, data: result[0], meesage:"Fail to send the information"})
+    connection.query("SELECT Acc_Email, Acc_FName, Acc_LNam,Acc_PhoneNum WHERE Acc_Email = ?", email, function (error, result) {
+        return res.send({ error: false, data: result[0], meesage: "Fail to send the information" })
     });
 
     fname.innerHTML = Acc_Fname;
@@ -93,15 +162,15 @@ router.get("/user_profile", function(req, res) {
     phone.innerHTML = Acc_PhoneNum;
 });
 
-router.put("/user_profile", function(req, res) {
+router.put("/user_profile", function (req, res) {
     let email = req.body.User_Account.Acc_Email;
     let info = req.body.User_Account;
 
     //dont know what to put
     /*sql*/
-    connection.query("UPDATE User_Account SET ? WHERE Acc_Email = ?",[info,email],function(error,result){
-        if(error) throw error;
-        return res.send({error:false, data: result.affectedRows, meesage:"Change user info successfully"});
+    connection.query("UPDATE User_Account SET ? WHERE Acc_Email = ?", [info, email], function (error, result) {
+        if (error) throw error;
+        return res.send({ error: false, data: result.affectedRows, meesage: "Change user info successfully" });
     });
 });
 
@@ -165,34 +234,34 @@ router.get("/ad_product", (req, res) => {
 
 
 
-router.get("/v1/products", function(req,res){
-   let sql ="SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
-    "FROM Product AS p " +
-    "LEFT JOIN Collection AS c ON p.Pro_ColID = c.Col_ID " +
-    "LEFT JOIN ProductPicture AS pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_id LIKE '%f' " +
-    "WHERE 1=1 ";
+router.get("/v1/products", function (req, res) {
+    let sql = "SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
+        "FROM Product AS p " +
+        "LEFT JOIN Collection AS c ON p.Pro_ColID = c.Col_ID " +
+        "LEFT JOIN ProductPicture AS pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_id LIKE '%f' " +
+        "WHERE 1=1 ";
 
-    const {name,type,collection} = req.query
+    const { name, type, collection } = req.query
 
     const searchvari = []
 
-    if(name) {
-        sql += " AND p.Pro_Name LIKE ?"; 
+    if (name) {
+        sql += " AND p.Pro_Name LIKE ?";
         searchvari.push(`%${name}%`);
-        
+
     }
-    if(type){
+    if (type) {
         sql += " AND p.Pro_Type LIKE ?";
         searchvari.push(`%${type}%`);
 
     }
-    if(collection){
+    if (collection) {
         sql += "AND c.Col_Name LIKE ?";
         searchvari.push(`%${collection}%`)
     }
 
-    connection.query(sql,searchvari, function(err,results){
-        if(err) {
+    connection.query(sql, searchvari, function (err, results) {
+        if (err) {
             console.error("Database query error:", err);
             return res.status(500).json([])
         }
@@ -221,7 +290,7 @@ router.get("/v1/products/:id", (req, res) => {
 
 
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     console.log(`Connected DB: ${process.env.DB_name}`);
 });
 
