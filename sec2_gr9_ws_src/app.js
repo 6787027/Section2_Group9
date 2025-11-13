@@ -76,105 +76,124 @@ router.post("/v1/signup", function (req, res) {
 
 // Login Acc
 router.post("/v1/login", function (req, res) {
+
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({ message: "Please fill out the form completely" })
+            return res.status(400).json({ message: "Please fill out the form completely" });
         }
 
-        const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
+        // ✅ เพิ่ม Acc_Type, Acc_FName, Acc_LName
+        const sql = "SELECT Acc_Email, Acc_Password, Acc_Type, Acc_FName, Acc_LName FROM User_Account WHERE Acc_Email = ?";
 
-        connection.query(sql, [req.body.email], (err, result) => {
+        connection.query(sql, [email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
 
-            // Not found send Error 401 (Unauthorized)
             if (result.length === 0) {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const user = result[0];
 
-            console.log(req.body.password)
-            console.log(user.Acc_Password)
-            bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
-
-                // A. จัดการกรณี bcrypt error
+            bcrypt.compare(password, user.Acc_Password, (err, correct) => {
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
                 }
 
-                //password wrong
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-                // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
+                // ✅ Payload เก็บประเภทผู้ใช้
                 const payload = {
                     email: user.Acc_Email,
-                    type: user.Acc_Type
+                    type: user.Acc_Type,
                 };
 
-                const token = jwt.sign(
-                    payload,
-                    process.env.JWT_SECRET,
-                    { expiresIn: '1h' } // Set expire time
-                );
+                const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+                // ✅ ส่งข้อมูลประเภทผู้ใช้กลับไปด้วย
                 res.json({
                     message: "Login successful",
-                    token: token,
+                    token,
                     user: {
                         id: user.Acc_Email,
                         email: user.Acc_Email,
                         firstName: user.Acc_FName,
-                        lastName: user.Acc_LName
-                    }
+                        lastName: user.Acc_LName,
+                        type: user.Acc_Type, // 👈 เพิ่มตรงนี้
+                    },
                 });
-
-            }); // สิ้นสุด bcrypt.compare
-        }); // สิ้นสุด connection.query
-
+            });
+        });
     } catch (e) {
         console.error("Sync error:", e);
         res.status(500).json({ message: "Internal server error" });
     }
 });
 
-/*wait for login */
-router.get("/user_profile", function (req, res) {
-    /*input section */
 
-
-    /*select section*/
-    let fname = document.getElementById("fname")
-    let lname = document.getElementById("lname")
-    let email = document.getElementById("email")
-    let phone = document.getElementById("phone")
-    connection.query("SELECT Acc_Email, Acc_FName, Acc_LNam,Acc_PhoneNum WHERE Acc_Email = ?", email, function (error, result) {
-        return res.send({ error: false, data: result[0], meesage: "Fail to send the information" })
-    });
-
-    fname.innerHTML = Acc_Fname;
-    lname.innerHTML = Acc_Lname;
-    email.innerHTML = Acc_Email;
-    phone.innerHTML = Acc_PhoneNum;
+router.get("/user_profile/:email", (req, res) => {
+  const email = req.params.email;
+  const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
+  db.query(sql, [email], (err, data) => {
+    if (err) return res.status(500).json(err);
+    if (data.length === 0) return res.status(404).json({ message: "User not found" });
+    res.json(data[0]);
+  });
 });
 
-router.put("/user_profile", function (req, res) {
-    let email = req.body.User_Account.Acc_Email;
-    let info = req.body.User_Account;
+router.put("/user_profile", async (req, res) => {
+  const { email, fname, lname, phone, password } = req.body;
 
-    //dont know what to put
-    /*sql*/
-    connection.query("UPDATE User_Account SET ? WHERE Acc_Email = ?", [info, email], function (error, result) {
-        if (error) throw error;
-        return res.send({ error: false, data: result.affectedRows, meesage: "Change user info successfully" });
+  try {
+    const fields = [];
+    const values = [];
+
+    if (fname) {
+      fields.push("Acc_FName = ?");
+      values.push(fname);
+    }
+    if (lname) {
+      fields.push("Acc_LName = ?");
+      values.push(lname);
+    }
+    if (phone) {
+      fields.push("Acc_PhoneNum = ?");
+      values.push(phone);
+    }
+
+    // ✅ ถ้ามีการกรอกรหัสผ่านใหม่ — เข้ารหัสก่อนเก็บ
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      fields.push("Acc_Password = ?");
+      values.push(hashedPassword);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ message: "No fields to update" });
+    }
+
+    values.push(email);
+    const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
+
+    db.query(sql, values, (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Database error" });
+      }
+      res.json({ message: "User updated successfully" });
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 router.get("/ad_product", (req, res) => {
     const search = (req.query.search || "").toLowerCase();
@@ -275,20 +294,20 @@ router.get("/ad_account", (req, res) => {
 });
 
 router.put("/ad_account", (req, res) => {
-  const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
+    const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
 
-  const sql = `
+    const sql = `
     UPDATE User_Account
     SET Acc_FName = ?, Acc_LName = ?, Acc_PhoneNum = ?, Acc_Type = ?
     WHERE Acc_Email = ?`;
 
-  connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
-    if (err) {
-      console.error("Error updating account:", err);
-      return res.status(500).send("Database update error");
-    }
-    res.sendStatus(200);
-  });
+    connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
+        if (err) {
+            console.error("Error updating account:", err);
+            return res.status(500).send("Database update error");
+        }
+        res.sendStatus(200);
+    });
 });
 
 
@@ -441,96 +460,96 @@ router.delete("/v1/products/:id", (req, res) => {
 
 // POST: add new product
 router.post("/v1/products", (req, res) => {
-  const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
+    const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
 
-  if (!name || !price || !type || !colname) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+    if (!name || !price || !type || !colname) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 
-  // 1. ตรวจสอบว่า collection มีอยู่แล้วหรือไม่
-  connection.query(
-    "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
-    [colname],
-    (colErr, colResults) => {
-      if (colErr) {
-        console.error(colErr);
-        return res.status(500).json({ message: "Database error" });
-      }
+    // 1. ตรวจสอบว่า collection มีอยู่แล้วหรือไม่
+    connection.query(
+        "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
+        [colname],
+        (colErr, colResults) => {
+            if (colErr) {
+                console.error(colErr);
+                return res.status(500).json({ message: "Database error" });
+            }
 
-      const handleInsertProduct = (colID) => {
-        // 2. สร้าง Pro_ID อัตโนมัติ
-        const prefix = type === "Doll" ? "DS" : "AC";
-        const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
+            const handleInsertProduct = (colID) => {
+                // 2. สร้าง Pro_ID อัตโนมัติ
+                const prefix = type === "Doll" ? "DS" : "AC";
+                const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
 
-        connection.query(newIDSQL, (idErr, idResults) => {
-          if (idErr) return res.status(500).json({ message: "Error generating product ID" });
+                connection.query(newIDSQL, (idErr, idResults) => {
+                    if (idErr) return res.status(500).json({ message: "Error generating product ID" });
 
-          let nextNum = 1;
-          if (idResults.length > 0) {
-            const lastID = idResults[0].Pro_ID;
-            nextNum = parseInt(lastID.substring(2)) + 1;
-          }
-          const newID = prefix + nextNum.toString().padStart(5, "0");
+                    let nextNum = 1;
+                    if (idResults.length > 0) {
+                        const lastID = idResults[0].Pro_ID;
+                        nextNum = parseInt(lastID.substring(2)) + 1;
+                    }
+                    const newID = prefix + nextNum.toString().padStart(5, "0");
 
-          // 3. เพิ่มสินค้า
-          const insertSQL = `
+                    // 3. เพิ่มสินค้า
+                    const insertSQL = `
             INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
             VALUES (?, ?, ?, ?, ?, ?, ?)
           `;
-          connection.query(
-            insertSQL,
-            [newID, name, desc, price, type, quantity, colID],
-            (insertErr) => {
-              if (insertErr) {
-                console.error(insertErr);
-                return res.status(500).json({ message: "Error inserting product" });
-              }
+                    connection.query(
+                        insertSQL,
+                        [newID, name, desc, price, type, quantity, colID],
+                        (insertErr) => {
+                            if (insertErr) {
+                                console.error(insertErr);
+                                return res.status(500).json({ message: "Error inserting product" });
+                            }
 
-              // 4. เพิ่มรูปภาพ
-              const insertPics = `
+                            // 4. เพิ่มรูปภาพ
+                            const insertPics = `
                 INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture)
                 VALUES 
                 (?, ?, ?),
                 (?, ?, ?),
                 (?, ?, ?)
               `;
-              connection.query(
-                insertPics,
-                [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
-                (picErr) => {
-                  if (picErr) {
-                    console.error(picErr);
-                    return res.status(500).json({ message: "Error inserting pictures" });
-                  }
-                  res.json({ message: "Product added successfully", Pro_ID: newID });
-                }
-              );
-            }
-          );
-        });
-      };
+                            connection.query(
+                                insertPics,
+                                [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
+                                (picErr) => {
+                                    if (picErr) {
+                                        console.error(picErr);
+                                        return res.status(500).json({ message: "Error inserting pictures" });
+                                    }
+                                    res.json({ message: "Product added successfully", Pro_ID: newID });
+                                }
+                            );
+                        }
+                    );
+                });
+            };
 
-      // ถ้ามี collection อยู่แล้ว
-      if (colResults.length > 0) {
-        handleInsertProduct(colResults[0].Col_ID);
-      } else {
-        // สร้าง Col_ID ใหม่
-        const newColID = "COL" + Date.now();
-        connection.query(
-          "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
-          [newColID, colname],
-          (insertColErr) => {
-            if (insertColErr) {
-              console.error(insertColErr);
-              return res.status(500).json({ message: "Error creating collection" });
+            // ถ้ามี collection อยู่แล้ว
+            if (colResults.length > 0) {
+                handleInsertProduct(colResults[0].Col_ID);
+            } else {
+                // สร้าง Col_ID ใหม่
+                const newColID = "COL" + Date.now();
+                connection.query(
+                    "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
+                    [newColID, colname],
+                    (insertColErr) => {
+                        if (insertColErr) {
+                            console.error(insertColErr);
+                            return res.status(500).json({ message: "Error creating collection" });
+                        }
+                        handleInsertProduct(newColID);
+                    }
+                );
+                console.log("Add new product successfully");
             }
-            handleInsertProduct(newColID);
-          }
-        );
-        console.log("Add new product successfully");
-      }
-    }
-  );
+        }
+    );
 });
 
 

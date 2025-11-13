@@ -1,8 +1,12 @@
 "use client";
 
+
+import { LogOut } from "lucide-react";
 import Adpro from "@/components/built-components/protable";
 import { useEffect, useState } from "react";
 import AddProductModal from "@/components/built-components/AddProductModal";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface Product {
     Pic_f: any;
@@ -23,6 +27,10 @@ export default function Ad_product() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showAddModal, setShowAddModal] = useState(false);
 
+    const router = useRouter();
+    const auth = useAuth();
+
+
     // โหลดข้อมูลจาก backend ทุกครั้ง search/filter เปลี่ยน
     useEffect(() => {
         fetch(`http://localhost:3001/ad_product?search=${searchTerm}&type=${filterType}`)
@@ -31,6 +39,11 @@ export default function Ad_product() {
             .catch(err => console.error("Error loading products:", err));
     }, [searchTerm, filterType]);
 
+    const handleLogout = () => {
+        auth.logout(); // เคลียร์ token และ user ออกจาก context/localStorage
+        router.push("/home"); // กลับไปหน้า Home
+    };
+
     return (
         <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
 
@@ -38,7 +51,7 @@ export default function Ad_product() {
             <div className="bg-white min-w-65 shadow-xl">
                 <header>
                     <div className="my-16 ml-8">
-                        <h1 className="text-[#282151] font-bold text-xl">Admin name</h1>
+                        <h1 id="adname" className="text-[#282151] font-bold text-xl">Admin name</h1>
                     </div>
                 </header>
 
@@ -50,6 +63,12 @@ export default function Ad_product() {
                     <h2 className="mb-7"><a href="/ad_account">Account</a></h2>
                     <h2><a href="/ad_order">Order</a></h2>
                 </nav>
+                <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
+                    <div className="flex flex-row">
+                       <button onClick={handleLogout} className="px-4 py-2 flex flex-row " ><LogOut className="mr-2"></LogOut> Logout</button>
+                    </div>
+                </div>
+
             </div>
 
             {/* Content */}
@@ -138,7 +157,7 @@ export default function Ad_product() {
                     {showAddModal && (
                         <AddProductModal
                             onClose={() => setShowAddModal(false)}
-                            onSuccess={() => {window.location.reload()}}
+                            onSuccess={() => { window.location.reload() }}
                         />
                     )}
                 </div>

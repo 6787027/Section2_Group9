@@ -1,6 +1,9 @@
 "use client"
 import Adacc from "@/components/built-components/acctable"
 import { useEffect, useState } from "react";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 interface Account {
     Acc_Type: string;
@@ -15,6 +18,8 @@ export default function Ad_account() {
    const [accounts, setAccounts] = useState<Account[]>([]);
     const [filterType, setFilterType] = useState<string>("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const router = useRouter();
+    const auth = useAuth();
 
     useEffect(() => {
     const fetchAccounts = async () => {
@@ -37,7 +42,10 @@ export default function Ad_account() {
     fetchAccounts();
 }, [filterType, searchTerm]);
 
-
+const handleLogout = () => {
+        auth.logout(); // เคลียร์ token และ user ออกจาก context/localStorage
+        router.push("/home"); // กลับไปหน้า Home
+    };
 
     return (
         <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
@@ -56,6 +64,11 @@ export default function Ad_account() {
                         <h2 className="text-xl"><a href="/ad_order">Order</a><br></br></h2>
                     </div>
                 </nav>
+                <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
+                    <div className="flex flex-row">
+                       <button onClick={handleLogout} className="px-4 py-2 flex flex-row " ><LogOut className="mr-2"></LogOut> Logout</button>
+                    </div>
+                </div>
             </div>
 
             <main className="flex flex-col m-15 mt-10">

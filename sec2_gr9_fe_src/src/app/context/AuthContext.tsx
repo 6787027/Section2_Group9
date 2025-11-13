@@ -7,6 +7,8 @@ interface User {
   id: string; // <-- เราจะใช้ Email เป็น ID
   email: string;
   firstName: string;
+  lastName: string;
+  phonenum:string
 };
 
 // หน้าตาของ Context
