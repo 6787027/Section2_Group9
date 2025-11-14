@@ -215,7 +215,7 @@ insert into ProductPicture(Pic_id,Pic_ProID,Pro_Picture) values
 ("AC00014b","AC00014","https://i.pinimg.com/736x/da/86/2e/da862e21e3db7f13fec76effde5e4944.jpg"),
 ("AC00014s","AC00014","https://i.pinimg.com/736x/27/d6/30/27d630d988c1150cb22809b335a6a7d9.jpg"),
 
-("AC00015f","AC00015","https://i.pinimg.com/736x/da/86/2e/da862e21e3db7f13fec76effde5e4944.jpg"),
+("AC00015f","AC00015","https://i.pinimg.com/736x/1f/56/ea/1f56ea061e12cb343f69559280f861d6.jpg"),
 ("AC00015b","AC00015","https://i.pinimg.com/736x/7b/5c/a3/7b5ca3bd0368989386d866e9c1c2ed55.jpg"),
 ("AC00015s","AC00015","https://i.pinimg.com/736x/98/2e/d7/982ed752c2204be063f8ef07abc03951.jpg");
 
@@ -235,12 +235,17 @@ insert into CartItem(Cart_AccEmail, Cart_ProID, Cart_Quantity) values
 create table User_Order(
 	Or_Num varchar(255) not null primary key,
     Or_Time DATETIME not null,
-    Or_CartID int not null
+    Or_Status varchar(255) not null,
+    -- Status: Ordered, Paid, Prepared, Sent
+    Or_Price double(13,2) not null
+    
 );
 
-insert into user_order(Or_Num, Or_Time) values
-("OR00001","2025-11-11 21:20:54");
-
+insert into user_order(Or_Num, Or_Time, Or_Status,Or_Price) values
+("OR00001","2025-11-11 21:20:54","Sent", 590),
+("OR00002","2025-11-12 04:18:25","Prepared", 1770),
+("OR00003","2025-11-13 18:40:07","Paid", 1070),
+("OR00004","2025-11-13 20:09:47","Ordered", 2140);
 
 alter table Product
 add foreign key (Pro_ColID)
@@ -265,8 +270,3 @@ on update CASCADE on delete CASCADE;
 
 alter table CartItem
 add unique key (Cart_AccEmail, Cart_ProID);
-
-alter table User_Order
-add foreign key (Or_CartID)
-references CartItem (CartItem_ID)
-ON Update Cascade;
