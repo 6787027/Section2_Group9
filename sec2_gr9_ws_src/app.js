@@ -84,7 +84,7 @@ router.post("/v1/login", function (req, res) {
         }
 
         // ✅ เพิ่ม Acc_Type, Acc_FName, Acc_LName
-        const sql = "SELECT Acc_Email, Acc_Password, Acc_Type, Acc_FName, Acc_LName FROM User_Account WHERE Acc_Email = ?";
+        const sql = "SELECT Acc_Email, Acc_Password, Acc_Type, Acc_FName, Acc_LName, Acc_PhoneNum FROM User_Account WHERE Acc_Email = ?";
 
         connection.query(sql, [email], (err, result) => {
             if (err) {
@@ -125,6 +125,7 @@ router.post("/v1/login", function (req, res) {
                         email: user.Acc_Email,
                         firstName: user.Acc_FName,
                         lastName: user.Acc_LName,
+                        phonenum: user.Acc_PhoneNum,
                         type: user.Acc_Type, // 👈 เพิ่มตรงนี้
                     },
                 });
@@ -138,60 +139,67 @@ router.post("/v1/login", function (req, res) {
 
 
 router.get("/user_profile/:email", (req, res) => {
-  const email = req.params.email;
-  const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
-  db.query(sql, [email], (err, data) => {
-    if (err) return res.status(500).json(err);
-    if (data.length === 0) return res.status(404).json({ message: "User not found" });
-    res.json(data[0]);
-  });
+    const email = req.params.email;
+    const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
+
+    // ✅ เปลี่ยน 'db' เป็น 'connection' (หรือตัวแปร DB ที่คุณใช้ใน /v1/login)
+    connection.query(sql, [email], (err, data) => {
+        if (err) {
+            console.error("Error fetching profile:", err);
+            return res.status(500).json({ message: "Database query error" });
+        }
+        if (data.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(data[0]);
+    });
 });
 
 router.put("/user_profile", async (req, res) => {
-  const { email, fname, lname, phone, password } = req.body;
+    const { email, fname, lname, phone, password } = req.body;
 
-  try {
-    const fields = [];
-    const values = [];
+    try {
+        const fields = [];
+        const values = [];
 
-    if (fname) {
-      fields.push("Acc_FName = ?");
-      values.push(fname);
+        if (fname) {
+            fields.push("Acc_FName = ?");
+            values.push(fname);
+        }
+        if (lname) {
+            fields.push("Acc_LName = ?");
+            values.push(lname);
+        }
+        if (phone) {
+            fields.push("Acc_PhoneNum = ?");
+            values.push(phone);
+        }
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            fields.push("Acc_Password = ?");
+            values.push(hashedPassword);
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ message: "No fields to update" });
+        }
+
+        values.push(email);
+        const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
+
+        // ✅ เปลี่ยน 'db' เป็น 'connection'
+        connection.query(sql, values, (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Database error" });
+            }
+            res.json({ message: "User updated successfully" });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
-    if (lname) {
-      fields.push("Acc_LName = ?");
-      values.push(lname);
-    }
-    if (phone) {
-      fields.push("Acc_PhoneNum = ?");
-      values.push(phone);
-    }
-
-    // ✅ ถ้ามีการกรอกรหัสผ่านใหม่ — เข้ารหัสก่อนเก็บ
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      fields.push("Acc_Password = ?");
-      values.push(hashedPassword);
-    }
-
-    if (fields.length === 0) {
-      return res.status(400).json({ message: "No fields to update" });
-    }
-
-    values.push(email);
-    const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
-
-    db.query(sql, values, (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Database error" });
-      }
-      res.json({ message: "User updated successfully" });
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
 });
 
 
@@ -292,6 +300,78 @@ router.get("/ad_account", (req, res) => {
         res.json(results);
     })
 });
+
+router.post("/ad_account", async (req, res) => {
+    // 1. ดึงข้อมูลจาก Modal
+    const { email, fname, lname, phonenum, pass, type } = req.body;
+
+    // 2. ตรวจสอบข้อมูล
+    if (!email || !fname || !lname || !pass || !type) {
+        return res.status(400).json({ message: "Please fill all required fields." });
+    }
+
+    try {
+        // 3. HASH รหัสผ่าน (สำคัญมาก!)
+        const hashedPassword = await bcrypt.hash(pass, 10); // 10 คือ "salt rounds"
+
+        // 4. สร้าง SQL Query
+        const sql = `
+            INSERT INTO User_Account 
+                (Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Password, Acc_Type) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        
+        const values = [email, fname, lname, phonenum || null, hashedPassword, type];
+
+        // 5. รัน Query
+        connection.query(sql, values, (err, result) => {
+            if (err) {
+                // 6. จัดการ Error (เช่น Email ซ้ำ)
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ message: "This email is already registered." });
+                }
+                console.error("Database error:", err);
+                return res.status(500).json({ message: "Database error" });
+            }
+            
+            // 7. ส่ง Response สำเร็จ
+            res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
+        });
+
+    } catch (error) {
+        console.error("Server error:", error);
+        res.status(500).json({ message: "Server error during password hashing." });
+    }
+});
+
+router.delete("/ad_account/:email", (req, res) => {
+    
+    const emailToDelete = req.params.email;
+
+    if (!emailToDelete) {
+        return res.status(400).json({ message: "Email parameter is missing" });
+    }
+    
+    const deleteSQL = "DELETE FROM User_Account WHERE Acc_Email = ?";
+
+    
+    connection.query(deleteSQL, [emailToDelete], (err, result) => {
+        if (err) {
+            console.error("Error deleting account:", err);
+            return res.status(500).json({ message: "Error deleting Account" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+
+        // ✅ 4. (แก้ไข) Log ตัวแปรที่ถูกต้อง
+        console.log(`Deleted Acc_Email: ${emailToDelete}`);
+        res.json({ message: "Account deleted successfully" });
+    });
+});
+
+
 
 router.put("/ad_account", (req, res) => {
     const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;

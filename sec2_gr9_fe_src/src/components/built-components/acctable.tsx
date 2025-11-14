@@ -18,6 +18,24 @@ export default function Acctable({ email, fname, lname, phonenum, pass, type }: 
     
         const accData = { email, fname, lname, phonenum, pass, type};
 
+        const handleDelete = async () => {
+        try {
+            const res = await fetch(`http://localhost:3001/ad_account/${email}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                alert("Account deleted successfully!");
+                window.location.reload();
+            } else {
+                alert("Failed to delete account");
+            }
+        } catch (err) {
+            console.error("Error deleting account:", err);
+            alert("Error deleting account");
+        }
+    };
+
     return (
         <tr>
             <td>{email}</td>
@@ -56,7 +74,8 @@ export default function Acctable({ email, fname, lname, phonenum, pass, type }: 
                                 Delete this account?
                             </h3>
                             <p className="text-gray-600 text-center mb-6">
-                                Are you sure you want to delete <span className="font-semibold">{name}</span>?
+                                Are you sure you want to delete <span className="font-semibold">{email}</span>?
+                                Account type: <span className="font-semibold">{type}</span>?
                             </p>
                             <div className="flex justify-center gap-6">
                                 <button

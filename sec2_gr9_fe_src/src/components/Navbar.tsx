@@ -3,12 +3,19 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from '../assets/logo-navbar.svg'
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
+// import { faUser } from "@fortawesome/free-regular-svg-icons"; // ไม่ได้ใช้งาน
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ShoppingBag, UserRound } from "lucide-react";
-import AboutUs from "@/app/(user)/aboutus/page";
+import AboutUs from "@/app/(user)/aboutus/page"; // ไม่ได้ใช้งาน แต่เป็นโค้ดเดิมของคุณ
+
+// 1. Import useAuth เพื่อเข้าถึง Context
+import { useAuth } from "@/app/context/AuthContext"; 
 
 export default function Navbar() {
+  // 2. ดึงสถานะ user ออกมาจาก AuthContext
+  // (user จะเป็น object ถ้า login อยู่, และเป็น null ถ้า logout)
+  const { user } = useAuth();
+
   return (
     <div >
       <main>
@@ -16,17 +23,12 @@ export default function Navbar() {
 
           <Image alt="logo-nav" src={Logo} width='180' className="float-left"/>
 
-          <div className="flex justify-items-end bg-white rounded-4xl    w-80 py-[0.2rem] border-2 border-gray-200 my-1">
-            <input 
-              className="text-black rounded-4xl pl-2 w-68  text-sm outline-none"
-              placeholder="Search"
-            ></input>
-            <a href="/home"><FontAwesomeIcon icon={faSearch} className="text-black ml-2 hover:text-[#A599ED] active:text-black "/>  </a>
-          </div>
           <div className="flex justify-end gap-8 w-[10rem]"> 
             <div className="flex justify-between gap-8">
-              <Link href="/cart"> <ShoppingBag color='black' strokeWidth={1} size={24} className="hover:stroke-[#A599ED] active:stroke-black"/>  </Link>
-              <Link href="/login"> <UserRound color='black' strokeWidth={1} size={24} className="hover:stroke-[#A599ED] active:stroke-back"/> </Link>
+              <Link href="/cart"> <ShoppingBag color='black' strokeWidth={1} size={24} className="hover:stroke-[#A599ED] active:stroke-black"/>   </Link>
+              <Link href={user ? "/user_profile" : "/login"}> 
+                <UserRound color='black' strokeWidth={1} size={24} className="hover:stroke-[#A599ED] active:stroke-back"/> 
+              </Link>
             </div>
           </div>
 
@@ -42,13 +44,13 @@ export default function Navbar() {
 
     
         
-          {/* {
-            true ?  (
-              <span>true</span>
-            ) : (
-              <span>false</span>
-            )
-          } */}
+        {/* {
+          true ?  (
+            <span>true</span>
+          ) : (
+            <span>false</span>
+          )
+        } */}
         
 
       </main>

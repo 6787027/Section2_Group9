@@ -8,7 +8,8 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  phonenum:string
+  phonenum:string;
+  type: string;
 };
 
 // หน้าตาของ Context

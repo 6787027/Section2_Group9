@@ -40,10 +40,10 @@ export default function AddProductModal({ onClose, onSuccess }) {
 
     return (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative">
+            <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative max-h-[90vh] overflow-y-auto">
                 <h2 className="text-3xl font-bold text-center mb-4">Add Product</h2>
 
-                <form className="overflow-auto"
+                <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         handleAdd();
@@ -62,6 +62,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                         />
 
                         <div className="mt-2 flex items-center">
+                    
                             {/* Price */}
                             <label className="mr-11 block text-sm font-semibold mb-1">Price</label>
                             <input
@@ -87,6 +88,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 <option value="Doll">Doll</option>
                                 <option value="Accessory">Accessory</option>
                             </select>
+                          
                         </div>
 
                         <div className="flex items-center">

@@ -48,7 +48,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
 
   return (
     <div className="fixed inset-0 bg-black/40  flex justify-center items-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative">
+      <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative max-h-[90vh] overflow-y-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Edit Product</h2>
 
         <form
@@ -161,11 +161,11 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             placeholder="Enter back image URL"
             className="border p-2 rounded w-full mb-5"
           />
-H
+
           <div className="flex justify-between">
             <button
               type="submit"
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+              className="bg-[#7469B6] text-white px-4 py-2 rounded"
             >
               Save
             </button>

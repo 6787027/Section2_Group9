@@ -30,8 +30,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const res = await fetch("http://localhost:3001/api/user/update", {
+    const res = await fetch("http://localhost:3001/user_profile", { // 👈 แก้จาก "/api/user/update"
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -41,6 +40,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
         phone: form.phone,
         password: form.password,
       }),
+
     });
 
     const data = await res.json();
@@ -68,6 +68,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-center text-2xl font-bold mb-6 text-[#282151]">
               Edit Profile
@@ -118,12 +119,26 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-[#7469B6] text-white py-2 rounded-xl mt-4"
-              >
-                Save
-              </button>
+              <div className="mt-5 justify-between flex ">
+
+                <button
+                  type="submit"
+                  className="bg-[#7469B6] px-7 text-white py-2 rounded-xl"
+                >
+                  Save
+                </button>
+
+                <button
+                  type="button" 
+                  onClick={onClose} 
+                  className="py-2 px-5 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+
+                
+              </div>
+
             </form>
           </motion.div>
         </motion.div>
