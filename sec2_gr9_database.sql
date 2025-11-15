@@ -1,22 +1,28 @@
 create database celestecraft;
 use celestecraft;
 
-
-
 create table User_Account (
 	Acc_Email varchar(255) not null primary key,
     Acc_FName varchar(255) not null,
     Acc_LName varchar(255) not null,
     Acc_PhoneNum varchar(10) not null,
     Acc_Password varchar(255) not null,
-    Acc_Type varchar(255) not null
+    Acc_Type varchar(255) not null,
     -- Type: Admin, User
+    Acc_LogTime datetime
 );
 
 insert into user_account (Acc_Email, Acc_FName, Acc_LName,Acc_Password,Acc_PhoneNum,Acc_Type) values
 ("matsukos128@gmail.com", "Nongnoey", "EiEi", "$2b$10$1bvtBnxEQ8OiteCm.Nk3Ae9qRstL9qZIH.fDYR4gdWXxCUy6y6YbG","0814668796","User"),
-("pimthida1117@gmail.com","Admin Noey", "Naja", "$2b$10$YaIQGH77hME30zoRigl6Hu3M00dkH8v0y6CaHtHDsiUqwdHt5t5vy", "0848798796", "Admin");
+("pimthida1117@gmail.com","Admin Noey", "Naja", "$2b$10$YaIQGH77hME30zoRigl6Hu3M00dkH8v0y6CaHtHDsiUqwdHt5t5vy", "0848798796", "Admin"),
+("usertest@gmail.com","User","01","$2b$10$1bvtBnxEQ8OiteCm.Nk3Ae9qRstL9qZIH.fDYR4gdWXxCUy6y6YbG","0879879877","User"),
+("admintest@gmail.com","Admin","01","$2b$10$YaIQGH77hME30zoRigl6Hu3M00dkH8v0y6CaHtHDsiUqwdHt5t5vy","0546871325","Admin");
 
+create table Login_Log (
+    Log_ID int not null AUTO_INCREMENT primary key,
+    Acc_Email varchar(255) not null,
+    Log_Time datetime not null
+);
 
 
 create table Collection(
@@ -247,6 +253,12 @@ insert into user_order(Or_Num, Or_Time, Or_Status,Or_Price) values
 ("OR00003","2025-11-13 18:40:07","Paid", 1070),
 ("OR00004","2025-11-13 20:09:47","Ordered", 2140);
 
+alter table Login_Log
+add foreign key (Acc_Email)
+references User_Account(Acc_Email)
+on update cascade on delete cascade;
+
+
 alter table Product
 add foreign key (Pro_ColID)
 references Collection(Col_ID)
@@ -255,18 +267,17 @@ on update cascade;
 alter table ProductPicture
 add foreign key (Pic_ProID)
 references Product (Pro_ID)
-on Update Cascade;
-
+on update cascade;
 
 alter table CartItem
 add foreign key (Cart_AccEmail)
 references User_Account(Acc_Email)
-on update CASCADE on delete CASCADE;
+on update cascade on delete cascade;
 
 alter table CartItem
 add foreign key (Cart_ProID)
 references Product(Pro_ID)
-on update CASCADE on delete CASCADE;
+on update cascade on delete cascade;
 
 alter table CartItem
 add unique key (Cart_AccEmail, Cart_ProID);
