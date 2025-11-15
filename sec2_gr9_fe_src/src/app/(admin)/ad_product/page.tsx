@@ -98,9 +98,20 @@ export default function Ad_product() {
 
                 <nav className="my-10 ml-8 text-xl">
                     <div className="mb-7 text-[#282151] font-bold">Tools</div>
-                    <h2 className="mb-7 font-bold"><a href="/ad_product">Product</a></h2>
-                    <h2 className="mb-7"><a href="/ad_account">Account</a></h2>
-                    <h2><a href="/ad_order">Order</a></h2>
+                    <h2 className="mb-7 font-bold">
+                        <a href="/ad_product">Product</a>
+                        </h2>
+                    <h2 className="mb-7">
+                        <a href="/ad_account">Account</a>
+                        </h2>
+                    <h2 className="text-xl  mb-7">
+                        <a href="/ad_order">Order</a>
+                        <br></br>
+                    </h2>
+                    <h2 className="text-xl">
+                        <a href="/ad_log">Login History</a>
+                        <br></br>
+                    </h2>
                 </nav>
                 <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
                     <div className="flex flex-row">

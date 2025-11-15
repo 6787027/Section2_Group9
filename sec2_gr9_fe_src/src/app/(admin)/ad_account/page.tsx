@@ -110,8 +110,12 @@ export default function Ad_account() {
                             <a href="/ad_account">Account</a>
                             <br></br>
                         </h2>
-                        <h2 className="text-xl">
+                        <h2 className="text-xl mb-7">
                             <a href="/ad_order">Order</a>
+                            <br></br>
+                        </h2>
+                        <h2 className="text-xl">
+                            <a href="/ad_log">Login History</a>
                             <br></br>
                         </h2>
                     </div>
@@ -244,7 +248,7 @@ export default function Ad_account() {
                             {showAddModal && (
                                 <AddAccountModal
                                     onClose={() => setShowAddModal(false)}
-                                    onSuccess={() => { 
+                                    onSuccess={() => {
                                         setShowAddModal(false);
                                         const currentSearch = searchTerm;
                                         setSearchTerm(prev => prev + ' ');

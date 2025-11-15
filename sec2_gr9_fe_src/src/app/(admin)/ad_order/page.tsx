@@ -2,31 +2,31 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import AdOr from "@/components/built-components/ortable";
 
 
 export default function Ad_order() {
   const router = useRouter();
   const auth = useAuth();
-  const [isAuthLoading, setIsAuthLoading] = useState(true); 
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    
+
     if (auth.isLoading) {
       return;
     }
-    
+
     if (!auth.user) {
       router.push("/login");
       return;
     }
- 
+
     if (auth.user.type !== "Admin") {
       router.push("/user_profile");
       return;
     }
-  
+
     setIsAuthLoading(false);
   }, [auth.isLoading, auth.user, router]);
 
@@ -44,6 +44,7 @@ export default function Ad_order() {
       </div>
     );
   }
+
 
   return (
     <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
@@ -67,8 +68,12 @@ export default function Ad_order() {
               <a href="/ad_account">Account</a>
               <br></br>
             </h2>
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold mb-7">
               <a href="/ad_order">Order</a>
+              <br></br>
+            </h2>
+            <h2 className="text-xl">
+              <a href="/ad_log">Login History</a>
               <br></br>
             </h2>
           </div>
@@ -171,112 +176,29 @@ export default function Ad_order() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* row 1 */}
-                  <tr>
-                    <td>OR0001</td>
-                    <td>2025/09/15 00:15:12</td>
-                    <td>1690</td>
-                    <td>
-                      <div id="statusborder">
-                        <div id="paid"></div>
-                        <div>Paid</div>
-                      </div>
-                    </td>
-                    <td className="flex flex-nowrap">
-                      <button type="button" id="or_edit">
-                        <svg
-                          className="w-[24px] h-[24px] text-black dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.5"
-                            d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                          />
-                        </svg>
-                      </button>
-                      <div className="mx-5"></div>
-                      <button type="button" id="or_del">
-                        <svg
-                          className="w-[24px] h-[24px] text-[#E00303] dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.5"
-                            d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"
-                          />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                  {/* row 2 */}
-                  <tr className="hover:bg-base-300">
-                    <td>OR0002</td>
-                    <td>2025/09/16 00:15:12</td>
-                    <td>590</td>
-                    <td>
-                      <div id="statusborder">
-                        <div id="sent"></div>
-                        <div>Sent</div>
-                      </div>
-                    </td>
-                    <td className="flex flex-nowrap">
-                      <button type="button" id="or_edit">
-                        <svg
-                          className="w-[24px] h-[24px] text-black dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.5"
-                            d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                          />
-                        </svg>
-                      </button>
-                      <div className="mx-5"></div>
-                      <button type="button" id="or_del">
-                        <svg
-                          className="w-[24px] h-[24px] text-[#E00303] dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.5"
-                            d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"
-                          />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
+
+                  {products.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-4 text-gray-500">
+                        No products found
+                      </td>
+                    </tr>
+                  ) : (
+                    products.map(p => (
+                      <Adpro
+                        key={p.Pro_ID}
+                        id={p.Pro_ID}
+                        name={p.Pro_Name}
+                        price={p.Pro_Price}
+                        type={p.Pro_Type}
+                        colname={p.Col_Name}
+                        quantity={p.Pro_Quantity}
+                        desc={p.Pro_Description}
+                        img1={p.Pic_f}
+                        img2={p.Pic_s}
+                        img3={p.Pic_b} />
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

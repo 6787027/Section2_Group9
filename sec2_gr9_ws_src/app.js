@@ -76,61 +76,101 @@ router.post("/v1/signup", function (req, res) {
 
 // Login Acc
 router.post("/v1/login", function (req, res) {
-
     try {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ message: "Please fill out the form completely" });
         }
 
-        // ✅ เพิ่ม Acc_Type, Acc_FName, Acc_LName
-        const sql = "SELECT Acc_Email, Acc_Password, Acc_Type, Acc_FName, Acc_LName, Acc_PhoneNum FROM User_Account WHERE Acc_Email = ?";
-
-        connection.query(sql, [email], (err, result) => {
+        // 1. SELECT ข้อมูล user
+        const selectSql = "SELECT * FROM User_Account WHERE Acc_Email = ?";
+        connection.query(selectSql, [email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
-
             if (result.length === 0) {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const user = result[0];
 
+            // 2. ตรวจสอบรหัสผ่าน
             bcrypt.compare(password, user.Acc_Password, (err, correct) => {
+                
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
                 }
-
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-                // ✅ Payload เก็บประเภทผู้ใช้
-                const payload = {
-                    email: user.Acc_Email,
-                    type: user.Acc_Type,
-                };
+                // ✅ 3. (ส่วนที่เพิ่มเข้ามา) บันทึก Log การล็อกอิน
+                const now = new Date();
+                const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
-                const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+                connection.query(insertLogSql, [user.Acc_Email, now], (insertErr, insertResult) => {
+                    if (insertErr) {
+                        // ไม่ต้องหยุดการล็อกอิน แต่ควร log error ไว้
+                        console.error("Failed to insert login log:", insertErr);
+                    } else {
+                        console.log(`Login log saved for ${user.Acc_Email}`);
+                    }
 
-                // ✅ ส่งข้อมูลประเภทผู้ใช้กลับไปด้วย
-                res.json({
-                    message: "Login successful",
-                    token,
-                    user: {
-                        id: user.Acc_Email,
-                        email: user.Acc_Email,
-                        firstName: user.Acc_FName,
-                        lastName: user.Acc_LName,
-                        phonenum: user.Acc_PhoneNum,
-                        type: user.Acc_Type, // 👈 เพิ่มตรงนี้
-                    },
-                });
-            });
+                    // 4. อัปเดตเวลาล็อกอินล่าสุด (โค้ดเดิมของคุณ)
+                    // (ผมเปลี่ยน Acc_LastLogin เป็น Acc_LogTime ตาม schema)
+                    const updateLoginTimeSql = "UPDATE User_Account SET Acc_LogTime = ? WHERE Acc_Email = ?";
+
+                    connection.query(updateLoginTimeSql, [now, user.Acc_Email], (updateErr, updateResult) => {
+                        if (updateErr) {
+                            console.error("Failed to update last login time:", updateErr);
+                        }
+
+                        // 5. สร้าง Token และส่งข้อมูลกลับ (โค้ดเดิมของคุณ)
+                        const payload = {
+                            email: user.Acc_Email,
+                            type: user.Acc_Type,
+                        };
+                        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+                        res.json({
+                            message: "Login successful",
+                            token,
+                            user: {
+                                id: user.Acc_Email,
+                                email: user.Acc_Email,
+                                firstName: user.Acc_FName,
+                                lastName: user.Acc_LName,
+                                phonenum: user.Acc_PhoneNum,
+                                type: user.Acc_Type,
+                            },
+                        });
+                    }); // 👈 สิ้นสุด query (UPDATE)
+                }); // 👈 สิ้นสุด query (INSERT LOG)
+            }); // 👈 สิ้นสุด bcrypt.compare
+        }); // 👈 สิ้นสุด query (SELECT)
+    } catch (e) {
+        console.error("Sync error:", e);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+router.get("/ad_log", (req, res) => {
+    try {
+
+        const sql = "SELECT Acc_Email, Log_Time AS Acc_LogTime FROM Login_Log ORDER BY Log_Time DESC";
+
+        connection.query(sql, (err, results) => {
+            if (err) {
+                console.error("Database query error:", err);
+                return res.status(500).json({ message: "Database query error" });
+            }
+
+
+            res.json(results);
         });
+
     } catch (e) {
         console.error("Sync error:", e);
         res.status(500).json({ message: "Internal server error" });
@@ -320,7 +360,7 @@ router.post("/ad_account", async (req, res) => {
                 (Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Password, Acc_Type) 
             VALUES (?, ?, ?, ?, ?, ?)
         `;
-        
+
         const values = [email, fname, lname, phonenum || null, hashedPassword, type];
 
         // 5. รัน Query
@@ -333,7 +373,7 @@ router.post("/ad_account", async (req, res) => {
                 console.error("Database error:", err);
                 return res.status(500).json({ message: "Database error" });
             }
-            
+
             // 7. ส่ง Response สำเร็จ
             res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
         });
@@ -345,16 +385,16 @@ router.post("/ad_account", async (req, res) => {
 });
 
 router.delete("/ad_account/:email", (req, res) => {
-    
+
     const emailToDelete = req.params.email;
 
     if (!emailToDelete) {
         return res.status(400).json({ message: "Email parameter is missing" });
     }
-    
+
     const deleteSQL = "DELETE FROM User_Account WHERE Acc_Email = ?";
 
-    
+
     connection.query(deleteSQL, [emailToDelete], (err, result) => {
         if (err) {
             console.error("Error deleting account:", err);
