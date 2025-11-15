@@ -3,6 +3,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react"; 
+import AdOr from "@/components/built-components/ortable";
 
 
 export default function Ad_order() {
@@ -11,27 +12,27 @@ export default function Ad_order() {
   const [isAuthLoading, setIsAuthLoading] = useState(true); 
 
   useEffect(() => {
-    // ถ้าระบบ Auth (จาก AuthProvider) ยังโหลดไม่เสร็จ ให้รอก่อน
+    
     if (auth.isLoading) {
       return;
     }
-    // ถ้าโหลดเสร็จ แต่ "ไม่มี" user, เด้งไปหน้า login
+    
     if (!auth.user) {
       router.push("/login");
       return;
     }
-    // ถ้า "มี" user แต่ "ไม่ใช่" Admin, เด้งไปหน้า user profile
+ 
     if (auth.user.type !== "Admin") {
       router.push("/user_profile");
       return;
     }
-    // ถ้ามาถึงตรงนี้ = เป็น Admin จริง
-    setIsAuthLoading(false); // อนุญาตให้แสดงผลหน้าเว็บ
+  
+    setIsAuthLoading(false);
   }, [auth.isLoading, auth.user, router]);
 
   const handleLogout = () => {
-    auth.logout(); // เคลียร์ token และ user ออกจาก context/localStorage
-    router.push("/home"); // กลับไปหน้า Home
+    auth.logout();
+    router.push("/home");
   };
 
   if (isAuthLoading) {
@@ -86,7 +87,6 @@ export default function Ad_order() {
       </div>
 
       <main className="flex flex-col m-15 mt-10">
-        {/* ... (เนื้อหา Main เหมือนเดิม) ... */}
         <div className="flex justify-between bg-white w-250 py-3 mb-10 items-center border-solid border-1 border-white rounded-2xl shadow-xl">
           <div className="ml-5">
             <div className="flex flex-nowrap border-solid border-1 border-black rounded-3xl pl-3 pr-3 ">
