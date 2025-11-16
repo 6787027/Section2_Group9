@@ -29,7 +29,6 @@ var connection = mysql.createConnection({
 });
 
 
-// post: create user for signup
 router.post("/v1/signup", function (req, res) {
     console.log("Create the user")
 
@@ -74,7 +73,7 @@ router.post("/v1/signup", function (req, res) {
 
 });
 
-// Login Acc
+
 router.post("/v1/login", function (req, res) {
     try {
         const { email, password } = req.body;
@@ -82,7 +81,6 @@ router.post("/v1/login", function (req, res) {
             return res.status(400).json({ message: "Please fill out the form completely" });
         }
 
-        // 1. SELECT ข้อมูล user
         const selectSql = "SELECT * FROM User_Account WHERE Acc_Email = ?";
         connection.query(selectSql, [email], (err, result) => {
             if (err) {
@@ -95,9 +93,8 @@ router.post("/v1/login", function (req, res) {
 
             const user = result[0];
 
-            // 2. ตรวจสอบรหัสผ่าน
             bcrypt.compare(password, user.Acc_Password, (err, correct) => {
-                
+
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
@@ -106,20 +103,17 @@ router.post("/v1/login", function (req, res) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-                // ✅ 3. (ส่วนที่เพิ่มเข้ามา) บันทึก Log การล็อกอิน
+               
                 const now = new Date();
                 const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
                 connection.query(insertLogSql, [user.Acc_Email, now], (insertErr, insertResult) => {
                     if (insertErr) {
-                        // ไม่ต้องหยุดการล็อกอิน แต่ควร log error ไว้
                         console.error("Failed to insert login log:", insertErr);
                     } else {
                         console.log(`Login log saved for ${user.Acc_Email}`);
                     }
 
-                    // 4. อัปเดตเวลาล็อกอินล่าสุด (โค้ดเดิมของคุณ)
-                    // (ผมเปลี่ยน Acc_LastLogin เป็น Acc_LogTime ตาม schema)
                     const updateLoginTimeSql = "UPDATE User_Account SET Acc_LogTime = ? WHERE Acc_Email = ?";
 
                     connection.query(updateLoginTimeSql, [now, user.Acc_Email], (updateErr, updateResult) => {
@@ -127,7 +121,6 @@ router.post("/v1/login", function (req, res) {
                             console.error("Failed to update last login time:", updateErr);
                         }
 
-                        // 5. สร้าง Token และส่งข้อมูลกลับ (โค้ดเดิมของคุณ)
                         const payload = {
                             email: user.Acc_Email,
                             type: user.Acc_Type,
@@ -146,10 +139,10 @@ router.post("/v1/login", function (req, res) {
                                 type: user.Acc_Type,
                             },
                         });
-                    }); // 👈 สิ้นสุด query (UPDATE)
-                }); // 👈 สิ้นสุด query (INSERT LOG)
-            }); // 👈 สิ้นสุด bcrypt.compare
-        }); // 👈 สิ้นสุด query (SELECT)
+                    }); 
+                }); 
+            });
+        });
     } catch (e) {
         console.error("Sync error:", e);
         res.status(500).json({ message: "Internal server error" });
@@ -182,7 +175,6 @@ router.get("/user_profile/:email", (req, res) => {
     const email = req.params.email;
     const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
 
-    // ✅ เปลี่ยน 'db' เป็น 'connection' (หรือตัวแปร DB ที่คุณใช้ใน /v1/login)
     connection.query(sql, [email], (err, data) => {
         if (err) {
             console.error("Error fetching profile:", err);
@@ -228,7 +220,6 @@ router.put("/user_profile", async (req, res) => {
         values.push(email);
         const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
 
-        // ✅ เปลี่ยน 'db' เป็น 'connection'
         connection.query(sql, values, (err) => {
             if (err) {
                 console.error(err);
@@ -267,13 +258,11 @@ router.get("/ad_product", (req, res) => {
 
     const params = [];
 
-    // Filter by type
     if (type !== "all") {
         sql += " AND p.Pro_Type = ?";
         params.push(type);
     }
 
-    // Search (ทุก field)
     if (search) {
         sql += ` AND (
             LOWER(p.Pro_ID) LIKE ? OR
@@ -314,20 +303,17 @@ router.get("/ad_account", (req, res) => {
     let conditions = [];
     let params = [];
 
-    // 🔹 กรองตามประเภท (Admin/User)
     if (type && type !== "all") {
         conditions.push("Acc_Type = ?");
         params.push(type);
     }
 
-    // 🔹 ค้นหาจากคำค้น (ชื่อ, นามสกุล, อีเมล)
     if (search && search.trim() !== "") {
         conditions.push("(Acc_FName LIKE ? OR Acc_LName LIKE ? OR Acc_Email LIKE ?)");
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword);
     }
-
-    // 🔹 รวมเงื่อนไขเข้า SQL
+L
     if (conditions.length > 0) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -342,19 +328,19 @@ router.get("/ad_account", (req, res) => {
 });
 
 router.post("/ad_account", async (req, res) => {
-    // 1. ดึงข้อมูลจาก Modal
+
     const { email, fname, lname, phonenum, pass, type } = req.body;
 
-    // 2. ตรวจสอบข้อมูล
+
     if (!email || !fname || !lname || !pass || !type) {
         return res.status(400).json({ message: "Please fill all required fields." });
     }
 
     try {
-        // 3. HASH รหัสผ่าน (สำคัญมาก!)
-        const hashedPassword = await bcrypt.hash(pass, 10); // 10 คือ "salt rounds"
 
-        // 4. สร้าง SQL Query
+        const hashedPassword = await bcrypt.hash(pass, 10);
+
+
         const sql = `
             INSERT INTO User_Account 
                 (Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Password, Acc_Type) 
@@ -363,10 +349,9 @@ router.post("/ad_account", async (req, res) => {
 
         const values = [email, fname, lname, phonenum || null, hashedPassword, type];
 
-        // 5. รัน Query
+
         connection.query(sql, values, (err, result) => {
             if (err) {
-                // 6. จัดการ Error (เช่น Email ซ้ำ)
                 if (err.code === 'ER_DUP_ENTRY') {
                     return res.status(409).json({ message: "This email is already registered." });
                 }
@@ -374,7 +359,6 @@ router.post("/ad_account", async (req, res) => {
                 return res.status(500).json({ message: "Database error" });
             }
 
-            // 7. ส่ง Response สำเร็จ
             res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
         });
 
@@ -398,14 +382,14 @@ router.delete("/ad_account/:email", (req, res) => {
     connection.query(deleteSQL, [emailToDelete], (err, result) => {
         if (err) {
             console.error("Error deleting account:", err);
-            return res.status(500).json({ message: "Error deleting Account" });
+            return res.status(500).json({ message: "Error deleting account" });
         }
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Account not found" });
         }
 
-        // ✅ 4. (แก้ไข) Log ตัวแปรที่ถูกต้อง
+
         console.log(`Deleted Acc_Email: ${emailToDelete}`);
         res.json({ message: "Account deleted successfully" });
     });
@@ -427,6 +411,146 @@ router.put("/ad_account", (req, res) => {
             return res.status(500).send("Database update error");
         }
         res.sendStatus(200);
+    });
+});
+
+router.get("/ad_order", (req, res) => {
+    const { status, search } = req.query;
+
+
+    let query = `
+        SELECT 
+            Or_Num, 
+            DATE_FORMAT(Or_Time, '%Y/%m/%d %H:%i:%s') AS Or_Time, 
+            Or_Status, 
+            Or_Price,
+            Or_AccEmail,
+            Or_Address 
+        FROM User_Order
+    `;
+    let conditions = [];
+    let params = [];
+
+    if (status && status !== "all") {
+        conditions.push("Or_Status = ?");
+        params.push(status);
+    }
+
+    if (search && search.trim() !== "") {
+  
+        conditions.push("(Or_Num LIKE ? OR Or_Price LIKE ? OR Or_Time LIKE ? OR Or_AccEmail LIKE ? OR Or_Address LIKE ?)");
+        const keyword = `%${search}%`;
+        params.push(keyword, keyword, keyword, keyword, keyword);
+    }
+
+    if (conditions.length > 0) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            console.error("Error fetching orders:", err);
+            return res.status(500).json({ error: "Database query failed" });
+        }
+        res.json(results);
+    });
+});
+
+
+router.post("/ad_order", (req, res) => {
+
+    const { price, status, email, address } = req.body;
+
+    if (!price || !status || !email || !address) {
+        return res.status(400).json({ message: "Please fill all required fields (Price, Status, Email, Address)." });
+    }
+
+    const findLastIdSql = "SELECT Or_Num FROM User_Order ORDER BY Or_Num DESC LIMIT 1";
+
+    connection.query(findLastIdSql, (err, results) => {
+        if (err) {
+            console.error("Database error (Finding last ID):", err);
+            return res.status(500).json({ message: "Database error" });
+        }
+
+        let newIdNum = 1;
+        if (results.length > 0) {
+            const lastId = results[0].Or_Num;
+            const lastNum = parseInt(lastId.substring(2));
+            newIdNum = lastNum + 1;
+        }
+        const newOrNum = "OR" + String(newIdNum).padStart(5, '0');
+
+        
+    
+        const insertSql = `INSERT INTO User_Order (Or_Num, Or_Time, Or_Price, Or_Status, Or_AccEmail, Or_Address) VALUES (?, NOW(), ?, ?, ?, ?)
+`;
+        const values = [newOrNum, price, status, email, address];
+
+        connection.query(insertSql, values, (err, result) => {
+            if (err) {
+                
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ message: "This order number already exists." });
+                }
+                if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+                    return res.status(404).json({ message: "Account Email not found. Please use an existing user email." });
+                }
+                console.error("Database error:", err);
+                return res.status(500).json({ message: "Database error" });
+            }
+            res.status(201).json({ message: "Order created successfully", newOrderId: newOrNum });
+        });
+    });
+});
+
+
+router.put("/ad_order", (req, res) => {
+  
+    const { Or_Num, Or_Status, Or_Address } = req.body;
+
+    if (!Or_Num || !Or_Status || !Or_Address) {
+        return res.status(400).json({ message: "Missing required fields (Or_Num, Or_Status, Or_Address)" });
+    }
+
+    const sql = `
+        UPDATE User_Order 
+        SET Or_Status = ?, Or_Address = ?
+        WHERE Or_Num = ?
+    `;
+    const values = [Or_Status, Or_Address, Or_Num];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error("Error updating order:", err);
+            return res.status(500).json({ message: "Database error" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.json({ message: "Order updated successfully" });
+    });
+});
+
+
+router.delete("/ad_order/:id", (req, res) => {
+    const idToDelete = req.params.id;
+
+    if (!idToDelete) {
+        return res.status(400).json({ message: "Order number parameter is missing" });
+    }
+
+    const deleteSQL = "DELETE FROM User_Order WHERE Or_Num = ?";
+
+    connection.query(deleteSQL, [idToDelete], (err, result) => {
+        if (err) {
+            console.error("Error deleting order:", err);
+            return res.status(500).json({ message: "Error deleting order" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.json({ message: "Order deleted successfully" });
     });
 });
 
@@ -480,11 +604,11 @@ router.get("/v1/products/:id", (req, res) => {
         if (result.length === 0) {
             return res.status(404).json({ message: "Product not found" });
         }
-        res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
+        res.json(result[0]); 
     });
 });
 
-// PUT: update product by ID
+
 router.put("/v1/products/:id", (req, res) => {
     const id = req.params.id;
     const {
@@ -578,7 +702,7 @@ router.delete("/v1/products/:id", (req, res) => {
     });
 });
 
-// POST: add new product
+
 router.post("/v1/products", (req, res) => {
     const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
 
@@ -586,7 +710,6 @@ router.post("/v1/products", (req, res) => {
         return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // 1. ตรวจสอบว่า collection มีอยู่แล้วหรือไม่
     connection.query(
         "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
         [colname],
@@ -597,7 +720,6 @@ router.post("/v1/products", (req, res) => {
             }
 
             const handleInsertProduct = (colID) => {
-                // 2. สร้าง Pro_ID อัตโนมัติ
                 const prefix = type === "Doll" ? "DS" : "AC";
                 const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
 
@@ -610,8 +732,6 @@ router.post("/v1/products", (req, res) => {
                         nextNum = parseInt(lastID.substring(2)) + 1;
                     }
                     const newID = prefix + nextNum.toString().padStart(5, "0");
-
-                    // 3. เพิ่มสินค้า
                     const insertSQL = `
             INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -624,15 +744,7 @@ router.post("/v1/products", (req, res) => {
                                 console.error(insertErr);
                                 return res.status(500).json({ message: "Error inserting product" });
                             }
-
-                            // 4. เพิ่มรูปภาพ
-                            const insertPics = `
-                INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture)
-                VALUES 
-                (?, ?, ?),
-                (?, ?, ?),
-                (?, ?, ?)
-              `;
+                            const insertPics = `INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture) VALUES (?, ?, ?), (?, ?, ?),(?, ?, ?)`;
                             connection.query(
                                 insertPics,
                                 [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
@@ -649,11 +761,9 @@ router.post("/v1/products", (req, res) => {
                 });
             };
 
-            // ถ้ามี collection อยู่แล้ว
             if (colResults.length > 0) {
                 handleInsertProduct(colResults[0].Col_ID);
             } else {
-                // สร้าง Col_ID ใหม่
                 const newColID = "COL" + Date.now();
                 connection.query(
                     "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",

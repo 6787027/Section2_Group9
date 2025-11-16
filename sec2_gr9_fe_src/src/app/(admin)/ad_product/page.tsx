@@ -82,7 +82,7 @@ export default function Ad_product() {
         );
     }
     return (
-        <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
+        <div className="bg-[#F1F0F4] flex flex-row">
 
             {/* Sidebar */}
             <div className="bg-white min-w-65 shadow-xl">

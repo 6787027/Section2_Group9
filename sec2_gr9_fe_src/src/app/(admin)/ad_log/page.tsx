@@ -104,7 +104,7 @@ export default function Ad_log() {
 
   if (isAuthLoading) {
     return (
-      <div className="bg-[#F1F0F4] min-h-screen w-screen flex justify-center items-center">
+      <div className="bg-[#F1F0F4] flex justify-center items-center">
         <h1 className="text-2xl font-bold text-[#282151]">
           Verifying Admin Access...
         </h1>

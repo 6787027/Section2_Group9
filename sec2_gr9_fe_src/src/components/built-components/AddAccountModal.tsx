@@ -53,7 +53,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="Enter email"
-                            className="border p-2 rounded w-full mb-3"
+                            className="border p-2 border-[#7469B6] w-full mb-3"
                             required
                         />
 
@@ -65,7 +65,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                                 value={formData.pass}
                                 onChange={handleChange}
                                 placeholder="Enter password"
-                                className="border p-2 rounded w-full"
+                                className="border p-2 border-[#7469B6] w-full"
                                 required
                             />
                         </div>
@@ -79,7 +79,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                                 value={formData.fname}
                                 onChange={handleChange}
                                 placeholder="Enter first name"
-                                className="border p-2 rounded w-60 mb-3"
+                                className="border p-2 border-[#7469B6] w-60 mb-3"
                                 required
                             />
                             </div>
@@ -92,7 +92,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                                 value={formData.lname}
                                 onChange={handleChange}
                                 placeholder="Enter last name"
-                                className="border p-2 rounded w-60 mb-3"
+                                className="border p-2 border-[#7469B6] w-60 mb-3"
                                 required
                             />
                             </div>
@@ -102,7 +102,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
-                                className="border p-2 rounded w-full mb-3 bg-white"
+                                className="border p-2 border-[#7469B6] w-full mb-3 bg-white"
                                 required
                             >
                                 <option value="">Select type</option>
@@ -120,7 +120,7 @@ export default function AddAccountModal({ onClose, onSuccess }) {
                             value={formData.phonenum}
                             onChange={handleChange}
                             placeholder="Enter front image URL"
-                            className="border p-2 rounded w-full mb-5"
+                            className="border p-2 border-[#7469B6] w-full mb-5"
                         />
 
 

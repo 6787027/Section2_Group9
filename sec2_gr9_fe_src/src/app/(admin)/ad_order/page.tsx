@@ -4,12 +4,26 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdOr from "@/components/built-components/ortable";
+import AddOrderModal from "@/components/built-components/AddOrderModal";
 
+interface Order {
+  Or_Status: string;
+  Or_Price: number;
+  Or_Time: string;
+  Or_Num: string;
+  Or_AccEmail: string;
+  Or_Address: string;
+}
 
 export default function Ad_order() {
   const router = useRouter();
   const auth = useAuth();
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [order, setOrder] = useState<Order[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+
 
   useEffect(() => {
 
@@ -30,6 +44,20 @@ export default function Ad_order() {
     setIsAuthLoading(false);
   }, [auth.isLoading, auth.user, router]);
 
+  useEffect(() => {
+    if (isAuthLoading) {
+      return;
+    }
+
+    fetch(`http://localhost:3001/ad_order?search=${searchTerm}&status=${filterStatus}`)
+      .then(res => res.json())
+      .then(data => setOrder(data))
+      .catch(err => console.error("Error loading products:", err));
+
+  }, [searchTerm, filterStatus, isAuthLoading]);
+
+
+
   const handleLogout = () => {
     auth.logout();
     router.push("/home");
@@ -47,7 +75,7 @@ export default function Ad_order() {
 
 
   return (
-    <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
+    <div id="main" className="bg-[#F1F0F4] flex flex-row">
       <div className="bg-white min-w-65 shadow-xl ">
         <header>
           <div className="my-16 ml-8 justify-items-start">
@@ -99,6 +127,8 @@ export default function Ad_order() {
                 type="text"
                 id="search"
                 placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"
               ></input>
               <button type="button">
@@ -124,6 +154,7 @@ export default function Ad_order() {
           <div className="mr-5 ">
             <button
               type="button"
+              onClick={() => setShowAddModal(true)}
               className="flex flex-nowrap font-bold text-[#282151] bg-[#E8E6FB] p-2 border-solid border-1 border-[#E8E6FB] rounded-2xl"
             >
               <svg
@@ -152,12 +183,15 @@ export default function Ad_order() {
             <label className="text-[#7469B6] mr-2">Order Status</label>
             <select
               id="or_select"
-              defaultValue="Select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               className="select pl-3 text-grey-200 bg-white border-solid border-1 border-white rounded-xl shadow-xl"
             >
-              <option disabled={true}>Select</option>
-              <option>Paid</option>
-              <option>Sent</option>
+              <option value="all">Select status</option>
+              <option value="Ordered">Ordered</option>
+              <option value="Paid">Paid</option>
+              <option value="Prepared">Prepared</option>
+              <option value="Sent">Sent</option>
             </select>
           </div>
           <div className="border-b-1 border-[#D9D9D9]"></div>
@@ -170,37 +204,43 @@ export default function Ad_order() {
                 <thead>
                   <tr>
                     <th>Order NO.</th>
+                    <th>Customer Email</th>
                     <th>Time</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Address</th>
                   </tr>
                 </thead>
                 <tbody>
 
-                  {products.length === 0 ? (
+                  {order.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-4 text-gray-500">
-                        No products found
+                        No order found
                       </td>
                     </tr>
                   ) : (
-                    products.map(p => (
-                      <Adpro
-                        key={p.Pro_ID}
-                        id={p.Pro_ID}
-                        name={p.Pro_Name}
-                        price={p.Pro_Price}
-                        type={p.Pro_Type}
-                        colname={p.Col_Name}
-                        quantity={p.Pro_Quantity}
-                        desc={p.Pro_Description}
-                        img1={p.Pic_f}
-                        img2={p.Pic_s}
-                        img3={p.Pic_b} />
+                    order.map(o => (
+                      <AdOr
+                        key={o.Or_Num}
+                        id={o.Or_Num}
+                        email={o.Or_AccEmail}
+                           
+                        time={o.Or_Time}
+                        price={o.Or_Price}
+                        status={o.Or_Status}
+                         address={o.Or_Address}
+                      />
                     ))
                   )}
                 </tbody>
               </table>
+              {showAddModal && (
+                <AddOrderModal
+                  onClose={() => setShowAddModal(false)}
+                  onSuccess={() => { window.location.reload() }}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -88,7 +88,7 @@ export default function Ad_account() {
     }
 
     return (
-        <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
+        <div className="bg-[#F1F0F4] flex flex-row">
             <div className="bg-white min-w-65 shadow-xl ">
                 <header>
                     <div className="my-16 ml-8 justify-items-start">

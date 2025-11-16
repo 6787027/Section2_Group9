@@ -63,7 +63,7 @@ export default function EditAccountModal({ acc, onClose, onSave }: EditModalProp
                             type="email"
                             value={email}
                             readOnly
-                            className="w-full border border-[#8575B4] rounded-md p-2"
+                            className="w-full border border-[#7469B6] p-2"
                         />
                     </div>
 
@@ -73,7 +73,7 @@ export default function EditAccountModal({ acc, onClose, onSave }: EditModalProp
                             type="text"
                             value={fname}
                             onChange={(e) => setFname(e.target.value)}
-                            className="w-full border border-[#8575B4] rounded-md p-2"
+                            className="w-full border border-[#7469B6] p-2"
                         />
                     </div>
 
@@ -83,7 +83,7 @@ export default function EditAccountModal({ acc, onClose, onSave }: EditModalProp
                             type="text"
                             value={lname}
                             onChange={(e) => setLname(e.target.value)}
-                            className="w-full border border-[#8575B4] rounded-md p-2"
+                            className="w-full border border-[#7469B6] p-2"
                         />
                     </div>
 
@@ -94,7 +94,7 @@ export default function EditAccountModal({ acc, onClose, onSave }: EditModalProp
                             name="type"
                             value={type}
                             onChange={(e) => setType(e.target.value)}
-                            className="w-full border border-[#8575B4] rounded-md p-2"
+                            className="w-full border border-[#7469B6] p-2"
                             required
                         >
                             <option value="">Select type</option>
@@ -109,7 +109,7 @@ export default function EditAccountModal({ acc, onClose, onSave }: EditModalProp
                             type="text"
                             value={phonenum}
                             onChange={(e) => setPhonenum(e.target.value)}
-                            className="w-full border border-[#8575B4] rounded-md p-2"
+                            className="w-full border border-[#7469B6] p-2"
                         />
                     </div>
                 </div>
