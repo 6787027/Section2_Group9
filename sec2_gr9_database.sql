@@ -243,15 +243,17 @@ create table User_Order(
     Or_Time DATETIME not null,
     Or_Status varchar(255) not null,
     -- Status: Ordered, Paid, Prepared, Sent
-    Or_Price double(13,2) not null
-    
+    Or_Price double(13,2) not null,
+    Or_AccEmail varchar(255) not null,
+    Or_Address longtext not null
 );
 
-insert into user_order(Or_Num, Or_Time, Or_Status,Or_Price) values
-("OR00001","2025-11-11 21:20:54","Sent", 590),
-("OR00002","2025-11-12 04:18:25","Prepared", 1770),
-("OR00003","2025-11-13 18:40:07","Paid", 1070),
-("OR00004","2025-11-13 20:09:47","Ordered", 2140);
+
+insert into user_order(Or_Num, Or_Time, Or_Status,Or_Price, Or_AccEmail,Or_Address) values
+("OR00001","2025-11-11 21:20:54","Sent", 590,"matsukos128@gmail.com","MaewNam Village"),
+("OR00002","2025-11-12 04:18:25","Prepared", 1770, "usertest@gmail.com","Penguin Co."),
+("OR00003","2025-11-13 18:40:07","Paid", 1070,"usertest@gmail.com","Wolf City"),
+("OR00004","2025-11-13 20:09:47","Ordered", 2140,"matsukos128@gmail.com","MaewNam Village");
 
 alter table Login_Log
 add foreign key (Acc_Email)
@@ -281,3 +283,8 @@ on update cascade on delete cascade;
 
 alter table CartItem
 add unique key (Cart_AccEmail, Cart_ProID);
+
+alter table User_Order
+add foreign key (Or_AccEmail)
+references User_Account(Acc_Email)
+on update cascade on delete cascade;
