@@ -27,6 +27,22 @@ var connection = mysql.createConnection({
     password: process.env.DB_password,
     database: process.env.DB_name
 });
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; 
+
+    if (token == null) return res.sendStatus(401); 
+
+    console.log(process.env.JWT_SECRET)
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403); 
+        req.user = user;
+        next();
+    });
+};
+
+
 
 
 router.post("/v1/signup", function (req, res) {
@@ -785,8 +801,8 @@ router.post("/v1/products", (req, res) => {
 
 
 
-router.get("/v1/cart/:userEmail", (req, res) => {
-    const userEmail = decodeURIComponent(req.params.userEmail);
+router.get("/v1/cart", authenticateToken, (req, res) => {
+    const userEmail = req.user.email; // ดึงจาก Token
     const sql = `
         SELECT 
             ci.Cart_ProID AS id,
@@ -803,82 +819,75 @@ router.get("/v1/cart/:userEmail", (req, res) => {
         WHERE ci.Cart_AccEmail = ? 
     `;
     connection.query(sql, [userEmail], (err, results) => {
-        if (err) {
-            console.error("Error fetching cart:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
+        if (err) return res.status(500).json({ error: "Database error" });
         res.json(results);
     });
 });
 
-router.post("/v1/cart/add", (req, res) => {
-    const { email, productId, quantity } = req.body;
+// POST: เพิ่มของลงตะกร้า
+router.post("/v1/cart/add", authenticateToken, (req, res) => {
+    const email = req.user.email;
+    const { productId, quantity } = req.body;
 
     const checkSql = "SELECT * FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(checkSql, [email, productId], (err, results) => {
         if (err) return res.status(500).json({ error: "DB error" });
 
         if (results.length > 0) {
+            // มีแล้ว -> Update Quantity
             const newQuantity = results[0].Cart_Quantity + quantity;
             const updateSql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
             connection.query(updateSql, [newQuantity, email, productId], (err) => {
                 if (err) return res.status(500).json({ error: "DB error" });
-                res.status(200).json({ message: "Item quantity updated" });
+                res.json({ message: "Updated quantity" });
             });
         } else {
+            // ยังไม่มี -> Insert
             const insertSql = "INSERT INTO CartItem (Cart_AccEmail, Cart_ProID, Cart_Quantity) VALUES (?, ?, ?)";
             connection.query(insertSql, [email, productId, quantity], (err) => {
                 if (err) return res.status(500).json({ error: "DB error" });
-                res.status(201).json({ message: "Item added to cart" });
+                res.status(201).json({ message: "Added to cart" });
             });
         }
     });
 });
 
-router.put("/v1/cart/update/quantity", (req, res) => {
-    const { email, productId, newQuantity } = req.body;
+// PUT: อัปเดตจำนวน
+router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
+    const email = req.user.email;
+    const { productId, newQuantity } = req.body;
+    
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [newQuantity, email, productId], (err, result) => {
+    connection.query(sql, [newQuantity, email, productId], (err) => {
         if (err) return res.status(500).json({ error: "DB error" });
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Item not found in cart" });
-        }
-        res.status(200).json({ message: "Quantity updated" });
+        res.json({ message: "Quantity updated" });
     });
 });
 
-router.delete("/v1/cart/remove", (req, res) => {
-    const { email, productId } = req.body;
+// DELETE: ลบของ
+router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
+    const email = req.user.email;
+    const { productId } = req.body;
+    
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [email, productId], (err, result) => {
+    connection.query(sql, [email, productId], (err) => {
         if (err) return res.status(500).json({ error: "DB error" });
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Item not found in cart" });
-        }
-        res.status(200).json({ message: "Item removed" });
+        res.json({ message: "Item removed" });
     });
 });
 
+// POST: คำนวณราคา (ไม่ต้อง Token ก็ได้)
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
-    if (!Array.isArray(items)) {
-        return res.status(400).json({ error: "Invalid payload." });
-    }
+    if (!Array.isArray(items)) return res.status(400).json({ error: "Invalid payload" });
+    
     let subtotal = 0;
-    try {
-        items.forEach(item => {
-            if (item.check) {
-                subtotal += item.price * item.selectedItem;
-            }
-        });
-        const shipping = subtotal > 0 ? 50 : 0;
-        const total = subtotal + shipping;
-        res.json({ subtotal, shipping, total });
-    } catch (err) {
-        res.status(500).json({ error: "Error calculating summary." });
-    }
+    items.forEach(item => {
+        if (item.check) subtotal += item.price * item.selectedItem;
+    });
+    const shipping = subtotal > 0 ? 50 : 0;
+    res.json({ subtotal, shipping, total: subtotal + shipping });
 });
-
 
 
 
