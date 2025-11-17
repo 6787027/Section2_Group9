@@ -40,10 +40,10 @@ export default function AddProductModal({ onClose, onSuccess }) {
 
     return (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative">
+            <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative max-h-[90vh] overflow-y-auto">
                 <h2 className="text-3xl font-bold text-center mb-4">Add Product</h2>
 
-                <form className="overflow-auto"
+                <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         handleAdd();
@@ -57,11 +57,12 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             value={formData.name}
                             onChange={handleChange}
                             placeholder="Enter product name"
-                            className="border p-2 rounded w-full mb-3"
+                            className="border border-[#7469B6] p-2 w-full mb-3"
                             required
                         />
 
                         <div className="mt-2 flex items-center">
+                    
                             {/* Price */}
                             <label className="mr-11 block text-sm font-semibold mb-1">Price</label>
                             <input
@@ -70,7 +71,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 value={formData.price}
                                 onChange={handleChange}
                                 placeholder="Enter price"
-                                className="border p-2 rounded w-full mb-3 mr-10"
+                                className="border border-[#7469B6] p-2 w-full mb-3 mr-10"
                                 required
                             />
 
@@ -80,13 +81,14 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
-                                className="border p-2 rounded w-full mb-3 bg-white"
+                                className="border border-[#7469B6] p-2 w-full mb-3 bg-white"
                                 required
                             >
                                 <option value="">Select type</option>
                                 <option value="Doll">Doll</option>
                                 <option value="Accessory">Accessory</option>
                             </select>
+                          
                         </div>
 
                         <div className="flex items-center">
@@ -98,7 +100,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 value={formData.quantity}
                                 onChange={handleChange}
                                 placeholder="Enter quantity"
-                                className="border mr-10 p-2 rounded w-full mb-3"
+                                className="border border-[#7469B6] mr-10 p-2 w-full mb-3"
                                 required
                             />
 
@@ -109,7 +111,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 value={formData.colname}
                                 onChange={handleChange}
                                 placeholder="Enter collection name"
-                                className="border p-2 rounded w-full mb-3"
+                                className="border border-[#7469B6] p-2 w-full mb-3"
                             />
                         </div>
 
@@ -119,7 +121,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             value={formData.desc}
                             onChange={handleChange}
                             placeholder="Enter description"
-                            className="border p-2 rounded w-full mb-3"
+                            className="border border-[#7469B6] p-2 w-full mb-3"
                         />
 
                         <label className="block text-sm font-semibold mb-1">Front Image URL</label>
@@ -128,7 +130,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             value={formData.img1}
                             onChange={handleChange}
                             placeholder="Enter front image URL"
-                            className="border p-2 rounded w-full mb-3"
+                            className="border border-[#7469B6] p-2 w-full mb-3"
                         />
 
                         <label className="block text-sm font-semibold mb-1">Side Image URL</label>
@@ -137,7 +139,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             value={formData.img2}
                             onChange={handleChange}
                             placeholder="Enter side image URL"
-                            className="border p-2 rounded w-full mb-3"
+                            className="border border-[#7469B6] p-2 w-full mb-3"
                         />
 
                         <label className="block text-sm font-semibold mb-1">Back Image URL</label>
@@ -146,7 +148,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             value={formData.img3}
                             onChange={handleChange}
                             placeholder="Enter back image URL"
-                            className="border p-2 rounded w-full mb-5"
+                            className="border border-[#7469B6] p-2 w-full mb-5"
                         />
 
                         <div className="flex justify-between">

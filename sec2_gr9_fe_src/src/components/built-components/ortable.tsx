@@ -1,48 +1,71 @@
+"use client"
+
 import { useState } from "react";
-import EditModal from "./EditAccountModal";
+import EditModal from "./EditOrderModal";
 
-interface Account {
+interface Order {
+    id: string;
+    time: string;
+    price: number;
+    status: string;
     email: string;
-    fname: string;
-    lname: string;
-    phonenum: string;
-    pass: string;
-    type: string;
-
-
+    address: string;
 };
 
-export default function Acctable({ email, fname, lname, phonenum, pass, type }: Account) {
+export default function Acctable({ id, time, price, status, email, address }: Order) {
     const [showEdit, setShowEdit] = useState(false);
-        const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    
-        const accData = { email, fname, lname, phonenum, pass, type};
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-        const handleDelete = async () => {
+    // ✅ 3. ส่งข้อมูลทั้งหมดไปให้ Edit Modal
+    const orData = { id, time, price, status, email, address };
+
+    const handleDelete = async () => {
         try {
-            const res = await fetch(`http://localhost:3001/ad_account/${email}`, {
+            // ✅ 4. แก้ไข URL ของ API ให้ถูกต้อง
+            const res = await fetch(`http://localhost:3001/ad_order/${id}`, {
                 method: "DELETE",
             });
 
             if (res.ok) {
-                alert("Account deleted successfully!");
+                alert("Order deleted successfully!");
                 window.location.reload();
             } else {
-                alert("Failed to delete account");
+                alert("Failed to delete order");
             }
         } catch (err) {
-            console.error("Error deleting account:", err);
-            alert("Error deleting account");
+            console.error("Error deleting order:", err);
+            alert("Error deleting order");
         }
     };
-
     return (
         <tr>
+            <td>{id}</td>
             <td>{email}</td>
-            <td>{type}</td>
-            <td>{fname}</td>
-            <td>{lname}</td>
-            <td>{phonenum}</td>
+            <td>{time}</td>
+            <td>{price}</td>
+            <td>
+                <div id="statusborder">
+                    <div id={status}></div>
+                    <div className="ml-1">{status}</div>
+                </div>
+            </td>
+            <td className="items-center">
+                <button onClick={() => document.getElementById(`address-${id}`)!.showModal()}>
+                    <svg className="w-[24px] h-[24px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778" />
+                    </svg>
+                </button>
+                <dialog id={`address-${id}`} className="modal">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">Address of Order number: {id}</h3>
+                        <p className="py-4">{address}</p>
+                    </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button>Close</button>
+                    </form>
+                </dialog>
+            </td>
+            <td></td>
             <td className="items-center">
                 <div className=" flex flex-nowrap">
                     <button id="edit" onClick={() => setShowEdit(true)}>
@@ -60,8 +83,8 @@ export default function Acctable({ email, fname, lname, phonenum, pass, type }: 
                 </div>
                 {showEdit && (
                     <EditModal
-                        key={email}
-                        acc={accData}
+                        key={id}
+                        or={orData}
                         onClose={() => setShowEdit(false)}
                         onSave={() => window.location.reload()}
                     />
@@ -71,11 +94,10 @@ export default function Acctable({ email, fname, lname, phonenum, pass, type }: 
                     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
                         <div className="bg-white rounded-xl shadow-2xl w-[400px] p-6">
                             <h3 className="text-xl font-bold mb-4 text-center">
-                                Delete this account?
+                                Delete this order?
                             </h3>
                             <p className="text-gray-600 text-center mb-6">
-                                Are you sure you want to delete <span className="font-semibold">{email}</span>?
-                                Account type: <span className="font-semibold">{type}</span>?
+                                Are you sure you want to delete order number <span className="font-semibold">{id}</span>?
                             </p>
                             <div className="flex justify-center gap-6">
                                 <button

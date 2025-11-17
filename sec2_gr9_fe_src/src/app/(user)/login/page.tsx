@@ -26,26 +26,33 @@ export default function Login() {
     try {
       const response = await fetch('http://localhost:3001/v1/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
+      // ✅ เก็บ token และ user ลง context
       auth.login(data.token, data.user);
 
-      router.push('/cart');
+      // ✅ ตรวจสอบประเภท user
+      if (data.user.type === 'Admin') {
+        router.push('/ad_product'); // ถ้าเป็น admin ไปหน้า admin
+      } else {
+        router.push('/user_profile'); // ถ้าเป็น user ไปหน้า profile
+      }
+
     } catch (error: any) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
-  };
+  }
+
 
   return (
     <div style={{ backgroundImage: `url(${bgsignin.src})` }} className="h-svh bg-cover bg-center flex  justify-center items-center">

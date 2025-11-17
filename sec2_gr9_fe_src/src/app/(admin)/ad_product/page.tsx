@@ -1,8 +1,12 @@
 "use client";
 
+
+import { LogOut } from "lucide-react";
 import Adpro from "@/components/built-components/protable";
 import { useEffect, useState } from "react";
 import AddProductModal from "@/components/built-components/AddProductModal";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface Product {
     Pic_f: any;
@@ -23,22 +27,70 @@ export default function Ad_product() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showAddModal, setShowAddModal] = useState(false);
 
-    // โหลดข้อมูลจาก backend ทุกครั้ง search/filter เปลี่ยน
+    const router = useRouter();
+    const auth = useAuth();
+
+
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+
     useEffect(() => {
+
+        if (auth.isLoading) {
+            return;
+        }
+
+        if (!auth.user) {
+            router.push("/login");
+            return;
+        }
+
+        if (auth.user.type !== 'Admin') {
+            router.push("/user_profile");
+            return;
+        }
+
+        setIsAuthLoading(false); // อนุญาตให้แสดงผลหน้าเว็บ
+
+    }, [auth.isLoading, auth.user, router]);
+
+
+    useEffect(() => {
+        if (isAuthLoading) {
+            return;
+        }
+
         fetch(`http://localhost:3001/ad_product?search=${searchTerm}&type=${filterType}`)
             .then(res => res.json())
             .then(data => setProducts(data))
             .catch(err => console.error("Error loading products:", err));
-    }, [searchTerm, filterType]);
 
+    }, [searchTerm, filterType, isAuthLoading]);
+
+    const handleLogout = () => {
+        auth.logout();
+        router.push("/home");
+    };
+
+    if (isAuthLoading) {
+        return (
+            <div className="bg-[#F1F0F4] min-h-screen w-screen flex justify-center items-center">
+                <h1 className="text-2xl font-bold text-[#282151]">
+                    Verifying Admin Access...
+                </h1>
+            </div>
+        );
+    }
     return (
-        <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
+        <div className="bg-[#F1F0F4] flex flex-row">
 
             {/* Sidebar */}
             <div className="bg-white min-w-65 shadow-xl">
                 <header>
                     <div className="my-16 ml-8">
-                        <h1 className="text-[#282151] font-bold text-xl">Admin name</h1>
+                        <h1 id="adname" className="text-[#282151] font-bold text-xl">
+                            {auth.user?.firstName || "Admin"}
+                        </h1>
                     </div>
                 </header>
 
@@ -46,10 +98,27 @@ export default function Ad_product() {
 
                 <nav className="my-10 ml-8 text-xl">
                     <div className="mb-7 text-[#282151] font-bold">Tools</div>
-                    <h2 className="mb-7 font-bold"><a href="/ad_product">Product</a></h2>
-                    <h2 className="mb-7"><a href="/ad_account">Account</a></h2>
-                    <h2><a href="/ad_order">Order</a></h2>
+                    <h2 className="mb-7 font-bold">
+                        <a href="/ad_product">Product</a>
+                        </h2>
+                    <h2 className="mb-7">
+                        <a href="/ad_account">Account</a>
+                        </h2>
+                    <h2 className="text-xl  mb-7">
+                        <a href="/ad_order">Order</a>
+                        <br></br>
+                    </h2>
+                    <h2 className="text-xl">
+                        <a href="/ad_log">Login History</a>
+                        <br></br>
+                    </h2>
                 </nav>
+                <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
+                    <div className="flex flex-row">
+                        <button onClick={handleLogout} className="px-4 py-2 flex flex-row " ><LogOut className="mr-2"></LogOut> Logout</button>
+                    </div>
+                </div>
+
             </div>
 
             {/* Content */}
@@ -59,11 +128,33 @@ export default function Ad_product() {
                 <div className="flex justify-between bg-white w-250 py-3 mb-10 items-center border-1 rounded-2xl shadow-xl">
 
                     <div className="ml-5">
-                        <div className="flex border-1 border-black rounded-3xl px-3">
-                            <input type="text" placeholder="Search by any field..."
+                        <div className="flex flex-nowrap border-solid border-1 border-black rounded-3xl pl-3 pr-3 ">
+                            <input
+                                id="search"
+                                type="text"
+                                placeholder="Search by any field..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"></input>
+                                className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"
+                            ></input>
+                            <button type="button">
+                                <svg
+                                    className="w-4 h-4 text-black dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        strokeLinecap="round"
+                                        strokeWidth="2"
+                                        d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
@@ -138,7 +229,7 @@ export default function Ad_product() {
                     {showAddModal && (
                         <AddProductModal
                             onClose={() => setShowAddModal(false)}
-                            onSuccess={() => {window.location.reload()}}
+                            onSuccess={() => { window.location.reload() }}
                         />
                     )}
                 </div>

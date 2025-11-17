@@ -48,7 +48,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
 
   return (
     <div className="fixed inset-0 bg-black/40  flex justify-center items-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative">
+      <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative max-h-[90vh] overflow-y-auto">
         <h2 className="text-3xl font-bold text-center mb-4">Edit Product</h2>
 
         <form
@@ -65,7 +65,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter product name"
-            className="border p-2 rounded w-full mb-3"
+            className="border p-2 border-[#7469B6] w-full mb-3"
             required
           />
 
@@ -78,7 +78,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.price}
             onChange={handleChange}
             placeholder="Enter price"
-            className="border p-2 rounded w-full mb-3 mr-10"
+            className="border p-2 border-[#7469B6] w-full mb-3 mr-10"
             required
           />
           
@@ -89,7 +89,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="border p-2 rounded w-full mb-3 bg-white"
+            className="border p-2 border-[#7469B6] w-full mb-3 bg-white"
             required
           >
             <option value="">Select type</option>
@@ -109,7 +109,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.quantity}
             onChange={handleChange}
             placeholder="Enter quantity"
-            className="border mr-10 p-2 rounded w-full mb-3"
+            className="border mr-10 p-2 border-[#7469B6] w-full mb-3"
             required
           />
 
@@ -120,7 +120,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.colname}
             onChange={handleChange}
             placeholder="Enter collection name"
-            className="border p-2 rounded w-full mb-3"
+            className="border p-2 border-[#7469B6] w-full mb-3"
           />
           </div>
           
@@ -131,7 +131,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.desc}
             onChange={handleChange}
             placeholder="Enter description"
-            className="border p-2 rounded w-full mb-3"
+            className="border p-2 border-[#7469B6] w-full mb-3"
           />
 
           {/* Image URLs */}
@@ -141,7 +141,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.img1}
             onChange={handleChange}
             placeholder="Enter front image URL"
-            className="border p-2 rounded w-full mb-3"
+            className="border p-2 border-[#7469B6] w-full mb-3"
           />
 
           <label className="block text-sm font-semibold mb-1">Side Image URL</label>
@@ -150,7 +150,7 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.img2}
             onChange={handleChange}
             placeholder="Enter side image URL"
-            className="border p-2 rounded w-full mb-3"
+            className="border p-2 border-[#7469B6] w-full mb-3"
           />
 
           <label className="block text-sm font-semibold mb-1">Back Image URL</label>
@@ -159,13 +159,13 @@ export default function Editproductmodal({ product, onClose, onSave }: EditModal
             value={formData.img3}
             onChange={handleChange}
             placeholder="Enter back image URL"
-            className="border p-2 rounded w-full mb-5"
+            className="border p-2 border-[#7469B6] w-full mb-5"
           />
-H
+
           <div className="flex justify-between">
             <button
               type="submit"
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+              className="bg-[#7469B6] text-white px-4 py-2 rounded"
             >
               Save
             </button>

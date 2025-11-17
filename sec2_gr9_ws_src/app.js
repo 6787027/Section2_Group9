@@ -29,7 +29,6 @@ var connection = mysql.createConnection({
 });
 
 
-// post: create user for signup
 router.post("/v1/signup", function (req, res) {
     console.log("Create the user")
 
@@ -74,69 +73,96 @@ router.post("/v1/signup", function (req, res) {
 
 });
 
-// Login Acc
+
 router.post("/v1/login", function (req, res) {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({ message: "Please fill out the form completely" })
+            return res.status(400).json({ message: "Please fill out the form completely" });
         }
 
-        const sql = "SELECT Acc_Email, Acc_Password FROM User_Account WHERE Acc_Email = ?";
-
-        connection.query(sql, [req.body.email], (err, result) => {
+        const selectSql = "SELECT * FROM User_Account WHERE Acc_Email = ?";
+        connection.query(selectSql, [email], (err, result) => {
             if (err) {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
-
-            // Not found send Error 401 (Unauthorized)
             if (result.length === 0) {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const user = result[0];
 
-            console.log(req.body.password)
-            console.log(user.Acc_Password)
-            bcrypt.compare(req.body.password, user.Acc_Password, (err, correct) => {
+            bcrypt.compare(password, user.Acc_Password, (err, correct) => {
 
-                // A. จัดการกรณี bcrypt error
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
                 }
-
-                //password wrong
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-                // 1. สร้าง Payload: ข้อมูลที่จะเก็บใน Token (ห้ามเก็บรหัสผ่าน!)
-                const payload = {
-                    email: user.Acc_Email,
-                    type: user.Acc_Type
-                };
+               
+                const now = new Date();
+                const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
-                const token = jwt.sign(
-                    payload,
-                    process.env.JWT_SECRET,
-                    { expiresIn: '1h' } // Set expire time
-                );
-
-                res.json({
-                    message: "Login successful",
-                    token: token,
-                    user: {
-                        id: user.Acc_Email,
-                        email: user.Acc_Email,
-                        firstName: user.Acc_FName,
-                        lastName: user.Acc_LName
+                connection.query(insertLogSql, [user.Acc_Email, now], (insertErr, insertResult) => {
+                    if (insertErr) {
+                        console.error("Failed to insert login log:", insertErr);
+                    } else {
+                        console.log(`Login log saved for ${user.Acc_Email}`);
                     }
-                });
 
-            }); // สิ้นสุด bcrypt.compare
-        }); // สิ้นสุด connection.query
+                    const updateLoginTimeSql = "UPDATE User_Account SET Acc_LogTime = ? WHERE Acc_Email = ?";
+
+                    connection.query(updateLoginTimeSql, [now, user.Acc_Email], (updateErr, updateResult) => {
+                        if (updateErr) {
+                            console.error("Failed to update last login time:", updateErr);
+                        }
+
+                        const payload = {
+                            email: user.Acc_Email,
+                            type: user.Acc_Type,
+                        };
+                        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+                        res.json({
+                            message: "Login successful",
+                            token,
+                            user: {
+                                id: user.Acc_Email,
+                                email: user.Acc_Email,
+                                firstName: user.Acc_FName,
+                                lastName: user.Acc_LName,
+                                phonenum: user.Acc_PhoneNum,
+                                type: user.Acc_Type,
+                            },
+                        });
+                    }); 
+                }); 
+            });
+        });
+    } catch (e) {
+        console.error("Sync error:", e);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+router.get("/ad_log", (req, res) => {
+    try {
+
+        const sql = "SELECT Acc_Email, Log_Time AS Acc_LogTime FROM Login_Log ORDER BY Log_Time DESC";
+
+        connection.query(sql, (err, results) => {
+            if (err) {
+                console.error("Database query error:", err);
+                return res.status(500).json({ message: "Database query error" });
+            }
+
+
+            res.json(results);
+        });
 
     } catch (e) {
         console.error("Sync error:", e);
@@ -144,37 +170,69 @@ router.post("/v1/login", function (req, res) {
     }
 });
 
-/*wait for login */
-router.get("/user_profile", function (req, res) {
-    /*input section */
 
+router.get("/user_profile/:email", (req, res) => {
+    const email = req.params.email;
+    const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
 
-    /*select section*/
-    let fname = document.getElementById("fname")
-    let lname = document.getElementById("lname")
-    let email = document.getElementById("email")
-    let phone = document.getElementById("phone")
-    connection.query("SELECT Acc_Email, Acc_FName, Acc_LNam,Acc_PhoneNum WHERE Acc_Email = ?", email, function (error, result) {
-        return res.send({ error: false, data: result[0], meesage: "Fail to send the information" })
-    });
-
-    fname.innerHTML = Acc_Fname;
-    lname.innerHTML = Acc_Lname;
-    email.innerHTML = Acc_Email;
-    phone.innerHTML = Acc_PhoneNum;
-});
-
-router.put("/user_profile", function (req, res) {
-    let email = req.body.User_Account.Acc_Email;
-    let info = req.body.User_Account;
-
-    //dont know what to put
-    /*sql*/
-    connection.query("UPDATE User_Account SET ? WHERE Acc_Email = ?", [info, email], function (error, result) {
-        if (error) throw error;
-        return res.send({ error: false, data: result.affectedRows, meesage: "Change user info successfully" });
+    connection.query(sql, [email], (err, data) => {
+        if (err) {
+            console.error("Error fetching profile:", err);
+            return res.status(500).json({ message: "Database query error" });
+        }
+        if (data.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(data[0]);
     });
 });
+
+router.put("/user_profile", async (req, res) => {
+    const { email, fname, lname, phone, password } = req.body;
+
+    try {
+        const fields = [];
+        const values = [];
+
+        if (fname) {
+            fields.push("Acc_FName = ?");
+            values.push(fname);
+        }
+        if (lname) {
+            fields.push("Acc_LName = ?");
+            values.push(lname);
+        }
+        if (phone) {
+            fields.push("Acc_PhoneNum = ?");
+            values.push(phone);
+        }
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            fields.push("Acc_Password = ?");
+            values.push(hashedPassword);
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ message: "No fields to update" });
+        }
+
+        values.push(email);
+        const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
+
+        connection.query(sql, values, (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Database error" });
+            }
+            res.json({ message: "User updated successfully" });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 
 router.get("/ad_product", (req, res) => {
     const search = (req.query.search || "").toLowerCase();
@@ -200,13 +258,11 @@ router.get("/ad_product", (req, res) => {
 
     const params = [];
 
-    // Filter by type
     if (type !== "all") {
         sql += " AND p.Pro_Type = ?";
         params.push(type);
     }
 
-    // Search (ทุก field)
     if (search) {
         sql += ` AND (
             LOWER(p.Pro_ID) LIKE ? OR
@@ -247,20 +303,17 @@ router.get("/ad_account", (req, res) => {
     let conditions = [];
     let params = [];
 
-    // 🔹 กรองตามประเภท (Admin/User)
     if (type && type !== "all") {
         conditions.push("Acc_Type = ?");
         params.push(type);
     }
 
-    // 🔹 ค้นหาจากคำค้น (ชื่อ, นามสกุล, อีเมล)
     if (search && search.trim() !== "") {
         conditions.push("(Acc_FName LIKE ? OR Acc_LName LIKE ? OR Acc_Email LIKE ?)");
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword);
     }
-
-    // 🔹 รวมเงื่อนไขเข้า SQL
+L
     if (conditions.length > 0) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -274,21 +327,231 @@ router.get("/ad_account", (req, res) => {
     })
 });
 
-router.put("/ad_account", (req, res) => {
-  const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
+router.post("/ad_account", async (req, res) => {
 
-  const sql = `
+    const { email, fname, lname, phonenum, pass, type } = req.body;
+
+
+    if (!email || !fname || !lname || !pass || !type) {
+        return res.status(400).json({ message: "Please fill all required fields." });
+    }
+
+    try {
+
+        const hashedPassword = await bcrypt.hash(pass, 10);
+
+
+        const sql = `
+            INSERT INTO User_Account 
+                (Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Password, Acc_Type) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [email, fname, lname, phonenum || null, hashedPassword, type];
+
+
+        connection.query(sql, values, (err, result) => {
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ message: "This email is already registered." });
+                }
+                console.error("Database error:", err);
+                return res.status(500).json({ message: "Database error" });
+            }
+
+            res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
+        });
+
+    } catch (error) {
+        console.error("Server error:", error);
+        res.status(500).json({ message: "Server error during password hashing." });
+    }
+});
+
+router.delete("/ad_account/:email", (req, res) => {
+
+    const emailToDelete = req.params.email;
+
+    if (!emailToDelete) {
+        return res.status(400).json({ message: "Email parameter is missing" });
+    }
+
+    const deleteSQL = "DELETE FROM User_Account WHERE Acc_Email = ?";
+
+
+    connection.query(deleteSQL, [emailToDelete], (err, result) => {
+        if (err) {
+            console.error("Error deleting account:", err);
+            return res.status(500).json({ message: "Error deleting account" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+
+
+        console.log(`Deleted Acc_Email: ${emailToDelete}`);
+        res.json({ message: "Account deleted successfully" });
+    });
+});
+
+
+
+router.put("/ad_account", (req, res) => {
+    const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
+
+    const sql = `
     UPDATE User_Account
     SET Acc_FName = ?, Acc_LName = ?, Acc_PhoneNum = ?, Acc_Type = ?
     WHERE Acc_Email = ?`;
 
-  connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
-    if (err) {
-      console.error("Error updating account:", err);
-      return res.status(500).send("Database update error");
+    connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
+        if (err) {
+            console.error("Error updating account:", err);
+            return res.status(500).send("Database update error");
+        }
+        res.sendStatus(200);
+    });
+});
+
+router.get("/ad_order", (req, res) => {
+    const { status, search } = req.query;
+
+
+    let query = `
+        SELECT 
+            Or_Num, 
+            DATE_FORMAT(Or_Time, '%Y/%m/%d %H:%i:%s') AS Or_Time, 
+            Or_Status, 
+            Or_Price,
+            Or_AccEmail,
+            Or_Address 
+        FROM User_Order
+    `;
+    let conditions = [];
+    let params = [];
+
+    if (status && status !== "all") {
+        conditions.push("Or_Status = ?");
+        params.push(status);
     }
-    res.sendStatus(200);
-  });
+
+    if (search && search.trim() !== "") {
+  
+        conditions.push("(Or_Num LIKE ? OR Or_Price LIKE ? OR Or_Time LIKE ? OR Or_AccEmail LIKE ? OR Or_Address LIKE ?)");
+        const keyword = `%${search}%`;
+        params.push(keyword, keyword, keyword, keyword, keyword);
+    }
+
+    if (conditions.length > 0) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            console.error("Error fetching orders:", err);
+            return res.status(500).json({ error: "Database query failed" });
+        }
+        res.json(results);
+    });
+});
+
+
+router.post("/ad_order", (req, res) => {
+
+    const { price, status, email, address } = req.body;
+
+    if (!price || !status || !email || !address) {
+        return res.status(400).json({ message: "Please fill all required fields (Price, Status, Email, Address)." });
+    }
+
+    const findLastIdSql = "SELECT Or_Num FROM User_Order ORDER BY Or_Num DESC LIMIT 1";
+
+    connection.query(findLastIdSql, (err, results) => {
+        if (err) {
+            console.error("Database error (Finding last ID):", err);
+            return res.status(500).json({ message: "Database error" });
+        }
+
+        let newIdNum = 1;
+        if (results.length > 0) {
+            const lastId = results[0].Or_Num;
+            const lastNum = parseInt(lastId.substring(2));
+            newIdNum = lastNum + 1;
+        }
+        const newOrNum = "OR" + String(newIdNum).padStart(5, '0');
+
+        
+    
+        const insertSql = `INSERT INTO User_Order (Or_Num, Or_Time, Or_Price, Or_Status, Or_AccEmail, Or_Address) VALUES (?, NOW(), ?, ?, ?, ?)
+`;
+        const values = [newOrNum, price, status, email, address];
+
+        connection.query(insertSql, values, (err, result) => {
+            if (err) {
+                
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ message: "This order number already exists." });
+                }
+                if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+                    return res.status(404).json({ message: "Account Email not found. Please use an existing user email." });
+                }
+                console.error("Database error:", err);
+                return res.status(500).json({ message: "Database error" });
+            }
+            res.status(201).json({ message: "Order created successfully", newOrderId: newOrNum });
+        });
+    });
+});
+
+
+router.put("/ad_order", (req, res) => {
+  
+    const { Or_Num, Or_Status, Or_Address } = req.body;
+
+    if (!Or_Num || !Or_Status || !Or_Address) {
+        return res.status(400).json({ message: "Missing required fields (Or_Num, Or_Status, Or_Address)" });
+    }
+
+    const sql = `
+        UPDATE User_Order 
+        SET Or_Status = ?, Or_Address = ?
+        WHERE Or_Num = ?
+    `;
+    const values = [Or_Status, Or_Address, Or_Num];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error("Error updating order:", err);
+            return res.status(500).json({ message: "Database error" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.json({ message: "Order updated successfully" });
+    });
+});
+
+
+router.delete("/ad_order/:id", (req, res) => {
+    const idToDelete = req.params.id;
+
+    if (!idToDelete) {
+        return res.status(400).json({ message: "Order number parameter is missing" });
+    }
+
+    const deleteSQL = "DELETE FROM User_Order WHERE Or_Num = ?";
+
+    connection.query(deleteSQL, [idToDelete], (err, result) => {
+        if (err) {
+            console.error("Error deleting order:", err);
+            return res.status(500).json({ message: "Error deleting order" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.json({ message: "Order deleted successfully" });
+    });
 });
 
 
@@ -341,11 +604,11 @@ router.get("/v1/products/:id", (req, res) => {
         if (result.length === 0) {
             return res.status(404).json({ message: "Product not found" });
         }
-        res.json(result[0]); // ส่งเฉพาะสินค้าตัวเดียว
+        res.json(result[0]); 
     });
 });
 
-// PUT: update product by ID
+
 router.put("/v1/products/:id", (req, res) => {
     const id = req.params.id;
     const {
@@ -439,98 +702,84 @@ router.delete("/v1/products/:id", (req, res) => {
     });
 });
 
-// POST: add new product
+
 router.post("/v1/products", (req, res) => {
-  const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
+    const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
 
-  if (!name || !price || !type || !colname) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+    if (!name || !price || !type || !colname) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 
-  // 1. ตรวจสอบว่า collection มีอยู่แล้วหรือไม่
-  connection.query(
-    "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
-    [colname],
-    (colErr, colResults) => {
-      if (colErr) {
-        console.error(colErr);
-        return res.status(500).json({ message: "Database error" });
-      }
+    connection.query(
+        "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
+        [colname],
+        (colErr, colResults) => {
+            if (colErr) {
+                console.error(colErr);
+                return res.status(500).json({ message: "Database error" });
+            }
 
-      const handleInsertProduct = (colID) => {
-        // 2. สร้าง Pro_ID อัตโนมัติ
-        const prefix = type === "Doll" ? "DS" : "AC";
-        const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
+            const handleInsertProduct = (colID) => {
+                const prefix = type === "Doll" ? "DS" : "AC";
+                const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
 
-        connection.query(newIDSQL, (idErr, idResults) => {
-          if (idErr) return res.status(500).json({ message: "Error generating product ID" });
+                connection.query(newIDSQL, (idErr, idResults) => {
+                    if (idErr) return res.status(500).json({ message: "Error generating product ID" });
 
-          let nextNum = 1;
-          if (idResults.length > 0) {
-            const lastID = idResults[0].Pro_ID;
-            nextNum = parseInt(lastID.substring(2)) + 1;
-          }
-          const newID = prefix + nextNum.toString().padStart(5, "0");
-
-          // 3. เพิ่มสินค้า
-          const insertSQL = `
+                    let nextNum = 1;
+                    if (idResults.length > 0) {
+                        const lastID = idResults[0].Pro_ID;
+                        nextNum = parseInt(lastID.substring(2)) + 1;
+                    }
+                    const newID = prefix + nextNum.toString().padStart(5, "0");
+                    const insertSQL = `
             INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
             VALUES (?, ?, ?, ?, ?, ?, ?)
           `;
-          connection.query(
-            insertSQL,
-            [newID, name, desc, price, type, quantity, colID],
-            (insertErr) => {
-              if (insertErr) {
-                console.error(insertErr);
-                return res.status(500).json({ message: "Error inserting product" });
-              }
+                    connection.query(
+                        insertSQL,
+                        [newID, name, desc, price, type, quantity, colID],
+                        (insertErr) => {
+                            if (insertErr) {
+                                console.error(insertErr);
+                                return res.status(500).json({ message: "Error inserting product" });
+                            }
+                            const insertPics = `INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture) VALUES (?, ?, ?), (?, ?, ?),(?, ?, ?)`;
+                            connection.query(
+                                insertPics,
+                                [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
+                                (picErr) => {
+                                    if (picErr) {
+                                        console.error(picErr);
+                                        return res.status(500).json({ message: "Error inserting pictures" });
+                                    }
+                                    res.json({ message: "Product added successfully", Pro_ID: newID });
+                                }
+                            );
+                        }
+                    );
+                });
+            };
 
-              // 4. เพิ่มรูปภาพ
-              const insertPics = `
-                INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture)
-                VALUES 
-                (?, ?, ?),
-                (?, ?, ?),
-                (?, ?, ?)
-              `;
-              connection.query(
-                insertPics,
-                [newID + "f", newID, img1, newID + "s", newID, img2, newID + "b", newID, img3],
-                (picErr) => {
-                  if (picErr) {
-                    console.error(picErr);
-                    return res.status(500).json({ message: "Error inserting pictures" });
-                  }
-                  res.json({ message: "Product added successfully", Pro_ID: newID });
-                }
-              );
+            if (colResults.length > 0) {
+                handleInsertProduct(colResults[0].Col_ID);
+            } else {
+                const newColID = "COL" + Date.now();
+                connection.query(
+                    "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
+                    [newColID, colname],
+                    (insertColErr) => {
+                        if (insertColErr) {
+                            console.error(insertColErr);
+                            return res.status(500).json({ message: "Error creating collection" });
+                        }
+                        handleInsertProduct(newColID);
+                    }
+                );
+                console.log("Add new product successfully");
             }
-          );
-        });
-      };
-
-      // ถ้ามี collection อยู่แล้ว
-      if (colResults.length > 0) {
-        handleInsertProduct(colResults[0].Col_ID);
-      } else {
-        // สร้าง Col_ID ใหม่
-        const newColID = "COL" + Date.now();
-        connection.query(
-          "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
-          [newColID, colname],
-          (insertColErr) => {
-            if (insertColErr) {
-              console.error(insertColErr);
-              return res.status(500).json({ message: "Error creating collection" });
-            }
-            handleInsertProduct(newColID);
-          }
-        );
-        console.log("Add new product successfully");
-      }
-    }
-  );
+        }
+    );
 });
 
 
