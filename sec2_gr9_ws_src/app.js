@@ -13,7 +13,7 @@ const jwt = require('jsonwebtoken')
 const port = 3001;
 const app = express();
 const router = express.Router();
- 
+
 
 app.use(cors());
 app.use(express.json());
@@ -29,14 +29,14 @@ var connection = mysql.createConnection({
 });
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; 
+    const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == null) return res.sendStatus(401); 
+    if (token == null) return res.sendStatus(401);
 
     console.log(process.env.JWT_SECRET)
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403); 
+        if (err) return res.sendStatus(403);
         req.user = user;
         next();
     });
@@ -119,7 +119,7 @@ router.post("/v1/login", function (req, res) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-               
+
                 const now = new Date();
                 const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
@@ -155,8 +155,8 @@ router.post("/v1/login", function (req, res) {
                                 type: user.Acc_Type,
                             },
                         });
-                    }); 
-                }); 
+                    });
+                });
             });
         });
     } catch (e) {
@@ -329,7 +329,7 @@ router.get("/ad_account", (req, res) => {
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword);
     }
-L
+    L
     if (conditions.length > 0) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -453,7 +453,7 @@ router.get("/ad_order", (req, res) => {
     }
 
     if (search && search.trim() !== "") {
-  
+
         conditions.push("(Or_Num LIKE ? OR Or_Price LIKE ? OR Or_Time LIKE ? OR Or_AccEmail LIKE ? OR Or_Address LIKE ?)");
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword, keyword, keyword);
@@ -497,15 +497,15 @@ router.post("/ad_order", (req, res) => {
         }
         const newOrNum = "OR" + String(newIdNum).padStart(5, '0');
 
-        
-    
+
+
         const insertSql = `INSERT INTO User_Order (Or_Num, Or_Time, Or_Price, Or_Status, Or_AccEmail, Or_Address) VALUES (?, NOW(), ?, ?, ?, ?)
 `;
         const values = [newOrNum, price, status, email, address];
 
         connection.query(insertSql, values, (err, result) => {
             if (err) {
-                
+
                 if (err.code === 'ER_DUP_ENTRY') {
                     return res.status(409).json({ message: "This order number already exists." });
                 }
@@ -522,7 +522,7 @@ router.post("/ad_order", (req, res) => {
 
 
 router.put("/ad_order", (req, res) => {
-  
+
     const { Or_Num, Or_Status, Or_Address } = req.body;
 
     if (!Or_Num || !Or_Status || !Or_Address) {
@@ -620,7 +620,7 @@ router.get("/v1/products/:id", (req, res) => {
         if (result.length === 0) {
             return res.status(404).json({ message: "Product not found" });
         }
-        res.json(result[0]); 
+        res.json(result[0]);
     });
 });
 
@@ -856,7 +856,7 @@ router.post("/v1/cart/add", authenticateToken, (req, res) => {
 router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
-    
+
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [newQuantity, email, productId], (err) => {
         if (err) return res.status(500).json({ error: "DB error" });
@@ -868,10 +868,13 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
 router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId } = req.body;
-    
+
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [email, productId], (err) => {
-        if (err) return res.status(500).json({ error: "DB error" });
+        if (err) {
+            console.error(err)
+            return res.status(500).json({ error: "DB error" });
+        } 
         res.json({ message: "Item removed" });
     });
 });
@@ -880,7 +883,7 @@ router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
     if (!Array.isArray(items)) return res.status(400).json({ error: "Invalid payload" });
-    
+
     let subtotal = 0;
     items.forEach(item => {
         if (item.check) subtotal += item.price * item.selectedItem;
@@ -890,7 +893,20 @@ router.post("/v1/cart/calculate", (req, res) => {
 });
 
 
+router.post("/v1/payment", authenticateToken, (req, res) => {
+    const { price, address } = req.body;
+    const email = req.user.email;
 
+
+    const insertSql = "INSERT INTO user_order (Or_Num, Or_Time, Or_Status, Or_Price, Or_AccEmail, Or_Address) VALUES (?, ?, 'Ordered', ?, ?, ?)";
+    connection.query(insertSql, [crypto.randomUUID(), new Date(), price, email, address], (err) => {
+        if (err) {
+            console.error(err)
+            return res.status(500).json({ error: "DB error" });
+        } 
+        res.status(201).json({ message: "Order created" });
+    });
+});
 
 
 connection.connect(function (err) {

@@ -4,9 +4,10 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react"
 
 interface Props {
     setModalShown: Dispatch<SetStateAction<'qr' | 'visa' | null>>
+    setSuccess: Dispatch<SetStateAction<boolean>>
 }
 
-export default function QRModal({ setModalShown }: Props) {
+export default function QRModal({ setModalShown, setSuccess }: Props) {
     const [time, setTime] = useState('03:00')
 
     useEffect(() => {
@@ -39,6 +40,7 @@ export default function QRModal({ setModalShown }: Props) {
                     <span className="font-bold text-4xl p-4 text-[#282151]">PAYMENT</span>
                     <Image src={QrPayment} alt="QR" />
                     <span className="mt-2">{time}</span>
+                    <input type="button" onClick={() => setSuccess(true)} value="Success" className='bg-green-300 p-2 rounded-md mt-4 cursor-pointer border border-black' />
                 </div>
             </div>
         </div>
