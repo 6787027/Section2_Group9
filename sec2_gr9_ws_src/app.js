@@ -121,7 +121,7 @@ router.post("/v1/login", function (req, res) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-                //ถ้าlogin สำเร็จ บันทึกประวัติการloginลงในตาราง Login_Log
+                //Create new login data base on datetime then insert into database
                 const now = new Date();
                 const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
@@ -132,7 +132,7 @@ router.post("/v1/login", function (req, res) {
                         console.log(`Login log saved for ${user.Acc_Email}`);
                     }
 
-                    //อัปเดตเวลาloginล่าสุดลงในตาราง
+                    //update login time in USer_Account
                     const updateLoginTimeSql = "UPDATE User_Account SET Acc_LogTime = ? WHERE Acc_Email = ?";
                     connection.query(updateLoginTimeSql, [now, user.Acc_Email], (updateErr, updateResult) => {
                         if (updateErr) {
@@ -168,9 +168,11 @@ router.post("/v1/login", function (req, res) {
     }
 });
 
+
 router.get("/ad_log", (req, res) => {
     try {
 
+        // Display log data from Login_Log (la to oldest)
         const sql = "SELECT Acc_Email, Log_Time AS Acc_LogTime FROM Login_Log ORDER BY Log_Time DESC";
 
         connection.query(sql, (err, results) => {
@@ -189,7 +191,7 @@ router.get("/ad_log", (req, res) => {
     }
 });
 
-
+// Display data ของ User 
 router.get("/user_profile/:email", (req, res) => {
     const email = req.params.email;
     const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
@@ -206,10 +208,13 @@ router.get("/user_profile/:email", (req, res) => {
     });
 });
 
+// Update data ของ User
 router.put("/user_profile", async (req, res) => {
+    // รับค่าทั้งหมดมาเพื่อ update เราจะ update ข้อมูลทุก fields แม้ไม่มีการ update
     const { email, fname, lname, phone, password } = req.body;
 
     try {
+        // ทำการเพิ่ม Array 2 ตัว ที่ทำหน้าที่เหมือน dictionary 
         const fields = [];
         const values = [];
 
@@ -227,16 +232,19 @@ router.put("/user_profile", async (req, res) => {
         }
 
         if (password) {
+            //เพิ่มการ encryption ของ password
             const hashedPassword = await bcrypt.hash(password, 10);
             fields.push("Acc_Password = ?");
             values.push(hashedPassword);
         }
 
+        // กรณีที่ไม่มีการ update
         if (fields.length === 0) {
             return res.status(400).json({ message: "No fields to update" });
         }
 
         values.push(email);
+        // ทำการแยก array ด้วย ,  
         const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
 
         connection.query(sql, values, (err) => {
@@ -877,7 +885,7 @@ router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
         if (err) {
             console.error(err)
             return res.status(500).json({ error: "DB error" });
-        } 
+        }
         res.json({ message: "Item removed" });
     });
 });
@@ -897,16 +905,22 @@ router.post("/v1/cart/calculate", (req, res) => {
 
 
 router.post("/v1/payment", authenticateToken, (req, res) => {
-    const { price, address } = req.body;
+    const { price, name, tel, address } = req.body;
     const email = req.user.email;
 
-    //สร้างsqlสำหรับorderใหม่ ที่มีorder numberไม่ซ้ำกัน
-    const insertSql = "INSERT INTO user_order (Or_Num, Or_Time, Or_Status, Or_Price, Or_AccEmail, Or_Address) VALUES (?, ?, 'Ordered', ?, ?, ?)";
-    connection.query(insertSql, [crypto.randomUUID(), new Date(), price, email, address], (err) => {
+    //รวมข้อมูลที่อยู่    //สร้างsqlสำหรับorderใหม่ ที่มีorder numberไม่ซ้ำกัน
+    const formattedAddress = `${name}\n${tel}\n${address}`;
+    
+    //Query เพื่อหาหมายเลข Or_Num ล่าสุด
+    const selectMaxSql = "SELECT MAX(Or_Num) as max_or_num FROM user_order WHERE Or_Num IS NOT NULL";
+
+    connection.query(selectMaxSql, (err, result) => {
         if (err) {
-            console.error(err)
-            return res.status(500).json({ error: "DB error" });
-        } 
+            console.error("DB Select Max Error:", err);
+            return res.status(500).json({ error: "DB error on selecting max order number" });
+        }
+
+        //ดึงค่าเลขสูงสุดที่เคยมี
         // clear cart items for that specific user once they paid for it
         const clearSql = "DELETE FROM cartitem WHERE Cart_AccEmail = ?"
         connection.query(clearSql, [email], (err) => {
@@ -915,7 +929,34 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
                 return res.status(500).json({ error: "Clear Cart Failed" })
             }
         })
-        res.status(201).json({ message: "Order created" });
+        const maxOrNum = result[0].max_or_num;
+        let nextOrderNumber = 1;
+
+        if (maxOrNum) {
+            //maxOrNum จะอยู่ในรูปแบบ "OR0000X"
+            //ดึงเฉพาะตัวเลขออกมา (ส่วนหลัง 'OR')
+            const currentNumber = parseInt(maxOrNum.replace('OR', ''));
+            
+            //เพิ่มเลขลำดับ
+            nextOrderNumber = currentNumber + 1;
+        }
+
+        //จัดรูปแบบเลขลำดับใหม่ (e.g., 1 -> "00001", 123 -> "00123")
+        const formattedOrNum = 'OR' + String(nextOrderNumber).padStart(5, '0');
+
+        //INSERT Order ใหม่
+        const insertSql = "INSERT INTO user_order (Or_Num, Or_Time, Or_Status, Or_Price, Or_AccEmail, Or_Address) VALUES (?, ?, 'Paid', ?, ?, ?)";
+
+        connection.query(insertSql, [formattedOrNum, new Date(), price, email, formattedAddress], (insertErr) => {
+            if (insertErr) {
+                console.error("DB Insert Error:", insertErr);
+                
+                return res.status(500).json({ error: "DB error on insert (Possible Race Condition)" });
+            }
+
+            // 5. สำเร็จ
+            res.status(201).json({ message: "Order created", orderNumber: formattedOrNum });
+        });
     });
 });
 

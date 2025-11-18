@@ -26,6 +26,7 @@ export default function Ad_log() {
   const [error, setError] = useState<string | null>(null);
 
   
+  //กันไม่ให้คนที่ไม่มียศแอดมินเข้าถึง
   useEffect(() => {
     if (auth.isLoading) {
       return;
@@ -97,6 +98,7 @@ export default function Ad_log() {
     fetchLoginLogs();
   }, [isAuthLoading, auth.token]); 
 
+  //logout
   const handleLogout = () => {
     auth.logout();
     router.push("/home");
