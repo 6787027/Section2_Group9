@@ -103,23 +103,25 @@ router.post("/v1/login", function (req, res) {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
+            //ตรวจสอบว่ามี user นี้ไหม
             if (result.length === 0) {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const user = result[0];
-
+            //เปรียบเทียบรหัสผ่าน
             bcrypt.compare(password, user.Acc_Password, (err, correct) => {
 
                 if (err) {
                     console.error("Bcrypt compare error:", err);
                     return res.status(500).json({ message: "Internal server error" });
                 }
+                //ตรวจสอบว่ารหัสผ่านถูกไหม
                 if (!correct) {
                     return res.status(401).json({ message: "Invalid email or password" });
                 }
 
-
+                //ถ้าlogin สำเร็จ บันทึกประวัติการloginลงในตาราง Login_Log
                 const now = new Date();
                 const insertLogSql = "INSERT INTO Login_Log (Acc_Email, Log_Time) VALUES (?, ?)";
 
@@ -130,19 +132,20 @@ router.post("/v1/login", function (req, res) {
                         console.log(`Login log saved for ${user.Acc_Email}`);
                     }
 
+                    //อัปเดตเวลาloginล่าสุดลงในตาราง
                     const updateLoginTimeSql = "UPDATE User_Account SET Acc_LogTime = ? WHERE Acc_Email = ?";
-
                     connection.query(updateLoginTimeSql, [now, user.Acc_Email], (updateErr, updateResult) => {
                         if (updateErr) {
                             console.error("Failed to update last login time:", updateErr);
                         }
-
+                        //สร้างข้อมูลpayloadเพื่อจะเก็บToken
                         const payload = {
                             email: user.Acc_Email,
                             type: user.Acc_Type,
                         };
+                        //สร้างToken โดยใช้ secret key จาก .env ให้หมดอายุใน 1 ชม.
                         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
+                        //ส่ง response กลับไปให้ client พร้อมกับ token และข้อมูลผู้ใช้งาน
                         res.json({
                             message: "Login successful",
                             token,
@@ -897,13 +900,21 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
     const { price, address } = req.body;
     const email = req.user.email;
 
-
+    //สร้างsqlสำหรับorderใหม่ ที่มีorder numberไม่ซ้ำกัน
     const insertSql = "INSERT INTO user_order (Or_Num, Or_Time, Or_Status, Or_Price, Or_AccEmail, Or_Address) VALUES (?, ?, 'Ordered', ?, ?, ?)";
     connection.query(insertSql, [crypto.randomUUID(), new Date(), price, email, address], (err) => {
         if (err) {
             console.error(err)
             return res.status(500).json({ error: "DB error" });
         } 
+        // clear cart items for that specific user once they paid for it
+        const clearSql = "DELETE FROM cartitem WHERE Cart_AccEmail = ?"
+        connection.query(clearSql, [email], (err) => {
+            if (err) {
+                console.error(err)
+                return res.status(500).json({ error: "Clear Cart Failed" })
+            }
+        })
         res.status(201).json({ message: "Order created" });
     });
 });

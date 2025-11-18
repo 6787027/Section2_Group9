@@ -48,7 +48,7 @@ export default function Cart() {
             <h1 className="pt-10 text-[#240046] text-3xl font-bold">MY CART</h1>
             <div className="text-center py-20 text-gray-500">
               <p className="text-2xl">Your cart is empty.</p>
-              <Link href="/" className="text-lg text-purple-600 hover:underline">
+              <Link href="/product" className="text-lg text-purple-600 hover:underline">
                 Continue Shopping
               </Link>
             </div>

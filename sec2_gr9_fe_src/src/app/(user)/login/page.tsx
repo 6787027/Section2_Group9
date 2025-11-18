@@ -17,13 +17,14 @@ export default function Login() {
 
   const router = useRouter();
   const auth = useAuth();
-
+  //เรียกใช้เมื่อกดปุ่ม login
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
+      //ส่ง request ไป API login
       const response = await fetch('http://localhost:3001/v1/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,14 +37,14 @@ export default function Login() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // ✅ เก็บ token และ user ลง context
+      //เก็บ token และข้อมูลผู้ใช้งานลง context
       auth.login(data.token, data.user);
 
-      // ✅ ตรวจสอบประเภท user
+      //ตรวจสอบประเภท user
       if (data.user.type === 'Admin') {
-        router.push('/ad_product'); // ถ้าเป็น admin ไปหน้า admin
+        router.push('/ad_product'); //ถ้าเป็นadmin ไปหน้าadmin
       } else {
-        router.push('/user_profile'); // ถ้าเป็น user ไปหน้า profile
+        router.push('/user_profile'); //ถ้าเป็นuser ไปหน้าprofile
       }
 
     } catch (error: any) {
@@ -79,7 +80,10 @@ export default function Login() {
                 {error}
               </div>
             )}
-            <button type="submit" className="btn shadow-none border-0 mt-4 rounded-2xl bg-fuchsia-900 text-white" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+            <button type="submit"
+              className="btn shadow-none border-0 mt-4 rounded-2xl bg-fuchsia-900 text-white"
+              disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+            {/*ลิงค์ไปหน้า signup*/}
             <div className="flex justify-around">
               <span className="text-sm pl-6 text-white">Don’t have acccount ?</span>
               <Link href="/signup" className="text-sm font-normal text-[#A599ED] link link-hover hover:text-white pr-12">Sign up</Link>

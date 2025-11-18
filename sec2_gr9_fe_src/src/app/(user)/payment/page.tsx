@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image";
-import ImgOrder from "@/assets/ImageOrder.png"
 import Visa from "@/assets/visa.svg"
 import QR from "@/assets/qr.png"
 import { Minus, Plus } from "lucide-react";
@@ -10,16 +9,14 @@ import QRModal from "@/components/QRModal";
 import { useAuth } from "@/app/context/AuthContext";
 import { CartItemType, formatCurrency, useCart } from "@/app/context/CartContext";
 import { SuccessPaymentModal } from "@/components/SuccessPaymentModal";
+import { useRouter } from "next/navigation";
 
 export default function Payment() {
   const { user, token, isLoading: isAuthLoading } = useAuth();
 
   const [method, setMethod] = useState<'qr' | 'visa' | null>("qr")
   const [modalShown, setShowModalShown] = useState<'qr' | 'visa' | null>(null)
-  const [count, setCount] = useState(1)
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
 
   const [name, setName] = useState("")
   const [tel, setTel] = useState("")
@@ -31,17 +28,19 @@ export default function Payment() {
     cartItems,
     summary,
     updateItemQuantity,
+    clearCart
   } = useCart();
 
+  //เรียกใช้functionนี้เมื่อผู้ใช้งานกดปุ่ม pay now
   const handleBtn = () => {
     setShowModalShown(method)
   }
 
+  const router = useRouter()
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    //ส่ง request ไป API payment
     const res = await fetch('http://localhost:3001/v1/payment', {
       method: "POST",
       headers: {
@@ -55,18 +54,23 @@ export default function Payment() {
       })
     })
 
-    if(res.status === 201) {
-      if(method === 'visa')
+    if (res.status === 201) {
+      if (method === 'visa')
         setPaymentSuccess(true)
     }
   }
 
   useEffect(() => {
-    if(paymentSuccess) {
+    if (paymentSuccess) {
       setShowModalShown(null)
+      clearCart()
+      setTimeout(() => {
+        router.replace('/')
+      }, 3000)
     }
   }, [paymentSuccess])
 
+  //function อัปเดตสินค้า
   const handleQuantityChange = (item: CartItemType, newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity !== item.selectedItem) {
       updateItemQuantity(item.id, newQuantity);
@@ -81,7 +85,7 @@ export default function Payment() {
         <div className="p-8 flex flex-col flex-1">
 
           <span className="text-[#240046] text-2xl font-bold font-instrument-sans">YOUR ORDER</span>
-          {/*Order Product*/}
+          {/*แสดง Order Product แต่ละชิ้นในตะกร้า*/}
           {cartItems.map(item => (
             <div className="pt-4 flex gap-8" key={item.id}>
               <Image src={item.imageSrc} alt="ProductImg" width={80}
@@ -117,6 +121,7 @@ export default function Payment() {
           <div>
             <hr className="my-6" />
           </div>
+          {/*แสดงยอดสรุป*/}
           <div className="flex justify-between items-center text-[#7469B6]">
             <div className="flex flex-col">
               <span>Subtotal</span>
@@ -133,6 +138,7 @@ export default function Payment() {
         <div className="p-8 flex flex-col flex-1">
           <form className="flex" onSubmit={handleSubmit}>
             <fieldset className="flex flex-1">
+              {/*ข้อมูลการจัดส่ง*/}
               <legend className="border-base-300 rounded-box p-4 flex flex-col gap-2 w-full max-w-[24rem]">
                 <span className="text-[#240046] font-semibold font-instrument-sans">SHIPPING DETAILS</span>
                 <label className="label text-[#7469B6] font-instrument-sans">Name</label>
@@ -141,6 +147,7 @@ export default function Payment() {
                 <input type="tel" value={tel} onChange={(e) => setTel(e.target.value)} className="input rounded-2xl border w-full" required />
                 <label className="label text-[#7469B6] font-instrument-sans">Address Details</label>
                 <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="input rounded-2xl border w-full" required />
+                {/*เลือกวิธีชำระเงิน*/}
                 <div className="flex flex-col gap-2 pt-2 mb-4">
                   <span className="text-[#240046] font-semibold font-instrument-sans">PAYMENT DETAILS</span>
                   <div className="flex gap-2">
@@ -153,6 +160,7 @@ export default function Payment() {
                   </div>
                 </div>
 
+                {/*ถ้าเลือกvisa แสดงฟอร์มกรอกข้อมูลบัตร*/}
                 {method === 'visa' && (
                   <>
                     <label className="label text-[#7469B6] font-instrument-sans">Name on Card</label>
@@ -164,7 +172,6 @@ export default function Payment() {
                         <label className="label text-[#7469B6] font-instrument-sans">Valid Through</label>
                         <input type="date" className="input rounded-2xl border" required />
                       </div>
-
                       <div>
                         <label className="label text-[#7469B6] font-instrument-sans">CVV</label>
                         <input type="number" className="input rounded-2xl border" required />
@@ -173,17 +180,21 @@ export default function Payment() {
                   </>
                 )}
 
-                <button type="submit" disabled={!isFormFilled} onClick={() => handleBtn()} className="mt-4 cursor-pointer bg-[#7b6fe6] hover:bg-[#7469B6] disabled:bg-gray-400 disabled:cursor-not-allowed hover:text-white rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
+                {/*กดปุ่มpay nowเสจ จากนั้นจะเรียกใช้function handleBtn แต่ต้องกรอกข้อมูลให้ครบก่อนถึงกดได้*/}
+                <button type="submit" disabled={!isFormFilled} onClick={() => handleBtn()}
+                  className="mt-4 cursor-pointer bg-[#7b6fe6] hover:bg-[#7469B6] disabled:bg-gray-400 disabled:cursor-not-allowed hover:text-white rounded-2xl p-2 flex justify-center items-center text-white">Pay Now</button>
               </legend>
             </fieldset>
           </form>
         </div>
       </div>
 
+      {/*แสดง modal คิวอาโค้ด ถ้า ModalShown เป็น qr*/}
       {modalShown === 'qr' && (
         <QRModal setSuccess={setPaymentSuccess} setModalShown={setShowModalShown} />
       )}
 
+      {/*แสดง modal เมื่อชำระเงินสำเร็จ ถ้า ModalShown เป็นจริง*/}
       {paymentSuccess && (
         <SuccessPaymentModal setModalShown={setPaymentSuccess} />
       )}

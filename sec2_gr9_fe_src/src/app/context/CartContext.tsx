@@ -48,6 +48,7 @@ type CartContextType = {
   isCalculating: boolean;
   fetchCartFromDB: (userEmail: string) => Promise<void>;
   addToCart: (product: Product, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   updateItemQuantity: (id: string, newQuantity: number) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   toggleItemCheck: (id: string) => void;
@@ -157,6 +158,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // set cart items to empty array after a successful payment
+  const clearCart = async () => {
+    setCartItems([])
+  }
+
   const updateItemQuantity = async (id: string, newQuantity: number) => {
     if (!user || !token || newQuantity < 1) return;
 
@@ -226,6 +232,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isCalculating,
       fetchCartFromDB, 
       addToCart,
+      clearCart,
       updateItemQuantity,
       removeItem,
       toggleItemCheck
