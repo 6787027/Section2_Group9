@@ -51,6 +51,8 @@ export default function Payment() {
       body: JSON.stringify({
         email: user?.email,
         price: summary.total,
+        name: name,
+        tel: tel,
         address: address
       })
     })

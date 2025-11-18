@@ -208,7 +208,7 @@ export default function Ad_order() {
                     <th>Time</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Address</th>
+                    <th>Sending Info.</th>
                   </tr>
                 </thead>
                 <tbody>
