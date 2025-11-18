@@ -340,7 +340,7 @@ router.get("/ad_account", (req, res) => {
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword);
     }
-    L
+
     if (conditions.length > 0) {
         query += " WHERE " + conditions.join(" AND ");
     }

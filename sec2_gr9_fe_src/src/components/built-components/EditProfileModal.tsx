@@ -85,10 +85,12 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
             <h2 className="text-center text-2xl font-bold mb-6 text-[#282151]">
               Edit Profile
             </h2>
+            
             {/* ฟอร์มสำหรับแก้ไขโปรไฟล์ */}
             <form onSubmit={handleSubmit} className="space-y-4 text-[#7469B6]">
-              {/* ชื่อและนามสกุล */}
               <div className="grid grid-cols-2 gap-4">
+
+                {/* Firstname */}
                 <div>
                   <label className="block text-left text-sm">First name</label>
                   <input
@@ -99,6 +101,8 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
                     className="w-full border-[#7469B6] border p-2 mt-1"
                   />
                 </div>
+
+                {/* Lastname */}
                 <div>
                   <label className="block text-left text-sm">Last name</label>
                   <input
@@ -111,7 +115,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
                 </div>
               </div>
 
-              {/* เบอร์โทร*/}
+              {/* Phone number */}
               <div>
                 <label className="block text-left text-sm">Phone number</label>
                 <input
@@ -123,7 +127,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
                 />
               </div>
 
-              {/* รหัสผ่าน (สำหรับกรอกเมื่อต้องการเปลี่ยน) */}
+              {/*Password (สำหรับกรอกเมื่อต้องการเปลี่ยน) */}
               <div>
                 <label className="block text-left text-sm">Password</label>
                 <input
