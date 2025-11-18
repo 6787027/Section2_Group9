@@ -1,10 +1,8 @@
 'use client'
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-// หน้าตาของ User ที่ได้จาก API login
-// (สังเกตว่า 'id' ตอนนี้คือ string (email))
 interface User {
-  id: string; // <-- เราจะใช้ Email เป็น ID
+  id: string; 
   email: string;
   firstName: string;
   lastName: string;
@@ -12,7 +10,7 @@ interface User {
   type: string;
 };
 
-// หน้าตาของ Context
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -28,7 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // พยายามดึง User จาก localStorage ตอนเปิดเว็บ
   useEffect(() => {
     try {
       const storedToken = localStorage.getItem('authToken');

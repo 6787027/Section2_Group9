@@ -1,12 +1,12 @@
 'use client'
 import React from "react";
-import Link from 'next/link';
-import { useAuth } from "@/app/context/AuthContext";
-import { useCart, formatCurrency } from "@/app/context/CartContext";
-import CartItemRow from "@/components/built-components/cartrecord"; 
+import Link from 'next/link'; 
+import { useAuth } from "@/app/context/AuthContext";//เรียกใช้ usestate ที่เกี่ยวข้องกับ authentication
+import { useCart, formatCurrency } from "@/app/context/CartContext"; //เรียกใช้ usestate ที่เกี่ยวข้องกับ cart
+import CartItemRow from "@/components/built-components/cartrecord"; //import component จาก cartrecord
 
 export default function Cart() {
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth(); 
   
   const { 
     cartItems, 
@@ -26,7 +26,7 @@ export default function Cart() {
     );
   }
   
-  if (!user) {
+  if (!user)  {// ถ้าไม่พบ token ให้ไป login ก่อน
     return (
       <div className="flex-col flex min-h-screen p-8 text-center bg-[#282151]">
          <div className="bg-white w-full rounded-4xl p-20">
@@ -40,7 +40,7 @@ export default function Cart() {
     );
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0) { // cart items ว่างจะให้ไป shopping ก่อน
     return (
       <div className="flex-col flex min-h-screen p-8 text-ce bg-[#282151]">
         <div className="bg-white w-full rounded-4xl">
@@ -76,7 +76,7 @@ export default function Cart() {
                   <th className="py-2">REMOVE</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody> 
                 {cartItems.map(item => (
                   <CartItemRow
                     key={item.id}
@@ -85,7 +85,7 @@ export default function Cart() {
                     onToggleItem={toggleItemCheck}
                     onRemoveItem={removeItem} 
                   />
-                ))}
+                ))} /
               </tbody>
             </table>
 
