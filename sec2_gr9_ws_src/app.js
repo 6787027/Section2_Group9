@@ -1029,8 +1029,28 @@ router.get("/myorder", authenticateToken, (req , res) =>{
         }
         return res.status(200).json({result})
     });
-    
 } ); 
+
+// search product for navbar
+router.get("/v1/navbar/search", (req, res) => {
+    const keyword = req.query.keyword || "";
+    const sql = `
+        SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type
+        FROM Product
+        WHERE Pro_Name LIKE ? OR Pro_Type LIKE ?            
+    `;
+
+    const searchTerm = `%${keyword
+}%`;
+    connection.query(sql, [searchTerm, searchTerm], (err, results) => {
+        if (err) {
+            console.error("Database query error:", err);
+            return res.status(500).json([]);
+        }           
+        res.json(results);
+    });
+});
+
 
 
 
