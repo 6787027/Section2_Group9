@@ -1019,6 +1019,20 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
     });
 });
 
+router.get("/myorder", authenticateToken, (req , res) =>{
+    const userEmail = req.user.email;
+    const selectMyOrder = `select * from User_Order where Or_AccEmail= ?`
+
+    connection.query(selectMyOrder, [userEmail], (err, result) => {
+        if(err) {
+            return res.status(500).json("GET ERROR")
+        }
+        return res.status(200).json({result})
+    });
+    
+} ); 
+
+
 
 connection.connect(function (err) {
     console.log(`Connected DB: ${process.env.DB_name}`);
