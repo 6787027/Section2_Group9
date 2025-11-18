@@ -27,6 +27,8 @@ var connection = mysql.createConnection({
     password: process.env.DB_password,
     database: process.env.DB_name
 });
+
+// ตรวจสอบ token
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -44,9 +46,10 @@ const authenticateToken = (req, res, next) => {
 
 
 
-
+//signup
 router.post("/v1/signup", function (req, res) {
     console.log("Create the user")
+    //เช็คก่อนว่า email ที่เราจะ signup มีในระบบแล้วยัง
 
     connection.query("SELECT Acc_Email FROM User_Account WHERE Acc_Email = ?", req.body.email, (err, result) => {
 
@@ -58,7 +61,7 @@ router.post("/v1/signup", function (req, res) {
         if (result.length > 0) {
             return res.status(400).json({ message: "This email already exists" });
         }
-
+        // encrypt password เพื่อความปลอดภัย
         bcrypt.hash(req.body.password, 10, (hashErr, hashedPassword) => {
 
             if (hashErr) {
@@ -583,7 +586,7 @@ router.delete("/ad_order/:id", (req, res) => {
 
 
 
-
+/* backend หน้า product รวม */
 router.get("/v1/products", function (req, res) {
     let sql = "SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
         "FROM Product AS p " +
@@ -591,6 +594,8 @@ router.get("/v1/products", function (req, res) {
         "LEFT JOIN ProductPicture AS pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_id LIKE '%f' " +
         "WHERE 1=1 ";
 
+
+    /*กำหนด command sql ไปดึง product จาก db โดยจะเพิ่มเงื่อนไขเรื่อย ๆ ตาม search variable*/
     const { name, type, collection } = req.query
 
     const searchvari = []
@@ -811,7 +816,7 @@ router.post("/v1/products", (req, res) => {
 
 
 
-
+//ดึง cart จาก db
 router.get("/v1/cart", authenticateToken, (req, res) => {
     const userEmail = req.user.email; // ดึงจาก Token
     const sql = `
@@ -829,13 +834,14 @@ router.get("/v1/cart", authenticateToken, (req, res) => {
         LEFT JOIN ProductPicture pp ON p.Pro_ID = pp.Pic_ProID AND pp.Pic_ID LIKE '%f'
         WHERE ci.Cart_AccEmail = ? 
     `;
+    // ดึงข้อมูล cart ที่มี useremail = useremail จาก token
     connection.query(sql, [userEmail], (err, results) => {
         if (err) return res.status(500).json({ error: "Database error" });
         res.json(results);
     });
 });
 
-// POST: เพิ่มของลงตะกร้า
+// เพิ่มของลงตะกร้า
 router.post("/v1/cart/add", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, quantity } = req.body;
@@ -863,10 +869,11 @@ router.post("/v1/cart/add", authenticateToken, (req, res) => {
     });
 });
 
-// PUT: อัปเดตจำนวน
+// อัปเดตจำนวน
 router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
+    //ส่ง productID, quantity ผ่าน body
 
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [newQuantity, email, productId], (err) => {
@@ -875,11 +882,12 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     });
 });
 
-// DELETE: ลบของ
+//ลบของ
 router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId } = req.body;
 
+    //  ลบของจาก cart จาก proID
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [email, productId], (err) => {
         if (err) {
@@ -890,7 +898,7 @@ router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     });
 });
 
-// POST: คำนวณราคา (ไม่ต้อง Token ก็ได้)
+//คำนวณราคา 
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
     if (!Array.isArray(items)) return res.status(400).json({ error: "Invalid payload" });

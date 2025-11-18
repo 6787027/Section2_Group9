@@ -1,5 +1,5 @@
+// component แสดงดวง จาก external web service
 'use client';
-import Image from 'next/image';
 import { TarotCard } from '@/app/(user)/home/page';
 
 type ModalProps = {

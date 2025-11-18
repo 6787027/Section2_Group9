@@ -6,6 +6,7 @@ import { useCart, formatCurrency } from "@/app/context/CartContext"; //เรี
 import CartItemRow from "@/components/built-components/cartrecord"; //import component จาก cartrecord
 
 export default function Cart() {
+  // function ไว้แสดงผลหน้า cart โดรจะต้องมีการยืนยัน token และการ map ข้อมูลตะกร้าที่ได้มาจากฐานข้อมูลที่ตรงกับผู้ใช้
   const { user, isLoading: isAuthLoading } = useAuth(); 
   
   const { 
@@ -85,7 +86,7 @@ export default function Cart() {
                     onToggleItem={toggleItemCheck}
                     onRemoveItem={removeItem} 
                   />
-                ))} /
+                ))} 
               </tbody>
             </table>
 

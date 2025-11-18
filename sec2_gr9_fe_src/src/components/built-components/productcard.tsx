@@ -13,6 +13,7 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 2,
   }).format(amount);
 };
+// component product card ใน product
 export default function ProductCard({ name, price, imageUrl, type, collection }: ProductCardProps) {
   return (
     <div className="card bg-base-100  shadow-sm">

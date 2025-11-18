@@ -1,4 +1,5 @@
 'use client'
+//component ของ record ใน cart
 import Image from "next/image";
 import { CartItemType, formatCurrency } from "@/app/context/CartContext";
 import { Minus, Plus, Trash2 } from "lucide-react";
