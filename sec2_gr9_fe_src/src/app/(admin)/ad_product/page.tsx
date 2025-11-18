@@ -8,6 +8,7 @@ import AddProductModal from "@/components/built-components/AddProductModal";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 
+// Interface สำหรับกำหนดโครงสร้างข้อมูลของสินค้า (Product)
 interface Product {
     Pic_f: any;
     Pic_b: any;
@@ -28,23 +29,25 @@ export default function Ad_product() {
     const [showAddModal, setShowAddModal] = useState(false);
 
     const router = useRouter();
-    const auth = useAuth();
-
+    const auth = useAuth(); // เรียกใช้ Auth Context
 
     const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-
+    // ทำงานเมื่อโหลดหน้าเว็บ หรือสถานะ Auth เปลี่ยนแปลง
     useEffect(() => {
 
+        // ถ้าระบบ Auth กำลังโหลด ให้รอ
         if (auth.isLoading) {
             return;
         }
 
+        // ถ้ายังไม่ Login ให้ดีดไปหน้า Login
         if (!auth.user) {
             router.push("/login");
             return;
         }
 
+        // ถ้า login แล้ว แต่ไม่ใช่ Admin ให้ดีดไปหน้า Profile ปกติ
         if (auth.user.type !== 'Admin') {
             router.push("/user_profile");
             return;
@@ -54,12 +57,14 @@ export default function Ad_product() {
 
     }, [auth.isLoading, auth.user, router]);
 
-
+    // ทำงานเมื่อมีการเปลี่ยนคำค้นหา (searchTerm) หรือประเภท (filterType)
     useEffect(() => {
+        // รอให้ตรวจสอบสิทธิ์เสร็จก่อน
         if (isAuthLoading) {
             return;
         }
 
+        // ดึงข้อมูล API
         fetch(`http://localhost:3001/ad_product?search=${searchTerm}&type=${filterType}`)
             .then(res => res.json())
             .then(data => setProducts(data))
@@ -67,11 +72,13 @@ export default function Ad_product() {
 
     }, [searchTerm, filterType, isAuthLoading]);
 
+    // Log out
     const handleLogout = () => {
         auth.logout();
         router.push("/home");
     };
 
+    // แสดงระหว่างรอตรวจสอบสิทธิ์
     if (isAuthLoading) {
         return (
             <div className="bg-[#F1F0F4] min-h-screen w-screen flex justify-center items-center">
@@ -95,15 +102,15 @@ export default function Ad_product() {
                 </header>
 
                 <div className="mx-3 border-b-1 border-[#D9D9D9]"></div>
-
+                {/* Navbar */}
                 <nav className="my-10 ml-8 text-xl">
                     <div className="mb-7 text-[#282151] font-bold">Tools</div>
                     <h2 className="mb-7 font-bold">
                         <a href="/ad_product">Product</a>
-                        </h2>
+                    </h2>
                     <h2 className="mb-7">
                         <a href="/ad_account">Account</a>
-                        </h2>
+                    </h2>
                     <h2 className="text-xl  mb-7">
                         <a href="/ad_order">Order</a>
                         <br></br>
@@ -113,6 +120,8 @@ export default function Ad_product() {
                         <br></br>
                     </h2>
                 </nav>
+
+                {/* ปุ่ม Logout */}
                 <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
                     <div className="flex flex-row">
                         <button onClick={handleLogout} className="px-4 py-2 flex flex-row " ><LogOut className="mr-2"></LogOut> Logout</button>
@@ -158,6 +167,7 @@ export default function Ad_product() {
                         </div>
                     </div>
 
+                    {/* Add Product */}
                     <div className="mr-5">
                         <button onClick={() => setShowAddModal(true)} className="flex font-bold text-[#282151] bg-[#E8E6FB] p-2 border-1 rounded-2xl">
                             <svg className="mr-2 w-6 h-6 text-[#282151] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -188,6 +198,7 @@ export default function Ad_product() {
                 {/* Table */}
                 <div className="overflow-auto border-1 bg-white rounded-b-2xl shadow-xl w-250 h-110">
                     <table className="table table-pin-rows table-pin-cols">
+                        {/* Head */}
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -201,8 +212,11 @@ export default function Ad_product() {
                             </tr>
                         </thead>
 
+                        {/* Body */}
                         <tbody>
+                            {/* ตรวจสอบว่ามีสินค้าหรือไม่ */}
                             {products.length === 0 ? (
+                                // กรณีไม่มีสินค้า
                                 <tr>
                                     <td colSpan={8} className="text-center py-4 text-gray-500">
                                         No products found
@@ -210,6 +224,7 @@ export default function Ad_product() {
                                 </tr>
                             ) : (
                                 products.map(p => (
+                                    // กรณีมีสินค้า: วนลูปแสดงผลด้วย Component Adpro
                                     <Adpro
                                         key={p.Pro_ID}
                                         id={p.Pro_ID}
@@ -226,10 +241,11 @@ export default function Ad_product() {
                             )}
                         </tbody>
                     </table>
+                    {/* Modal เพิ่มสินค้า: แสดงเมื่อ showAddModal เป็น true */}
                     {showAddModal && (
                         <AddProductModal
                             onClose={() => setShowAddModal(false)}
-                            onSuccess={() => { window.location.reload() }}
+                            onSuccess={() => { window.location.reload() }} // รีโหลดหน้าเว็บเมื่อเพิ่มสำเร็จ
                         />
                     )}
                 </div>

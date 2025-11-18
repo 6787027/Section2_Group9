@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import Adacc from "@/components/built-components/acctable";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
@@ -6,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import AddAccountModal from "@/components/built-components/AddAccountModal";
 
+// Interface สำหรับกำหนดโครงสร้างข้อมูลของ Account
 interface Account {
     Acc_Type: string;
     Acc_Password: string;
@@ -16,53 +18,60 @@ interface Account {
 }
 
 export default function Ad_account() {
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [filterType, setFilterType] = useState<string>("all");
-    const [searchTerm, setSearchTerm] = useState("");
+    // --- State Management ---
+    const [accounts, setAccounts] = useState<Account[]>([]); // เก็บข้อมูลบัญชีทั้งหมดที่ดึงมาจาก API
+    const [filterType, setFilterType] = useState<string>("all"); // เก็บค่า Filter ประเภทบัญชี (all, User, Admin)
+    const [searchTerm, setSearchTerm] = useState(""); // เก็บคำค้นหา
+    const [isAuthLoading, setIsAuthLoading] = useState(true); // สถานะการโหลดเพื่อตรวจสอบสิทธิ์
+    const [showAddModal, setShowAddModal] = useState(false); // ควบคุมการเปิด/ปิด Modal เพิ่มบัญชี
+
+    // Hooks สำหรับ Routing และ Auth
     const router = useRouter();
     const auth = useAuth();
-    const [isAuthLoading, setIsAuthLoading] = useState(true);
-    const [showAddModal, setShowAddModal] = useState(false);
 
 
+    //ตรวจสอบสิทธิ์ Admin
     useEffect(() => {
         // ถ้าระบบ Auth (จาก AuthProvider) ยังโหลดไม่เสร็จ ให้รอก่อน
         if (auth.isLoading) {
             return;
         }
-        // ถ้าโหลดเสร็จ แต่ "ไม่มี" user, เด้งไปหน้า login
+        // ถ้าโหลดเสร็จ แต่ไม่มีการ login เด้งไปหน้า login
         if (!auth.user) {
             router.push("/login");
             return;
         }
-        // ถ้า "มี" user แต่ "ไม่ใช่" Admin, เด้งไปหน้า user profile
+        // ถ้าเป็น user แต่ไม่ใช่ Admin ให้เด้งไปหน้า user profile
         if (auth.user.type !== "Admin") {
             router.push("/user_profile");
             return;
         }
-        // ถ้ามาถึงตรงนี้ = เป็น Admin จริง
-        setIsAuthLoading(false); // อนุญาตให้แสดงผลหน้าเว็บ
+        // ถ้ามาถึงตรงนี้ = เป็น Admin จริง อนุญาตให้แสดงผลหน้าเว็บ
+        setIsAuthLoading(false);
     }, [auth.isLoading, auth.user, router]);
 
 
+    // ทำงานเมื่อมีการเปลี่ยน Filter (filterType) หรือ คำค้นหา (searchTerm)
     useEffect(() => {
-        // เพิ่ม Guard: ถ้ารอตรวจสอบสิทธิ์ ห้าม fetch
+        // เพิ่ม Guard: ถ้ารอตรวจสอบสิทธิ์ยังไม่เสร็จ ห้ามดึงข้อมูล
         if (isAuthLoading) {
             return;
         }
 
         const fetchAccounts = async () => {
             try {
+                // สร้าง Query String จาก State
                 const query = new URLSearchParams({
                     type: filterType,
                     search: searchTerm,
                 }).toString();
 
+                // เรียก API พร้อม Query String
                 const res = await fetch(`http://localhost:3001/ad_account?${query}`);
                 if (!res.ok) throw new Error("Failed to fetch");
 
                 const result = await res.json();
-                setAccounts(result);
+                setAccounts(result); // อัปเดตข้อมูลลง State
             } catch (err) {
                 console.error("Error fetching accounts:", err);
             }
@@ -71,12 +80,13 @@ export default function Ad_account() {
         fetchAccounts();
     }, [filterType, searchTerm, isAuthLoading]);
 
+    // Logout Handler
     const handleLogout = () => {
         auth.logout(); // เคลียร์ token และ user ออกจาก context/localStorage
         router.push("/home"); // กลับไปหน้า Home
     };
 
-
+    // แสดงผลระหว่างรอตรวจสอบว่าเป็น Admin หรือไม่
     if (isAuthLoading) {
         return (
             <div className="bg-[#F1F0F4] min-h-screen w-screen flex justify-center items-center">
@@ -89,16 +99,20 @@ export default function Ad_account() {
 
     return (
         <div className="bg-[#F1F0F4] flex flex-row">
+
+            {/* Sidebar */}
             <div className="bg-white min-w-65 shadow-xl ">
                 <header>
                     <div className="my-16 ml-8 justify-items-start">
-
                         <h1 className="text-[#282151] font-bold text-xl">
+                            {/* แสดง Firstname ของ Admin */}
                             {auth.user?.firstName || "Admin"}
                         </h1>
                     </div>
                 </header>
                 <div className="mx-3 border-b-1 border-[#D9D9D9]"></div>
+
+                {/* Navbar */}
                 <nav>
                     <div className="my-10 ml-8 text-xl justify-items-start">
                         <div className="mb-7 text-[#282151] font-bold">Tools</div>
@@ -120,6 +134,8 @@ export default function Ad_account() {
                         </h2>
                     </div>
                 </nav>
+
+                {/* Logout */}
                 <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
                     <div className="flex flex-row">
                         <button
@@ -133,15 +149,18 @@ export default function Ad_account() {
             </div>
 
             <main className="flex flex-col m-15 mt-10">
+
+                {/* Search Bar & Add Account Button */}
                 <div className="flex justify-between bg-white w-250 py-3 mb-10 items-center border-solid border-1 border-white rounded-2xl shadow-xl">
                     <div className="ml-5">
+                        {/* Search Input */}
                         <div className="flex flex-nowrap border-solid border-1 border-black rounded-3xl pl-3 pr-3 ">
                             <input
                                 id="search"
                                 type="text"
                                 placeholder="Search by any field..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => setSearchTerm(e.target.value)} // อัปเดต State search เมื่อพิมพ์
                                 className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"
                             ></input>
                             <button type="button">
@@ -164,10 +183,12 @@ export default function Ad_account() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Add Account Button */}
                     <div className="mr-5 ">
                         <button
                             type="button"
-                            onClick={() => setShowAddModal(true)}
+                            onClick={() => setShowAddModal(true)} // เปิด Modal
                             className="flex flex-nowrap font-bold text-[#282151] bg-[#E8E6FB] p-2 border-solid border-1 border-[#E8E6FB] rounded-2xl"
                         >
                             <svg
@@ -191,6 +212,8 @@ export default function Ad_account() {
                         </button>
                     </div>
                 </div>
+
+                {/* Filter Section: Dropdown เลือกประเภท account */}
                 <div className="border-1 border-white rounded-t-2xl shadow-xl bg-white w-250 h-fit">
                     <div className="mt-3 ml-5 mb-2">
                         <label htmlFor="filter" className="text-[#7469B6] mr-2">
@@ -199,7 +222,7 @@ export default function Ad_account() {
                         <select
                             id="filter"
                             value={filterType}
-                            onChange={(e) => setFilterType(e.target.value)}
+                            onChange={(e) => setFilterType(e.target.value)} // อัปเดต State filter เมื่อเลือก
                             className="select pl-3 text-grey-200 bg-white border-solid border-1 border-white rounded-xl shadow-xl"
                         >
                             <option value="all">Select a type</option>
@@ -209,11 +232,13 @@ export default function Ad_account() {
                     </div>
                     <div className="border-b-1 border-[#D9D9D9]"></div>
                 </div>
+
+                {/* Display account table */}
                 <div className="overflow-auto border-1 border-white rounded-b-2xl shadow-xl bg-white w-250 h-110">
                     <div>
                         <div className="overflow-auto">
                             <table className="table table-pin-rows table-pin-cols">
-                                {/* head */}
+                                {/* Head */}
                                 <thead>
                                     <tr>
                                         <th>Email</th>
@@ -223,14 +248,18 @@ export default function Ad_account() {
                                         <th>Phone number</th>
                                     </tr>
                                 </thead>
+                                {/* Body */}
                                 <tbody>
+                                    {/* ตรวจสอบว่ามีข้อมูลหรือไม่ */}
                                     {accounts.length === 0 ? (
+                                        // กรณีไม่มีข้อมูล
                                         <tr>
                                             <td colSpan={5} className="text-center text-gray-500">
                                                 No accounts found
                                             </td>
                                         </tr>
                                     ) : (
+                                        // กรณีมีข้อมูล: Loop แสดงผลโดยใช้ Component Adacc
                                         accounts.map((a) => (
                                             <Adacc
                                                 key={a.Acc_Email}
@@ -245,15 +274,18 @@ export default function Ad_account() {
                                     )}
                                 </tbody>
                             </table>
+
+                            {/* Modal สำหรับเพิ่มบัญชี (แสดงเมื่อ showAddModal = true) */}
                             {showAddModal && (
                                 <AddAccountModal
-                                    onClose={() => setShowAddModal(false)}
+                                    onClose={() => setShowAddModal(false)} // ปิด Modal
                                     onSuccess={() => {
                                         setShowAddModal(false);
+                                        // Logic การ Refresh หน้าเว็บ หรือโหลดข้อมูลใหม่
                                         const currentSearch = searchTerm;
                                         setSearchTerm(prev => prev + ' ');
                                         setSearchTerm(currentSearch);
-                                        window.location.reload()
+                                        window.location.reload() // Refresh หน้าเว็บ
                                     }}
                                 />
                             )}
