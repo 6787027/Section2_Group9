@@ -23,7 +23,10 @@ export default function Ad_order() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [order, setOrder] = useState<Order[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
+
+  // แยก State: searchTerm สำหรับ API (Trigger การค้นหา) และ searchInput สำหรับช่องกรอกข้อความ
+    const [searchTerm, setSearchTerm] = useState(""); 
+    const [searchInput, setSearchInput] = useState(""); 
   const [showAddModal, setShowAddModal] = useState(false);
 
   // ตรวจสอบว่า User เป็น Admin หรือไม่ ก่อนให้เข้าถึงหน้านี้
@@ -62,6 +65,18 @@ export default function Ad_order() {
       .catch(err => console.error("Error loading products:", err));
 
   }, [searchTerm, filterStatus, isAuthLoading]);
+
+  // ฟังก์ชันเริ่มการค้นหา (กดปุ่มหรือ Enter)
+    const handleSearch = () => {
+        setSearchTerm(searchInput); // ย้ายค่าจาก Input ไปเป็น Term เพื่อ Trigger useEffect
+    };
+
+    // ฟังก์ชันจับปุ่ม Enter
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
   // Logout
   const handleLogout = () => {
@@ -142,11 +157,12 @@ export default function Ad_order() {
                 type="text"
                 id="search"
                 placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput} // ใช้ searchInput แทน searchTerm
+                onChange={(e) => setSearchInput(e.target.value)} // อัปเดตแค่ searchInput (ยังไม่ fetch)
+                onKeyDown={handleKeyDown} // เพิ่มให้กด Enter ได้
                 className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"
               ></input>
-              <button type="button">
+              <button type="button" onClick={handleSearch}>
                 <svg
                   className="w-4 h-4 text-black dark:text-white"
                   aria-hidden="true"

@@ -25,7 +25,10 @@ interface Product {
 export default function Ad_product() {
     const [products, setProducts] = useState<Product[]>([]);
     const [filterType, setFilterType] = useState<string>("all");
+
+    // แยก State: searchTerm สำหรับ API (Trigger การค้นหา) และ searchInput สำหรับช่องกรอกข้อความ
     const [searchTerm, setSearchTerm] = useState("");
+    const [searchInput, setSearchInput] = useState("");
     const [showAddModal, setShowAddModal] = useState(false);
 
     const router = useRouter();
@@ -71,6 +74,18 @@ export default function Ad_product() {
             .catch(err => console.error("Error loading products:", err));
 
     }, [searchTerm, filterType, isAuthLoading]);
+
+    // ฟังก์ชันเริ่มการค้นหา (กดปุ่มหรือ Enter)
+    const handleSearch = () => {
+        setSearchTerm(searchInput); // ย้ายค่าจาก Input ไปเป็น Term เพื่อ Trigger useEffect
+    };
+
+    // ฟังก์ชันจับปุ่ม Enter
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     // Log out
     const handleLogout = () => {
@@ -142,11 +157,12 @@ export default function Ad_product() {
                                 id="search"
                                 type="text"
                                 placeholder="Search by any field..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                 value={searchInput} // ใช้ searchInput แทน searchTerm
+                                onChange={(e) => setSearchInput(e.target.value)} // อัปเดตแค่ searchInput (ยังไม่ fetch)
+                                onKeyDown={handleKeyDown} // เพิ่มให้กด Enter ได้
                                 className="placeholder-[#D0D0D0] input-m ml-2 mr-2 my-1 pr-20 bg-white"
                             ></input>
-                            <button type="button">
+                            <button type="button" onClick={handleSearch}>
                                 <svg
                                     className="w-4 h-4 text-black dark:text-white"
                                     aria-hidden="true"
