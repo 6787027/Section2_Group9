@@ -239,7 +239,7 @@ insert into CartItem(Cart_AccEmail, Cart_ProID, Cart_Quantity) values
 ('matsukos128@gmail.com', 'AC00001', 1);
 
 create table User_Order(
-	Or_Num varchar(255) not null AUTO_INCREMENT primary key,
+	Or_Num varchar(255) not null primary key,
     Or_Time DATETIME not null,
     Or_Status varchar(255) not null,
     -- Status: Ordered, Paid, Prepared, Sent
@@ -247,6 +247,7 @@ create table User_Order(
     Or_AccEmail varchar(255) not null,
     Or_Address longtext not null
 );
+
 
 
 insert into user_order(Or_Num, Or_Time, Or_Status,Or_Price, Or_AccEmail,Or_Address) values
