@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// (Interface นี้ถูกต้องแล้ว)
+
 interface ApiLoginLog {
   Acc_Email: string;
   Acc_LogTime: string; 
@@ -86,6 +86,7 @@ export default function Ad_log() {
           };
         });
 
+        // fetch data มาแสดงผล ถ้าสำเร็จจะให้หยุดการทำ IsDataLoading
         setLoginLogs(formattedLogs);
       } catch (err: any) {
         console.error("Fetch error:", err);
@@ -116,8 +117,9 @@ export default function Ad_log() {
 
   return (
     <div className="bg-[#F1F0F4] min-h-screen min-w-screen flex flex-row">
-      {/* ... (ส่วน Sidebar Navigation ของคุณ เหมือนเดิม) ... */}
       <div className="bg-white min-w-65 shadow-xl ">
+
+        {/* Display Firstname ของ Admin */}
         <header>
           <div className="my-16 ml-8 justify-items-start">
             <h1 className="text-[#282151] font-bold text-xl">
@@ -125,6 +127,8 @@ export default function Ad_log() {
             </h1>
           </div>
         </header>
+
+        {/* Navbar */}
         <div className="mx-3 border-b-1 border-[#D9D9D9]"></div>
         <nav>
           <div className="my-10 ml-8 text-xl justify-items-start">
@@ -147,6 +151,8 @@ export default function Ad_log() {
             </h2>
           </div>
         </nav>
+
+        {/* Logout */}
         <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
           <div className="flex flex-row">
             <button
@@ -173,21 +179,25 @@ export default function Ad_log() {
                 </thead>
                 
                 <tbody>
+                  {/* ระหว่างรอโหลด data */}
                   {isDataLoading && (
                     <tr>
                       <td colSpan={2} className="text-center">Loading data...</td>
                     </tr>
                   )}
+                  {/* ถ้า error */}
                   {error && (
                     <tr>
                       <td colSpan={2} className="text-center text-red-500">{error}</td>
                     </tr>
                   )}
+                  {/* ถ้าไม่มีข้อมูลใน Login_Log */}
                   {!isDataLoading && !error && loginLogs.length === 0 && (
                      <tr>
                       <td colSpan={2} className="text-center">No login history found.</td>
                     </tr>
                   )}
+                  {/* จะ display ข้อมูลโดยใช้ mapping ระหว่างข้อมูลกับหัวตาราง*/}
                   {!isDataLoading && !error && loginLogs.map((log, index) => (
                     <tr key={index}>
                       <td>{log.email}</td>
