@@ -189,7 +189,7 @@ router.get("/ad_log", (req, res) => {
     }
 });
 
-
+// Display data ของ User 
 router.get("/user_profile/:email", (req, res) => {
     const email = req.params.email;
     const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
@@ -206,10 +206,13 @@ router.get("/user_profile/:email", (req, res) => {
     });
 });
 
+// Update data ของ User
 router.put("/user_profile", async (req, res) => {
+    // รับค่าทั้งหมดมาเพื่อ update เราจะ update ข้อมูลทุก fields แม้ไม่มีการ update
     const { email, fname, lname, phone, password } = req.body;
 
     try {
+        // ทำการเพิ่ม Array 2 ตัว ที่ทำหน้าที่เหมือน dictionary 
         const fields = [];
         const values = [];
 
@@ -227,16 +230,19 @@ router.put("/user_profile", async (req, res) => {
         }
 
         if (password) {
+            //เพิ่มการ encryption ของ password
             const hashedPassword = await bcrypt.hash(password, 10);
             fields.push("Acc_Password = ?");
             values.push(hashedPassword);
         }
 
+        // กรณีที่ไม่มีการ update
         if (fields.length === 0) {
             return res.status(400).json({ message: "No fields to update" });
         }
 
         values.push(email);
+        // ทำการแยก array ด้วย ,  
         const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
 
         connection.query(sql, values, (err) => {
