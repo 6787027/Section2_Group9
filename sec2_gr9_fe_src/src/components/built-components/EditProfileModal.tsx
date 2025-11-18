@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,7 +85,7 @@ export default function EditProfileModal({ open, onClose, profile, refreshProfil
             <h2 className="text-center text-2xl font-bold mb-6 text-[#282151]">
               Edit Profile
             </h2>
-            
+
             {/* ฟอร์มสำหรับแก้ไขโปรไฟล์ */}
             <form onSubmit={handleSubmit} className="space-y-4 text-[#7469B6]">
               <div className="grid grid-cols-2 gap-4">

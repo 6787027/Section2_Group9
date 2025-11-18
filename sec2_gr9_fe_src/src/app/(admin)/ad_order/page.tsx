@@ -6,49 +6,56 @@ import { useEffect, useState } from "react";
 import AdOr from "@/components/built-components/ortable";
 import AddOrderModal from "@/components/built-components/AddOrderModal";
 
+// Interface สำหรับกำหนดโครงสร้างข้อมูลของ Order ที่จะได้รับจาก API
 interface Order {
-  Or_Status: string;
-  Or_Price: number;
-  Or_Time: string;
-  Or_Num: string;
+  Or_Status: string;
+  Or_Price: number;
+  Or_Time: string;
+  Or_Num: string;
   Or_AccEmail: string;
   Or_Address: string;
 }
 
 export default function Ad_order() {
   const router = useRouter();
-  const auth = useAuth();
+  const auth = useAuth(); // เรียกใช้ Auth Context เพื่อตรวจสอบสถานะ User
+
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [order, setOrder] = useState<Order[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
 
-
+  // ตรวจสอบว่า User เป็น Admin หรือไม่ ก่อนให้เข้าถึงหน้านี้
   useEffect(() => {
 
     if (auth.isLoading) {
       return;
     }
 
+    // ถ้ายังไม่ได้ Login ให้ดีดไปหน้า Login
     if (!auth.user) {
       router.push("/login");
       return;
     }
 
+    // ถ้า Login แล้วแต่ไม่ใช่ Admin ให้ดีดไปหน้า Profile ปกติ
     if (auth.user.type !== "Admin") {
       router.push("/user_profile");
       return;
     }
 
+    // ถ้าผ่านทุกเงื่อนไข ให้จบการโหลด Auth และแสดงเนื้อหา
     setIsAuthLoading(false);
   }, [auth.isLoading, auth.user, router]);
 
+  // ดึงข้อมูล Order เมื่อ searchTerm หรือ filterStatus เปลี่ยนแปลง
   useEffect(() => {
     if (isAuthLoading) {
       return;
     }
 
+    // เรียก API พร้อมส่ง Query Parameters (search และ status)
     fetch(`http://localhost:3001/ad_order?search=${searchTerm}&status=${filterStatus}`)
       .then(res => res.json())
       .then(data => setOrder(data))
@@ -56,13 +63,14 @@ export default function Ad_order() {
 
   }, [searchTerm, filterStatus, isAuthLoading]);
 
-
-
+  // Logout
   const handleLogout = () => {
     auth.logout();
     router.push("/home");
   };
 
+  // Loading Screen
+  // แสดงระหว่างรอตรวจสอบสิทธิ์ Admin
   if (isAuthLoading) {
     return (
       <div className="bg-[#F1F0F4] min-h-screen w-screen flex justify-center items-center">
@@ -76,7 +84,9 @@ export default function Ad_order() {
 
   return (
     <div id="main" className="bg-[#F1F0F4] flex flex-row">
+      {/* Side bar */}
       <div className="bg-white min-w-65 shadow-xl ">
+
         <header>
           <div className="my-16 ml-8 justify-items-start">
             <h1 className="text-[#282151] font-bold text-xl">
@@ -84,6 +94,8 @@ export default function Ad_order() {
             </h1>
           </div>
         </header>
+
+        {/* Navbar */}
         <div className="mx-3 border-b-1 border-[#D9D9D9]"></div>
         <nav>
           <div className="my-10 ml-8 text-xl justify-items-start">
@@ -107,6 +119,7 @@ export default function Ad_order() {
           </div>
         </nav>
 
+        {/* Logout */}
         <div className="items-baseline-last text-[#7469B6] mt-25 px-4">
           <div className="flex flex-row">
             <button
@@ -122,6 +135,8 @@ export default function Ad_order() {
       <main className="flex flex-col m-15 mt-10">
         <div className="flex justify-between bg-white w-250 py-3 mb-10 items-center border-solid border-1 border-white rounded-2xl shadow-xl">
           <div className="ml-5">
+
+            {/* Search bar */}
             <div className="flex flex-nowrap border-solid border-1 border-black rounded-3xl pl-3 pr-3 ">
               <input
                 type="text"
@@ -151,6 +166,8 @@ export default function Ad_order() {
               </button>
             </div>
           </div>
+
+          {/* Add Order จะขึ้น Modal จาก componetn AddOrModal */}
           <div className="mr-5 ">
             <button
               type="button"
@@ -178,8 +195,12 @@ export default function Ad_order() {
             </button>
           </div>
         </div>
+
+
         <div className="border-1 border-white rounded-t-2xl shadow-xl bg-white w-250 h-fit">
           <div className="mt-3 ml-5 mb-2">
+
+            {/* Filter order by status : Drop down list*/}
             <label className="text-[#7469B6] mr-2">Order Status</label>
             <select
               id="or_select"
@@ -212,8 +233,9 @@ export default function Ad_order() {
                   </tr>
                 </thead>
                 <tbody>
-
+                  {/* ตรวจสอบว่ามีข้อมูลหรือไม่ */}
                   {order.length === 0 ? (
+                    // กรณีไม่พบข้อมูล
                     <tr>
                       <td colSpan={8} className="text-center py-4 text-gray-500">
                         No order found
@@ -221,24 +243,26 @@ export default function Ad_order() {
                     </tr>
                   ) : (
                     order.map(o => (
+                      // กรณีมีข้อมูล: Loop แสดงผลด้วย Component AdOr
                       <AdOr
                         key={o.Or_Num}
                         id={o.Or_Num}
                         email={o.Or_AccEmail}
-                           
+
                         time={o.Or_Time}
                         price={o.Or_Price}
                         status={o.Or_Status}
-                         address={o.Or_Address}
+                        address={o.Or_Address}
                       />
                     ))
                   )}
                 </tbody>
               </table>
+              {/* Modal Component: แสดงเมื่อ showAddModal เป็น true */}
               {showAddModal && (
                 <AddOrderModal
                   onClose={() => setShowAddModal(false)}
-                  onSuccess={() => { window.location.reload() }}
+                  onSuccess={() => { window.location.reload() }} // เสร็จแล้วรีโหลดหน้าเว็บให้ข้อมูลขึ้น
                 />
               )}
             </div>

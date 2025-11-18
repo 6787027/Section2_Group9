@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 export default function AddProductModal({ onClose, onSuccess }) {
+    // เก็บข้อมูลจาก Form Input ทั้งหมดไว้ใน Object เดียว
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -13,24 +14,32 @@ export default function AddProductModal({ onClose, onSuccess }) {
         img3: "",
     });
 
+    // ฟังก์ชันสำหรับอัปเดต State เมื่อมีการพิมพ์ข้อมูลใน Input
     const handleChange = (e) => {
+        // ใช้ Spread Operator (...) เพื่อคงค่าเดิมใน Field อื่นๆ
+        // และอัปเดตเฉพาะ Field ที่กำลังพิมพ์ (ระบุด้วย e.target.name)
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // ฟังก์ชันสำหรับบันทึกข้อมูล (Submit Form)
     const handleAdd = async () => {
         try {
+            // ส่ง Request แบบ POST ไปยัง API เพื่อสร้างสินค้าใหม่
             const res = await fetch("http://localhost:3001/v1/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formData), // แปลงข้อมูลใน State เป็น JSON
             });
+
             const data = await res.json();
+
+            // ตรวจสอบผลลัพธ์จาก Server
             if (res.ok) {
-                alert("Product added successfully!");
-                onClose();
-                onSuccess();
+                alert("Product added successfully!"); // แจ้งเตือนความสำเร็จ
+                onClose();   // ปิด Modal
+                onSuccess(); // เรียก Callback เพื่อให้หน้าหลักอัปเดตข้อมูล
             } else {
-                alert("Failed to add product: " + data.message);
+                alert("Failed to add product: " + data.message); // แจ้งเตือนเมื่อล้มเหลว
             }
         } catch (err) {
             console.error(err);
@@ -39,18 +48,21 @@ export default function AddProductModal({ onClose, onSuccess }) {
     };
 
     return (
+        // Background Overlay: สีดำโปร่งแสง
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+
             <div className="bg-white rounded-xl shadow-2xl w-[600px] p-6 relative max-h-[90vh] overflow-y-auto">
                 <h2 className="text-3xl font-bold text-center mb-4">Add Product</h2>
 
+                {/* Form Section */}
                 <form
                     onSubmit={(e) => {
-                        e.preventDefault();
-                        handleAdd();
+                        e.preventDefault(); // ป้องกันการ Refresh หน้าเว็บ
+                        handleAdd(); // เรียกฟังก์ชันเพิ่มข้อมูล
                     }}
                 >
                     <div className="text-[#7469B6]">
-                        {/* Product Name */}
+                        {/* Product Name Input */}
                         <label className="block text-sm font-semibold mb-1">Product Name</label>
                         <input
                             name="name"
@@ -62,8 +74,8 @@ export default function AddProductModal({ onClose, onSuccess }) {
                         />
 
                         <div className="mt-2 flex items-center">
-                    
-                            {/* Price */}
+
+                            {/* Price Input */}
                             <label className="mr-11 block text-sm font-semibold mb-1">Price</label>
                             <input
                                 name="price"
@@ -75,7 +87,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 required
                             />
 
-                            {/* Type */}
+                            {/* Type Selection (Drop down list) */}
                             <label className="mr-13 block text-sm font-semibold mb-1">Type</label>
                             <select
                                 name="type"
@@ -88,11 +100,11 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 <option value="Doll">Doll</option>
                                 <option value="Accessory">Accessory</option>
                             </select>
-                          
+
                         </div>
 
                         <div className="flex items-center">
-                            {/* Quantity */}
+                            {/* Quantity Input */}
                             <label className="mr-5 block text-sm font-semibold mb-1">Quantity</label>
                             <input
                                 name="quantity"
@@ -104,7 +116,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                                 required
                             />
 
-                            {/* Collection */}
+                            {/* Collection Name Input */}
                             <label className="mr-5 block text-sm font-semibold mb-1">Collection</label>
                             <input
                                 name="colname"
@@ -115,6 +127,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             />
                         </div>
 
+                        {/* Description Input (Textarea) */}
                         <label className="mt-2 block text-sm font-semibold mb-1">Description</label>
                         <textarea
                             name="desc"
@@ -124,6 +137,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             className="border border-[#7469B6] p-2 w-full mb-3"
                         />
 
+                        {/* Image URLs Inputs */}
                         <label className="block text-sm font-semibold mb-1">Front Image URL</label>
                         <input
                             name="img1"
@@ -151,6 +165,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
                             className="border border-[#7469B6] p-2 w-full mb-5"
                         />
 
+                        {/* Buttons Section: Submit & Cancel */}
                         <div className="flex justify-between">
                             <button
                                 type="submit"
@@ -161,7 +176,7 @@ export default function AddProductModal({ onClose, onSuccess }) {
 
                             <button
                                 type="button"
-                                onClick={onClose}
+                                onClick={onClose} // ปิด Modal
                                 className="text-gray-600 px-4 py-2 hover:underline"
                             >
                                 Cancel
