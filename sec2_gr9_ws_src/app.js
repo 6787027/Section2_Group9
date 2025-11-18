@@ -260,7 +260,7 @@ router.put("/user_profile", async (req, res) => {
                 console.error(err);
                 return res.status(500).json({ message: "Database error" });
             }
-            res.json({ message: "User updated successfully" });
+            res.json({ message: "User updated successfully"});
         });
     } catch (error) {
         console.error(error);
@@ -378,7 +378,7 @@ router.post("/ad_account", async (req, res) => {
     const { email, fname, lname, phonenum, pass, type } = req.body;
 
     // Validation: ตรวจสอบว่ากรอกครบทุกช่อง
-    if (!email || !fname || !lname || !pass || !type) {
+    if (!email || !fname || !lname || !phonenum || !pass || !type) {
         return res.status(400).json({ message: "Please fill all required fields." });
     }
 
@@ -404,7 +404,7 @@ router.post("/ad_account", async (req, res) => {
                 return res.status(500).json({ message: "Database error" });
             }
 
-            res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
+            res.status(201).json({ message: "Account created successfully"});
         });
 
     } catch (error) {
@@ -457,6 +457,8 @@ router.put("/ad_account", (req, res) => {
         }
         res.sendStatus(200);
     });
+    console.log(`Updated Acc_Email: ${Acc_Email}`);
+        res.json({ message: "Account updated successfully" });
 });
 
 // ดึงข้อมูลคำสั่งซื้อ
@@ -648,11 +650,8 @@ router.get("/v1/products", function (req, res) {
 router.get("/v1/products/:id", (req, res) => {
     const id = req.params.id; // รับ Product ID จาก URL
 
-    // SQL Query: 
-    // 1. เลือกข้อมูลสินค้า (Product) และชื่อคอลเลกชัน (Collection)
-    // 2. ใช้เทคนิค Pivot (MAX + CASE WHEN) เพื่อแปลงแถวของรูปภาพ (ProductPicture) ให้เป็นคอลัมน์ (Pic_f, Pic_b, Pic_s) 
-    //    โดยเช็คจาก suffix ของ Pic_ID ('f'=หน้า, 'b'=หลัง, 's'=ข้าง)
-    // 3. JOIN 3 ตาราง: Product, ProductPicture, Collection
+    // ใช้เทคนิค Pivot (MAX + CASE WHEN) เพื่อแปลงแถวของรูปภาพ (ProductPicture) ให้เป็นคอลัมน์ (Pic_f, Pic_b, Pic_s) 
+    // โดยเช็คจาก suffix ของ Pic_ID ('f'=หน้า, 'b'=หลัง, 's'=ข้าง)
     const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
     
     connection.query(sql, [id], (err, result) => {
@@ -682,11 +681,6 @@ router.put("/v1/products/:id", (req, res) => {
         img2,
         img3
     } = req.body; // รับค่าทั้งหมดจาก Body
-
-    // Validation: ตรวจสอบค่าที่จำเป็น
-    if (!name || !price || !type) {
-        return res.status(400).json({ message: "Missing required fields" });
-    }
 
     // SQL 1: อัปเดตตาราง Product
     // มีการ JOIN กับ Collection เพื่ออัปเดต Pro_ColID โดยอ้างอิงจาก Col_Name ที่ส่งมา
