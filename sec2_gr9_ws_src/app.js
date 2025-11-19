@@ -1015,6 +1015,31 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
 });
 
 
+// ดึงข้อมูลคำสั่งซื้อของผู้ใช้คนที่ล็อกอินอยู่
+router.get("/myorder", authenticateToken, (req , res) =>{
+    const userEmail = req.user.email;
+    const selectMyOrder = ` SELECT 
+            Or_Num, 
+            DATE_FORMAT(Or_Time, '%Y/%m/%d %H:%i:%s') AS Or_Time, 
+            Or_Status, 
+            Or_Price,
+            Or_AccEmail,
+            Or_Address 
+        FROM User_Order WHERE Or_AccEmail= ?`;  
+// ดึงคำสั่งซื้อที่ตรงกับอีเมลของผู้ใช้ที่ล็อกอิน
+     connection.query(selectMyOrder, [userEmail], (err, result) => {
+        if(err) {
+            return res.status(500).json("GET ERROR")
+        }
+        return res.status(200).json({result})
+    });
+} ); 
+
+
+
+
+
+
 connection.connect(function (err) {
     console.log(`Connected DB: ${process.env.DB_name}`);
 });
