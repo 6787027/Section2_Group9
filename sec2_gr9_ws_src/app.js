@@ -1013,11 +1013,20 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
     });
 });
 
+
+// ดึงข้อมูลคำสั่งซื้อของผู้ใช้คนที่ล็อกอินอยู่
 router.get("/myorder", authenticateToken, (req , res) =>{
     const userEmail = req.user.email;
-    const selectMyOrder = `select * from User_Order where Or_AccEmail= ?`
-
-    connection.query(selectMyOrder, [userEmail], (err, result) => {
+    const selectMyOrder = ` SELECT 
+            Or_Num, 
+            DATE_FORMAT(Or_Time, '%Y/%m/%d %H:%i:%s') AS Or_Time, 
+            Or_Status, 
+            Or_Price,
+            Or_AccEmail,
+            Or_Address 
+        FROM User_Order WHERE Or_AccEmail= ?`;  
+// ดึงคำสั่งซื้อที่ตรงกับอีเมลของผู้ใช้ที่ล็อกอิน
+     connection.query(selectMyOrder, [userEmail], (err, result) => {
         if(err) {
             return res.status(500).json("GET ERROR")
         }
@@ -1025,25 +1034,7 @@ router.get("/myorder", authenticateToken, (req , res) =>{
     });
 } ); 
 
-// search product for navbar
-router.get("/v1/navbar/search", (req, res) => {
-    const keyword = req.query.keyword || "";
-    const sql = `
-        SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type
-        FROM Product
-        WHERE Pro_Name LIKE ? OR Pro_Type LIKE ?            
-    `;
 
-    const searchTerm = `%${keyword
-}%`;
-    connection.query(sql, [searchTerm, searchTerm], (err, results) => {
-        if (err) {
-            console.error("Database query error:", err);
-            return res.status(500).json([]);
-        }           
-        res.json(results);
-    });
-});
 
 
 
