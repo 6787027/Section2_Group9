@@ -6,7 +6,8 @@ import { AuroraText } from "@/components/ui/aurora-text";
 import home from "@/assets/Home.svg";
 import TarotModal from '@/components/built-components/tarotModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+ 
+// Define the TarotCard type based on the expected API response
 export type TarotCard = {
     name: string;
     name_short: string;
@@ -14,13 +15,14 @@ export type TarotCard = {
     desc: string;
 };
 
+// Main Home component
 export default function Home() {
     const [card, setCard] = useState<TarotCard | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-
+// Function to handle fetching a random tarot card
     const handleRandomCard = async () => {
         setIsLoading(true);
         setError(null);
@@ -44,6 +46,7 @@ export default function Home() {
 
     return (
         <>
+         {/* Main container with background and centering */}
             <div className="bg-[#282151] min-h-screen text-center ">
                 <main>
                     <div className=" min-h-screen relative w-full h-screen">
@@ -68,14 +71,12 @@ export default function Home() {
                         {error && <p className="text-red-400 mt-4">{error}</p>}
                     </div>
 
+                    {/* Recommended Products Section */}
                     <div className="py-2">
                         <div className="py-2"><AuroraText className="text-4xl font-bold" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"]} speed={2} >Recommended Products</AuroraText></div>
-
-                        {/* Div หลัก: ใช้ max-w-7xl เพื่อจำกัดความกว้างและ mx-auto จัดตรงกลาง */}
+                    {/* Product Cards Container */}
                         <div className="flex overflow-x-scroll py-2 gap-8 mx-auto max-w-7xl">
-
-                            {/* Div การ์ด: ใช้ flex-shrink-0 และ W-72 (288px) เพื่อกำหนดขนาดที่สวยงาม */}
-
+                        {/* Product Card 1 */}
                             <Link href="http://localhost:3000/product/DS00003" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -87,7 +88,7 @@ export default function Home() {
                                 </div>
                             </div>
                             </Link>
-
+                        {/* Product Card 2 */}
                              <Link href="http://localhost:3000/product/DS00007" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -99,7 +100,7 @@ export default function Home() {
                                 </div>
                             </div>
                             </Link>
-
+                        {/* Product Card 3 */}
                              <Link href="http://localhost:3000/product/DS00006" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -111,7 +112,7 @@ export default function Home() {
                                 </div>
                             </div>
                             </Link>
-
+                        {/* Product Card 4 */}
                             <Link href="http://localhost:3000/product/DS00010" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -123,7 +124,7 @@ export default function Home() {
                                 </div>
                             </div>
                             </Link>
-                            
+                        {/* Product Card 5 */}
                             <Link href="http://localhost:3000/product/DS00009" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -135,7 +136,7 @@ export default function Home() {
                                 </div>
                             </div>
                             </Link>
-
+                        {/* Product Card 6 */}
                             <Link href="http://localhost:3000/product/DS000005" className="hover:text-[#A599ED] active:text-black text-2xl" > 
                             <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
                                 <div>
@@ -155,6 +156,7 @@ export default function Home() {
                     </div>
                 </main>
             </div>
+            {/* Tarot Modal Component */}    
             <TarotModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

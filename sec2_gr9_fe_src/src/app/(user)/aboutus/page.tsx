@@ -10,16 +10,18 @@ import Link from "next/link";
 import { SparklesText } from "@/components/ui/sparkles-text"
 
 
-
+// Main AboutUs component
 export default function AboutUs() {
   return (
+    // Main container with background and padding   
     <div className="bg-[#282151] flex flex-col min-h-screen p-8   ">
       <main>
         <div className="text-center ">
           <AuroraText className="text-4xl font-bold tracking-tighter md:text-5xl lg:text-7xl  pb-8" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"] } speed = {2}>ABOUT US</AuroraText>
         </div>
-    
+        {/*  Member Profiles */}
         <div className=" grid grid-cols-2  gap-12 ">
+
         {/* 6787027 */}
         <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg  ">
           <div className="w-60 flex-shrink-0">
