@@ -918,32 +918,59 @@ router.post("/v1/cart/add", authenticateToken, (req, res) => {
 router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
-    //ส่ง productID, quantity ผ่าน body
-    
 
+    // 1. ตรวจสอบการมีอยู่ของค่า
+    if (!productId || typeof newQuantity === 'undefined') {
+        return res.status(400).json({ error: "Invalid product ID or quantity: Missing fields." });
+    }
+
+    // 2. ตรวจสอบว่าเป็นตัวเลขที่ถูกต้องเท่านั้น
+    const quantityValue = Number(newQuantity);
+
+    // ตรวจสอบ:
+    // a) เป็น NaN (เกิดเมื่อแปลง 'hello' หรือ '500jfdj' ด้วย Number())
+    // b) ไม่เป็นจำนวนเต็ม
+    // c) เป็น 0 หรือติดลบ (ถ้าไม่ต้องการให้เป็น 0 หรือติดลบ)
+    if (isNaN(quantityValue) || !Number.isInteger(quantityValue) || quantityValue <= 0) {
+        return res.status(400).json({ error: "Quantity must be a positive integer value." });
+    }
+
+    // ถ้าผ่านการตรวจสอบทั้งหมด ให้ใช้ quantityValue ที่เป็น Number ใน Query
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [newQuantity, email, productId], (err) => {
-        if (err) return res.status(500).json({ error: "DB error" });
+    connection.query(sql, [quantityValue, email, productId], (err) => {
+        if (err) {
+             console.error("Database error during update:", err); // ควร log error ด้วย
+             return res.status(500).json({ error: "DB error" });
+        }
         res.json({ message: "Quantity updated" });
     });
 });
-
 //ลบของ
 router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId } = req.body;
+    
+    // 1. ตรวจสอบว่า productId ถูกส่งมาใน Body หรือไม่
+    //    และต้องไม่ใช่ค่าว่างเปล่า (Empty String) หลังจาก trim()
+    if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
+        return res.status(400).json({ 
+            error: "Invalid input: Product ID is required and must be a non-empty string." 
+        });
+    }
 
-    //  ลบของจาก cart จาก proID
+    
+    // ลบของจาก cart จาก proID
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [email, productId], (err) => {
+    
+    // ใช้ productId.trim() เพื่อตัดช่องว่างหน้า/หลังออกก่อนใช้งาน
+    connection.query(sql, [email, productId.trim()], (err, result) => {
         if (err) {
-            console.error(err)
+            console.error("Database error during item removal:", err);
             return res.status(500).json({ error: "DB error" });
         }
-        res.json({ message: "Item removed" });
+        res.json({ message: "Item removed", result: result });
     });
 });
-
 //คำนวณราคา 
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
