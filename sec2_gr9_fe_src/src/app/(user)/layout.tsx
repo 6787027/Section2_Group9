@@ -1,4 +1,4 @@
-import Navbar from "../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/footer";
 
 export const metadata = { title: "CelesteCraft", description: "Next.js App" };
