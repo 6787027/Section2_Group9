@@ -919,6 +919,7 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
     //ส่ง productID, quantity ผ่าน body
+    
 
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [newQuantity, email, productId], (err) => {

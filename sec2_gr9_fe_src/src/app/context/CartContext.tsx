@@ -223,9 +223,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const removeItem = async (id: string) => {
     if (!user || !token) return;
     try {
-      // สังเกต: ตรงนี้ใช้ path /api/cart/remove (ต่างจากจุดอื่นที่เป็น /v1/) 
-      // อาจต้องเช็ค Backend ว่า path ถูกต้องหรือไม่
-      const res = await fetch('http://localhost:3001/api/cart/remove', {
+      const res = await fetch('http://localhost:3001/v1/cart/remove', {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
