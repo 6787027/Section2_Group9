@@ -85,7 +85,7 @@ router.post("/v1/signup", function (req, res) {
                 }
 
                 console.log("New user created");
-                res.status(201).json({ message: "User created successfully" });
+                res.status(201).json({ message: "User created successfully", result: insertResult });
             });
         });
     });
