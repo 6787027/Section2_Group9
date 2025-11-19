@@ -23,13 +23,7 @@ export default function Navbar() {
 
 
           <Image alt="logo-nav" src={Logo} width='180' className="float-left"/>
-          <div className="flex justify-items-end bg-white rounded-4xl    w-80 py-[0.2rem] border-2 border-gray-200 my-1">
-            <input 
-              className="text-black rounded-4xl pl-2 w-68  text-sm outline-none"
-              placeholder="Search"
-              ></input>
-              <a href="/home"><FontAwesomeIcon icon={faSearch} className="text-black ml-2 hover:text-[#A599ED] active:text-black "/>  </a>
-          </div>
+          
           <div className="flex justify-end gap-8 w-[10rem]"> 
             <div className="flex justify-between gap-8">
               <Link href="/cart"> <ShoppingBag color='black' strokeWidth={1} size={24} className="hover:stroke-[#A599ED] active:stroke-black"/>   </Link>
