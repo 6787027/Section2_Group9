@@ -213,6 +213,10 @@ router.get("/ad_log", (req, res) => {
     }
 });
 
+// Test
+// method: get
+// URL: http://localhost:3001/usertest@gmail.com
+
 // ดึงข้อมูลโปรไฟล์ผู้ใช้รายบุคคล 
 router.get("/user_profile/:email", (req, res) => {
     const email = req.params.email; // รับ email จาก URL parameter
@@ -232,6 +236,16 @@ router.get("/user_profile/:email", (req, res) => {
     });
 });
 
+// Test
+// method: put
+// URL: http://localhost:3001/v1/payment
+// body: raw JSON
+/*{
+    "email":"usertest@gmail.com",
+    "fname":"Test",
+    "lname":"data",
+    "phone":"01234567893"
+}*/
 // อัปเดตข้อมูลโปรไฟล์ผู้ใช้
 router.put("/user_profile", async (req, res) => {
     // รับค่าจาก Body
@@ -286,6 +300,13 @@ router.put("/user_profile", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+
+// Test
+// method: get
+// URL: http://localhost:3001/ad_product
+// URL: http://localhost:3001/ad_product?search=Fort
+// URL: http://localhost:3001/ad_product?type=Accessory
+// URL: http://localhost:3001/ad_product?search=Fort&type=Doll
 
 // ดึงข้อมูลสินค้าสำหรับ Admin 
 // รองรับการ Search และการ Filter Type
@@ -356,6 +377,12 @@ router.get("/ad_product", (req, res) => {
     });
 });
 
+// Test
+// method: get
+// URL: http://localhost:3001/ad_account
+// URL: http://localhost:3001/ad_account?search=Nong
+// URL: http://localhost:3001/ad_account?type=user
+// URL: http://localhost:3001/ad_account?search=Noey&type=Admin
 // ดึงข้อมูลบัญชีผู้ใช้
 router.get("/ad_account", (req, res) => {
     const { type, search } = req.query;
@@ -391,7 +418,20 @@ router.get("/ad_account", (req, res) => {
     })
 });
 
-// Route: สร้างบัญชีใหม่ (Create Account)
+
+// Test
+// method: post
+// URL: http://localhost:3001/v1/payment
+// body: raw JSON
+/*{
+    "email":"test1@gmail.com",
+    "fname":"Test",
+    "lname":"data",
+    "pass":"nothing",
+    "phone":"01234567893",
+    "type":"User"
+}*/
+// สร้างบัญชีใหม่
 router.post("/ad_account", async (req, res) => {
 
     const { email, fname, lname, phonenum, pass, type } = req.body;
@@ -432,6 +472,9 @@ router.post("/ad_account", async (req, res) => {
     }
 });
 
+// Test
+// method: put
+// URL: http://localhost:3001/ad_account/test1@gmail.com
 // ลบบัญชีผู้ใช้
 router.delete("/ad_account/:email", (req, res) => {
 
@@ -460,6 +503,15 @@ router.delete("/ad_account/:email", (req, res) => {
 });
 
 
+// Test
+// method: put
+// URL: http://localhost:3001/ad_account
+// body: raw JSON
+/*{
+    "email":"usertest@gmail.com",
+    "fname":"Mynameis",
+    "lname":"Testman"
+}*/
 // แก้ไขบัญชีผู้ใช้ในส่วนของ Admin
 router.put("/ad_account", (req, res) => {
     const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
@@ -480,6 +532,13 @@ router.put("/ad_account", (req, res) => {
     res.json({ message: "Account updated successfully" });
 });
 
+
+// Test
+// method: get
+// URL: http://localhost:3001/ad_order
+// URL: http://localhost:3001/ad_order?search=mats
+// URL: http://localhost:3001/ad_order?status=Paid
+// URL: http://localhost:3001/ad_order?search=mats&statud=Sent
 // ดึงข้อมูลคำสั่งซื้อ
 router.get("/ad_order", (req, res) => {
     const { status, search } = req.query;
@@ -524,6 +583,17 @@ router.get("/ad_order", (req, res) => {
     });
 });
 
+
+// Test
+// method: post
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    "price":45,
+    "status":"Paid",
+    "email":"usertest@gmail.com",
+    "address":"Noey 0124567891 MaewNam Village"
+}*/
 // สร้างคำสั่งซื้อใหม่
 router.post("/ad_order", (req, res) => {
 
@@ -575,6 +645,16 @@ router.post("/ad_order", (req, res) => {
     });
 });
 
+
+// Test
+// method: put
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    "Or_Num":OR00005,
+    "Or_Status":"Prepared",
+    "Or_Address":"Meow Meow"
+}*/
 // อัปเดตคำสั่งซื้อ
 router.put("/ad_order", (req, res) => {
 
@@ -603,6 +683,9 @@ router.put("/ad_order", (req, res) => {
     });
 });
 
+// Test
+// method: delete
+// URL: http://localhost:3001/ad_order/OR00005
 // ลบคำสั่งซื้อ
 router.delete("/ad_order/:id", (req, res) => {
     const idToDelete = req.params.id;
@@ -665,6 +748,11 @@ router.get("/v1/products", function (req, res) {
     })
 })
 
+
+// Test
+// method: get
+// URL: http://localhost:3001/products/AC00001
+
 // ดึงข้อมูลสินค้า 1 ชิ้น สำหรับหน้าซื้อของ
 router.get("/v1/products/:id", (req, res) => {
     const id = req.params.id; // รับ Product ID จาก URL
@@ -686,6 +774,15 @@ router.get("/v1/products/:id", (req, res) => {
 });
 
 
+// Test
+// method: put
+// URL: http://localhost:3001/products/AC00001
+// body: raw JSON
+/*{
+    "img1":"45654",
+    "img2":"56465",
+    "img3":sdfdsfd
+}*/
 // แก้ไขข้อมูลสินค้า (Update Product)
 router.put("/v1/products/:id", (req, res) => {
     const id = req.params.id;
@@ -751,6 +848,9 @@ router.put("/v1/products/:id", (req, res) => {
     );
 });
 
+// Test
+// method: delete
+// URL: http://localhost:3001/products/AC00001
 // ลบสินค้า
 router.delete("/v1/products/:id", (req, res) => {
     const id = req.params.id;
@@ -783,7 +883,21 @@ router.delete("/v1/products/:id", (req, res) => {
     });
 });
 
-
+// Test
+// method: post
+// URL: http://localhost:3001/products
+// body: raw JSON
+/*{
+    "name":"New"
+    "price":562,
+    "type":"Doll",
+    "colname":"newcol",
+    "quantity":12,
+    "desc":"maibok",
+    "img1":"sdfds",
+    "img2":"sdfdf",
+    "img3":"sdfdsfdff"
+}*/
 // เพิ่มสินค้าใหม่
 router.post("/v1/products", (req, res) => {
     const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
