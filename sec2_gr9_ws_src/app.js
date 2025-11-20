@@ -92,7 +92,16 @@ router.post("/v1/signup", function (req, res) {
 
 });
 
-
+/*
+Testing Login Account
+method: post
+URL: http://localhost:3001/v1/login
+body: raw JSON
+{
+    "email": "matsukos100@gmail.com",
+    "password": "maibok"
+}
+*/
 router.post("/v1/login", function (req, res) {
     try {
         const { email, password } = req.body;
@@ -251,7 +260,7 @@ router.put("/user_profile", async (req, res) => {
 
         // ตัวแปรสุดท้ายสำหรับ WHERE clause
         values.push(email);
-        
+
         // สร้าง SQL Command โดยนำ fields มาต่อกันด้วย comma
         const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
 
@@ -260,7 +269,7 @@ router.put("/user_profile", async (req, res) => {
                 console.error(err);
                 return res.status(500).json({ message: "Database error" });
             }
-            res.json({ message: "User updated successfully"});
+            res.json({ message: "User updated successfully" });
         });
     } catch (error) {
         console.error(error);
@@ -404,7 +413,7 @@ router.post("/ad_account", async (req, res) => {
                 return res.status(500).json({ message: "Database error" });
             }
 
-            res.status(201).json({ message: "Account created successfully"});
+            res.status(201).json({ message: "Account created successfully" });
         });
 
     } catch (error) {
@@ -458,7 +467,7 @@ router.put("/ad_account", (req, res) => {
         res.sendStatus(200);
     });
     console.log(`Updated Acc_Email: ${Acc_Email}`);
-        res.json({ message: "Account updated successfully" });
+    res.json({ message: "Account updated successfully" });
 });
 
 // ดึงข้อมูลคำสั่งซื้อ
@@ -653,7 +662,7 @@ router.get("/v1/products/:id", (req, res) => {
     // ใช้เทคนิค Pivot (MAX + CASE WHEN) เพื่อแปลงแถวของรูปภาพ (ProductPicture) ให้เป็นคอลัมน์ (Pic_f, Pic_b, Pic_s) 
     // โดยเช็คจาก suffix ของ Pic_ID ('f'=หน้า, 'b'=หลัง, 's'=ข้าง)
     const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
-    
+
     connection.query(sql, [id], (err, result) => {
         if (err) return res.status(500).json(err);
 
@@ -788,7 +797,7 @@ router.post("/v1/products", (req, res) => {
             const handleInsertProduct = (colID) => {
                 // กำหนด Prefix ของ ID ตามประเภท (Doll -> DS, อื่นๆ -> AC)
                 const prefix = type === "Doll" ? "DS" : "AC";
-                
+
                 // หา ID ล่าสุดเพื่อเจน ID ใหม่ (เช่น DS00005 -> DS00006)
                 const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
 
@@ -802,7 +811,7 @@ router.post("/v1/products", (req, res) => {
                     }
                     // สร้าง ID ใหม่ เติม 0 ด้านหน้าให้ครบ 5 หลัก
                     const newID = prefix + nextNum.toString().padStart(5, "0");
-                    
+
                     // Insert ลงตาราง Product
                     const insertSQL = `
             INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
@@ -816,7 +825,7 @@ router.post("/v1/products", (req, res) => {
                                 console.error(insertErr);
                                 return res.status(500).json({ message: "Error inserting product" });
                             }
-                            
+
                             // Insert รูปภาพลงตาราง ProductPicture (3 รูปพร้อมกัน)
                             // สร้าง ID รูปภาพโดยเอา ID สินค้า + suffix (f, s, b)
                             const insertPics = `INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture) VALUES (?, ?, ?), (?, ?, ?),(?, ?, ?)`;
@@ -919,7 +928,7 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
     //ส่ง productID, quantity ผ่าน body
-    
+
 
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [newQuantity, email, productId], (err) => {
@@ -957,14 +966,26 @@ router.post("/v1/cart/calculate", (req, res) => {
     res.json({ subtotal, shipping, total: subtotal + shipping });
 });
 
-
+/*
+Test
+method: post
+URL: http://localhost:3001/v1/payment
+body: raw JSON
+{
+    "price": 2025,
+    "name": "maibok",
+    "tell": "0123456789",
+    "address": "jrvjngjernj"
+}
+Token: นำ token มาใส่ที่ Auth
+*/
 router.post("/v1/payment", authenticateToken, (req, res) => {
     const { price, name, tel, address } = req.body;
     const email = req.user.email;
 
     //รวมข้อมูลที่อยู่    //สร้างsqlสำหรับorderใหม่ ที่มีorder numberไม่ซ้ำกัน
     const formattedAddress = `${name}\n${tel}\n${address}`;
-    
+
     //Query เพื่อหาหมายเลข Or_Num ล่าสุด
     const selectMaxSql = "SELECT MAX(Or_Num) as max_or_num FROM user_order WHERE Or_Num IS NOT NULL";
 
@@ -990,7 +1011,7 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
             //maxOrNum จะอยู่ในรูปแบบ "OR0000X"
             //ดึงเฉพาะตัวเลขออกมา (ส่วนหลัง 'OR')
             const currentNumber = parseInt(maxOrNum.replace('OR', ''));
-            
+
             //เพิ่มเลขลำดับ
             nextOrderNumber = currentNumber + 1;
         }
@@ -1004,7 +1025,7 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
         connection.query(insertSql, [formattedOrNum, new Date(), price, email, formattedAddress], (insertErr) => {
             if (insertErr) {
                 console.error("DB Insert Error:", insertErr);
-                
+
                 return res.status(500).json({ error: "DB error on insert (Possible Race Condition)" });
             }
 
@@ -1016,7 +1037,7 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
 
 
 // ดึงข้อมูลคำสั่งซื้อของผู้ใช้คนที่ล็อกอินอยู่
-router.get("/myorder", authenticateToken, (req , res) =>{
+router.get("/myorder", authenticateToken, (req, res) => {
     const userEmail = req.user.email;
     const selectMyOrder = ` SELECT 
             Or_Num, 
@@ -1025,15 +1046,15 @@ router.get("/myorder", authenticateToken, (req , res) =>{
             Or_Price,
             Or_AccEmail,
             Or_Address 
-        FROM User_Order WHERE Or_AccEmail= ?`;  
-// ดึงคำสั่งซื้อที่ตรงกับอีเมลของผู้ใช้ที่ล็อกอิน
-     connection.query(selectMyOrder, [userEmail], (err, result) => {
-        if(err) {
+        FROM User_Order WHERE Or_AccEmail= ?`;
+    // ดึงคำสั่งซื้อที่ตรงกับอีเมลของผู้ใช้ที่ล็อกอิน
+    connection.query(selectMyOrder, [userEmail], (err, result) => {
+        if (err) {
             return res.status(500).json("GET ERROR")
         }
-        return res.status(200).json({result})
+        return res.status(200).json({ result })
     });
-} ); 
+});
 
 
 
