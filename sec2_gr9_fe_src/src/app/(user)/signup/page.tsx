@@ -33,7 +33,7 @@ export default function Signup() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(dataToSend)
+      body: JSON.stringify(dataToSend) //กำหนดข้อมูลที่ส่งไปผ่าน request.body
     })
       .then(async response => { 
         if (!response.ok) {

@@ -1,5 +1,5 @@
 "use client"
-import ProductCard from "@/components/built-components/productcard"
+import ProductCard from "@/components/built-components/productcard" //import components ที่สร้างขึ้น
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import React from 'react'
@@ -32,6 +32,7 @@ export default function Product() {
   function fetchProducts(params = {}) {
     let query = new URLSearchParams(params).toString();
     let fetchURL = `http://localhost:3001/v1/products?${query}`
+    // รับ query เป็นตำต้นหา
     fetch(fetchURL)
       .then(res => res.json())
       .then(data => setshowproduct(data))
@@ -45,7 +46,7 @@ export default function Product() {
 
 
 
-
+/* function ไว้กำหนด query โดยจะ update query ตาม field ค้นหาที่กรอห */
   function handlesearch() {
     let searchParams: MySearchParams = {}
     if (product_name) {
@@ -59,7 +60,7 @@ export default function Product() {
     }
     fetchProducts(searchParams)
   }
-
+/* function ไว้ handle ปุ่ม clear โดยจะเคลียร์ query ทั้งหมดและ fetchproduct ใหม่ */
   function handleclear() {
     setproductname('');
     setproducttype('');
