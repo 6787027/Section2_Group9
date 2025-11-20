@@ -8,10 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faInstagram, faPinterest } from '@fortawesome/free-brands-svg-icons'
 import Link from "next/link";
 import { SparklesText } from "@/components/ui/sparkles-text"
+import style from "@/app/(user)/user.module.css"
 
 
 // Main AboutUs component
-export default function AboutUs() {
+export default function AboutUs() {                     
+
   return (
     // Main container with background and padding   
     <div className="bg-[#282151] flex flex-col min-h-screen p-8   ">
@@ -23,7 +25,7 @@ export default function AboutUs() {
         <div className=" grid grid-cols-2  gap-12 ">
 
         {/* 6787027 */}
-        <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg  ">
+        <div className={style.box}>
           <div className="w-60 flex-shrink-0">
             <Image alt="logo" src={Member27} width='240' className="rounded-lg"/>
           </div>
@@ -35,7 +37,7 @@ export default function AboutUs() {
         </div>
      
         {/* 6787034 */}
-        <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg  ">
+        <div className={style.box}>
           <div className="w-60 flex-shrink-0">
             <Image alt="logo" src={Member34} width='240' className="rounded-lg"/>
           </div>
@@ -47,7 +49,7 @@ export default function AboutUs() {
           </div>
         </div>
         {/* 6787042*/}
-        <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg ">
+        <div className={style.box}>
           <div className="w-60 flex-shrink-0">
             <Image alt="logo" src={Member42} width='240' className="rounded-lg"/>
           </div>
@@ -59,7 +61,7 @@ export default function AboutUs() {
         </div>
 
         {/* 6787062 */}
-        <div className="bg-[#FFF7F7] flex  px-4 py-4 rounded-lg   ">
+        <div className={style.box}>
 
           <div className="w-60 flex-shrink-0" >
             <Image alt="logo" src={Member62} width='240' className="rounded-lg"/>

@@ -10,7 +10,7 @@ import { faFacebook, faInstagram, faPinterest } from '@fortawesome/free-brands-s
 export default function Footer() {
     return (
         <div>
-            <main className="w-full flex flex-col justify-center items-center bg-[#1A0041]">
+            <footer className="w-full flex flex-col justify-center items-center bg-[#1A0041]">
                 <div className="footer bg-[#1A0041] w-full h-50  text-white px-10 py-8 flex justify-between max-w-[90rem]">
                     
                     <div className='flex'>
@@ -47,7 +47,7 @@ export default function Footer() {
                 
                 <div className="bg-[#7469B6] w-full h-8 text-white text-sm  py-2 flex justify-center "> © 2025 Copyright: CelesteCraft.com </div>
                     
-            </main>
+            </footer>
         </div>
     );
 }

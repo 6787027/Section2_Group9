@@ -17,7 +17,7 @@ export default function Navbar() {
   const { user } = useAuth();
   return (
     <div >
-      <main>
+      <nav>
         
         <div className="bg-white w-full h-12 text-white  px-6 flex justify-between border border-b-gray-200  items-center">
 
@@ -43,7 +43,7 @@ export default function Navbar() {
 
         </div>
 
-      </main>
+      </nav>
 
     </div>
   );

@@ -1,0 +1,9 @@
+.box {
+    background-color: #FFF7F7;
+    display: flex;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0.5rem;
+}
