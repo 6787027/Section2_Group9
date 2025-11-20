@@ -102,6 +102,16 @@ body: raw JSON
     "password": "maibok"
 }
 */
+/*
+Testing Login Account
+method: post
+URL: http://localhost:3001/v1/login
+body: raw JSON
+{
+    "email": "matsukos100@gmail.com",
+    "password": "maibok"
+}
+*/
 router.post("/v1/login", function (req, res) {
     try {
         const { email, password } = req.body;
