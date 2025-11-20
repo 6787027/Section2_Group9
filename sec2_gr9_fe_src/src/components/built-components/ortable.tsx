@@ -3,6 +3,7 @@
 import { useState } from "react";
 import EditModal from "./EditOrderModal";
 
+// สร้าง interface สำหรับ display แต่ละ order
 interface Order {
     id: string;
     time: string;
@@ -12,16 +13,16 @@ interface Order {
     address: string;
 };
 
-export default function Acctable({ id, time, price, status, email, address }: Order) {
+export default function Ortable({ id, time, price, status, email, address }: Order) {
     const [showEdit, setShowEdit] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    // ✅ 3. ส่งข้อมูลทั้งหมดไปให้ Edit Modal
+    // ส่งข้อมูลทั้งหมดไปให้ Edit Modal
     const orData = { id, time, price, status, email, address };
 
+    // สำหรับส่งไปลบข้อมูลใน database ที่ backend
     const handleDelete = async () => {
         try {
-            // ✅ 4. แก้ไข URL ของ API ให้ถูกต้อง
             const res = await fetch(`http://localhost:3001/ad_order/${id}`, {
                 method: "DELETE",
             });
@@ -39,25 +40,33 @@ export default function Acctable({ id, time, price, status, email, address }: Or
     };
     return (
         <tr>
+            {/* Display ข้อมูลตามหัวตาราง */}
             <td>{id}</td>
             <td>{email}</td>
             <td>{time}</td>
             <td>{price}</td>
+
+            {/* Display status โดยมี id = {status}ซึ่งตรงนี้จะไปดึง CSS มาแสดงผลด้วย */}
             <td>
                 <div id="statusborder">
                     <div id={status}></div>
                     <div className="ml-1">{status}</div>
                 </div>
             </td>
-            <td className="text-center">
-                <button onClick={() => document.getElementById(`address-${id}`)!.showModal()}>
-                    <svg className="w-[24px] h-[24px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778" />
-                    </svg>
-                </button>
+
+            {/* สร้างปุ่มสำหรับเปิด modal แสดงผลข้อความยาว ๆ ซึ่งในที่นี้คือข้อมูลที่อยู่จัดส่ง */}
+            <td>
+                <div className="text-center">
+                    <button onClick={() => document.getElementById(`address-${id}`)!.showModal()}>
+                        <svg className="w-[24px] h-[24px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778" />
+                        </svg>
+                    </button>
+                </div>
+                {/* Modal ที่อยู่จัดส่ง */}
                 <dialog id={`address-${id}`} className="modal">
                     <div className="modal-box">
-                        <h3 className="font-bold text-lg">Address of Order number: {id}</h3>
+                        <h3 className="font-bold text-lg">Sending information of Order number: {id}</h3>
                         <p className="py-4">{address}</p>
                     </div>
                     <form method="dialog" className="modal-backdrop">
@@ -65,15 +74,19 @@ export default function Acctable({ id, time, price, status, email, address }: Or
                     </form>
                 </dialog>
             </td>
-            <td></td>
+
+            {/* Set ปุ่ม สำหรับ Edit และลบข้อมูล */}
             <td className="items-center">
                 <div className=" flex flex-nowrap">
+
+                    {/* Edit */}
                     <button id="edit" onClick={() => setShowEdit(true)}>
                         <svg className="w-[24px] h-[24px] text-black dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
                         </svg>
                     </button>
 
+                    {/* Delete */}
                     <div id="delete" className="mx-5"></div>
                     <button onClick={() => setShowDeleteConfirm(true)}>
                         <svg className="w-[24px] h-[24px] text-[#E00303] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -81,6 +94,8 @@ export default function Acctable({ id, time, price, status, email, address }: Or
                         </svg>
                     </button>
                 </div>
+
+                {/* เมื่อกดเปิด Edit จะให้ขึ้น Modal สำหรับ update ข้อมูล ซึ่งตรงนี้จะ Linkไปให้ EditOrderModal */}
                 {showEdit && (
                     <EditModal
                         key={id}
@@ -90,6 +105,7 @@ export default function Acctable({ id, time, price, status, email, address }: Or
                     />
                 )}
 
+                {/* เมื่อกด Delete จะมี modal ถามว่าจะลบจริง ๆ ใช่ไหม เมื่อกดแล้วจะไปหา handleDelete */}
                 {showDeleteConfirm && (
                     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
                         <div className="bg-white rounded-xl shadow-2xl w-[400px] p-6">

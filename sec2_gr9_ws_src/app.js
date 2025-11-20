@@ -85,14 +85,33 @@ router.post("/v1/signup", function (req, res) {
                 }
 
                 console.log("New user created");
-                res.status(201).json({ message: "User created successfully" });
+                res.status(201).json({ message: "User created successfully", result: insertResult });
             });
         });
     });
 
 });
 
-
+/*
+Testing Login Account
+method: post
+URL: http://localhost:3001/v1/login
+body: raw JSON
+{
+    "email": "matsukos100@gmail.com",
+    "password": "maibok"
+}
+*/
+/*
+Testing Login Account
+method: post
+URL: http://localhost:3001/v1/login
+body: raw JSON
+{
+    "email": "matsukos100@gmail.com",
+    "password": "maibok"
+}
+*/
 router.post("/v1/login", function (req, res) {
     try {
         const { email, password } = req.body;
@@ -172,10 +191,11 @@ router.post("/v1/login", function (req, res) {
 });
 
 
+//ดึงข้อมูลประวัติการเข้าสู่ระบบ (Login Log)
 router.get("/ad_log", (req, res) => {
     try {
-
-        // Display log data from Login_Log (la to oldest)
+        // SQL: เลือก Email และเวลา Log จากตาราง Login_Log
+        // เรียงลำดับจากเวลาล่าสุดไปเก่าสุด (DESC)
         const sql = "SELECT Acc_Email, Log_Time AS Acc_LogTime FROM Login_Log ORDER BY Log_Time DESC";
 
         connection.query(sql, (err, results) => {
@@ -183,8 +203,7 @@ router.get("/ad_log", (req, res) => {
                 console.error("Database query error:", err);
                 return res.status(500).json({ message: "Database query error" });
             }
-
-
+            // ส่งผลลัพธ์กลับไปเป็น JSON
             res.json(results);
         });
 
@@ -194,9 +213,13 @@ router.get("/ad_log", (req, res) => {
     }
 });
 
-// Display data ของ User 
+// Test
+// method: get
+// URL: http://localhost:3001/usertest@gmail.com
+
+// ดึงข้อมูลโปรไฟล์ผู้ใช้รายบุคคล 
 router.get("/user_profile/:email", (req, res) => {
-    const email = req.params.email;
+    const email = req.params.email; // รับ email จาก URL parameter
     const sql = "SELECT * FROM user_account WHERE Acc_Email = ?";
 
     connection.query(sql, [email], (err, data) => {
@@ -204,23 +227,36 @@ router.get("/user_profile/:email", (req, res) => {
             console.error("Error fetching profile:", err);
             return res.status(500).json({ message: "Database query error" });
         }
+        // ถ้าไม่พบข้อมูล (Array ว่าง) ให้ส่ง 404
         if (data.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
+        // ส่งข้อมูลผู้ใช้คนแรกที่เจอ (data[0])
         res.json(data[0]);
     });
 });
 
-// Update data ของ User
+// Test
+// method: put
+// URL: http://localhost:3001/v1/payment
+// body: raw JSON
+/*{
+    "email":"usertest@gmail.com",
+    "fname":"Test",
+    "lname":"data",
+    "phone":"01234567893"
+}*/
+// อัปเดตข้อมูลโปรไฟล์ผู้ใช้
 router.put("/user_profile", async (req, res) => {
-    // รับค่าทั้งหมดมาเพื่อ update เราจะ update ข้อมูลทุก fields แม้ไม่มีการ update
+    // รับค่าจาก Body
     const { email, fname, lname, phone, password } = req.body;
 
     try {
-        // ทำการเพิ่ม Array 2 ตัว ที่ทำหน้าที่เหมือน dictionary 
+        // เทคนิค Dynamic Update Query: สร้าง Array เก็บ Field ที่ต้องการแก้
         const fields = [];
         const values = [];
 
+        // ตรวจสอบทีละค่า ถ้ามีส่งมา ให้เพิ่มเข้า Query
         if (fname) {
             fields.push("Acc_FName = ?");
             values.push(fname);
@@ -234,20 +270,22 @@ router.put("/user_profile", async (req, res) => {
             values.push(phone);
         }
 
+        // ถ้ามีการเปลี่ยนรหัสผ่าน ต้องทำการ Hash ก่อนบันทึก
         if (password) {
-            //เพิ่มการ encryption ของ password
             const hashedPassword = await bcrypt.hash(password, 10);
             fields.push("Acc_Password = ?");
             values.push(hashedPassword);
         }
 
-        // กรณีที่ไม่มีการ update
+        // กรณีที่ไม่มีการส่งข้อมูลอะไรมาอัปเดตเลย
         if (fields.length === 0) {
             return res.status(400).json({ message: "No fields to update" });
         }
 
+        // ตัวแปรสุดท้ายสำหรับ WHERE clause
         values.push(email);
-        // ทำการแยก array ด้วย ,  
+
+        // สร้าง SQL Command โดยนำ fields มาต่อกันด้วย comma
         const sql = `UPDATE user_account SET ${fields.join(", ")} WHERE Acc_Email = ?`;
 
         connection.query(sql, values, (err) => {
@@ -263,11 +301,20 @@ router.put("/user_profile", async (req, res) => {
     }
 });
 
+// Test
+// method: get
+// URL: http://localhost:3001/ad_product
+// URL: http://localhost:3001/ad_product?search=Fort
+// URL: http://localhost:3001/ad_product?type=Accessory
+// URL: http://localhost:3001/ad_product?search=Fort&type=Doll
 
+// ดึงข้อมูลสินค้าสำหรับ Admin 
+// รองรับการ Search และการ Filter Type
 router.get("/ad_product", (req, res) => {
     const search = (req.query.search || "").toLowerCase();
     const type = req.query.type || "all";
 
+    // เริ่มต้นสร้าง SQL Query หลัก: Join ตาราง Product, Picture, Collection
     let sql = `
         SELECT 
             p.Pro_ID,
@@ -277,6 +324,7 @@ router.get("/ad_product", (req, res) => {
             c.Col_Name,
             p.Pro_Quantity,
             p.Pro_Description,
+            -- ใช้ Aggregate function เพื่อดึงรูปภาพแยกตามมุม (หน้า, หลัง, ข้าง)
             MAX(CASE WHEN pic.Pic_ID LIKE '%f' THEN pic.Pro_Picture END) AS Pic_f,
             MAX(CASE WHEN pic.Pic_ID LIKE '%b' THEN pic.Pro_Picture END) AS Pic_b,
             MAX(CASE WHEN pic.Pic_ID LIKE '%s' THEN pic.Pro_Picture END) AS Pic_s
@@ -288,11 +336,13 @@ router.get("/ad_product", (req, res) => {
 
     const params = [];
 
+    // ถ้ามีการเลือกประเภทสินค้า (ไม่ใช่ all) ให้เพิ่มเงื่อนไข WHERE
     if (type !== "all") {
         sql += " AND p.Pro_Type = ?";
         params.push(type);
     }
 
+    // ถ้ามีคำค้นหา ให้เพิ่มเงื่อนไข LIKE ครอบคลุมหลายคอลัมน์
     if (search) {
         sql += ` AND (
             LOWER(p.Pro_ID) LIKE ? OR
@@ -300,15 +350,16 @@ router.get("/ad_product", (req, res) => {
             LOWER(p.Pro_Type) LIKE ? OR
             LOWER(p.Pro_Quantity) LIKE ? OR
             LOWER(c.Col_Name) LIKE ? OR
-            LOWER(p.Pro_Price) LIKE ? OR
-            LOWER(p.Pro_Description) LIKE ?
+            LOWER(p.Pro_Price) LIKE ?
         )`;
 
+        // push search term สำหรับทุก ? ที่ใส่ไป (7 ตัว)
         for (let i = 0; i < 7; i++) {
             params.push(`%${search}%`);
         }
     }
 
+    // Group By เพื่อรวมผลลัพธ์รูปภาพเข้ากับสินค้าชิ้นเดียว
     sql += `
         GROUP BY 
             p.Pro_ID, p.Pro_Name, p.Pro_Price, p.Pro_Type, 
@@ -326,6 +377,13 @@ router.get("/ad_product", (req, res) => {
     });
 });
 
+// Test
+// method: get
+// URL: http://localhost:3001/ad_account
+// URL: http://localhost:3001/ad_account?search=Nong
+// URL: http://localhost:3001/ad_account?type=user
+// URL: http://localhost:3001/ad_account?search=Noey&type=Admin
+// ดึงข้อมูลบัญชีผู้ใช้
 router.get("/ad_account", (req, res) => {
     const { type, search } = req.query;
 
@@ -333,17 +391,20 @@ router.get("/ad_account", (req, res) => {
     let conditions = [];
     let params = [];
 
+    // กรองตามประเภทบัญชี (User/Admin)
     if (type && type !== "all") {
         conditions.push("Acc_Type = ?");
         params.push(type);
     }
 
+    // ค้นหาตามชื่อ หรือ อีเมล
     if (search && search.trim() !== "") {
         conditions.push("(Acc_FName LIKE ? OR Acc_LName LIKE ? OR Acc_Email LIKE ?)");
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword);
     }
 
+    // ประกอบ Query
     if (conditions.length > 0) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -357,19 +418,32 @@ router.get("/ad_account", (req, res) => {
     })
 });
 
+
+// Test
+// method: post
+// URL: http://localhost:3001/v1/payment
+// body: raw JSON
+/*{
+    "email":"test1@gmail.com",
+    "fname":"Test",
+    "lname":"data",
+    "pass":"nothing",
+    "phone":"01234567893",
+    "type":"User"
+}*/
+// สร้างบัญชีใหม่
 router.post("/ad_account", async (req, res) => {
 
     const { email, fname, lname, phonenum, pass, type } = req.body;
 
-
-    if (!email || !fname || !lname || !pass || !type) {
+    // Validation: ตรวจสอบว่ากรอกครบทุกช่อง
+    if (!email || !fname || !lname || !phonenum || !pass || !type) {
         return res.status(400).json({ message: "Please fill all required fields." });
     }
 
     try {
-
+        // Hash Password ก่อนบันทึก
         const hashedPassword = await bcrypt.hash(pass, 10);
-
 
         const sql = `
             INSERT INTO User_Account 
@@ -379,9 +453,9 @@ router.post("/ad_account", async (req, res) => {
 
         const values = [email, fname, lname, phonenum || null, hashedPassword, type];
 
-
         connection.query(sql, values, (err, result) => {
             if (err) {
+                // เช็ค Error Duplicate Entry
                 if (err.code === 'ER_DUP_ENTRY') {
                     return res.status(409).json({ message: "This email is already registered." });
                 }
@@ -389,7 +463,7 @@ router.post("/ad_account", async (req, res) => {
                 return res.status(500).json({ message: "Database error" });
             }
 
-            res.status(201).json({ message: "Account created successfully", insertedId: result.insertId });
+            res.status(201).json({ message: "Account created successfully" });
         });
 
     } catch (error) {
@@ -398,6 +472,10 @@ router.post("/ad_account", async (req, res) => {
     }
 });
 
+// Test
+// method: put
+// URL: http://localhost:3001/ad_account/test1@gmail.com
+// ลบบัญชีผู้ใช้
 router.delete("/ad_account/:email", (req, res) => {
 
     const emailToDelete = req.params.email;
@@ -408,17 +486,16 @@ router.delete("/ad_account/:email", (req, res) => {
 
     const deleteSQL = "DELETE FROM User_Account WHERE Acc_Email = ?";
 
-
     connection.query(deleteSQL, [emailToDelete], (err, result) => {
         if (err) {
             console.error("Error deleting account:", err);
             return res.status(500).json({ message: "Error deleting account" });
         }
 
+        // ถ้าไม่มีแถวไหนถูกลบ แสดงว่าหาบัญชีไม่เจอ
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Account not found" });
         }
-
 
         console.log(`Deleted Acc_Email: ${emailToDelete}`);
         res.json({ message: "Account deleted successfully" });
@@ -426,7 +503,16 @@ router.delete("/ad_account/:email", (req, res) => {
 });
 
 
-
+// Test
+// method: put
+// URL: http://localhost:3001/ad_account
+// body: raw JSON
+/*{
+    "email":"usertest@gmail.com",
+    "fname":"Mynameis",
+    "lname":"Testman"
+}*/
+// แก้ไขบัญชีผู้ใช้ในส่วนของ Admin
 router.put("/ad_account", (req, res) => {
     const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
 
@@ -442,12 +528,22 @@ router.put("/ad_account", (req, res) => {
         }
         res.sendStatus(200);
     });
+    console.log(`Updated Acc_Email: ${Acc_Email}`);
+    res.json({ message: "Account updated successfully" });
 });
 
+
+// Test
+// method: get
+// URL: http://localhost:3001/ad_order
+// URL: http://localhost:3001/ad_order?search=mats
+// URL: http://localhost:3001/ad_order?status=Paid
+// URL: http://localhost:3001/ad_order?search=mats&statud=Sent
+// ดึงข้อมูลคำสั่งซื้อ
 router.get("/ad_order", (req, res) => {
     const { status, search } = req.query;
 
-
+    // Format วันที่ให้สวยงามด้วย DATE_FORMAT
     let query = `
         SELECT 
             Or_Num, 
@@ -461,13 +557,14 @@ router.get("/ad_order", (req, res) => {
     let conditions = [];
     let params = [];
 
+    // กรองตามสถานะ
     if (status && status !== "all") {
         conditions.push("Or_Status = ?");
         params.push(status);
     }
 
+    // ค้นหาหลายฟิลด์ (เลข Order, ราคา, อีเมลลูกค้า)
     if (search && search.trim() !== "") {
-
         conditions.push("(Or_Num LIKE ? OR Or_Price LIKE ? OR Or_Time LIKE ? OR Or_AccEmail LIKE ? OR Or_Address LIKE ?)");
         const keyword = `%${search}%`;
         params.push(keyword, keyword, keyword, keyword, keyword);
@@ -487,6 +584,17 @@ router.get("/ad_order", (req, res) => {
 });
 
 
+// Test
+// method: post
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    "price":45,
+    "status":"Paid",
+    "email":"usertest@gmail.com",
+    "address":"Noey 0124567891 MaewNam Village"
+}*/
+// สร้างคำสั่งซื้อใหม่
 router.post("/ad_order", (req, res) => {
 
     const { price, status, email, address } = req.body;
@@ -495,6 +603,7 @@ router.post("/ad_order", (req, res) => {
         return res.status(400).json({ message: "Please fill all required fields (Price, Status, Email, Address)." });
     }
 
+    // Logic: หา ID ล่าสุดเพื่อ Generate ID ใหม่ (เช่น OR00005 -> OR00006)
     const findLastIdSql = "SELECT Or_Num FROM User_Order ORDER BY Or_Num DESC LIMIT 1";
 
     connection.query(findLastIdSql, (err, results) => {
@@ -506,20 +615,22 @@ router.post("/ad_order", (req, res) => {
         let newIdNum = 1;
         if (results.length > 0) {
             const lastId = results[0].Or_Num;
+            // ตัด string "OR" ออก แล้วแปลงเป็น int เพื่อบวก 1
             const lastNum = parseInt(lastId.substring(2));
             newIdNum = lastNum + 1;
         }
+        // Format กลับเป็น String "OR" + เลข 5 หลัก
         const newOrNum = "OR" + String(newIdNum).padStart(5, '0');
 
 
-
+        // Insert ข้อมูลลงตาราง User_Order
         const insertSql = `INSERT INTO User_Order (Or_Num, Or_Time, Or_Price, Or_Status, Or_AccEmail, Or_Address) VALUES (?, NOW(), ?, ?, ?, ?)
 `;
         const values = [newOrNum, price, status, email, address];
 
         connection.query(insertSql, values, (err, result) => {
             if (err) {
-
+                // จัดการ Error
                 if (err.code === 'ER_DUP_ENTRY') {
                     return res.status(409).json({ message: "This order number already exists." });
                 }
@@ -535,6 +646,16 @@ router.post("/ad_order", (req, res) => {
 });
 
 
+// Test
+// method: put
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    "Or_Num":OR00005,
+    "Or_Status":"Prepared",
+    "Or_Address":"Meow Meow"
+}*/
+// อัปเดตคำสั่งซื้อ
 router.put("/ad_order", (req, res) => {
 
     const { Or_Num, Or_Status, Or_Address } = req.body;
@@ -562,7 +683,10 @@ router.put("/ad_order", (req, res) => {
     });
 });
 
-
+// Test
+// method: delete
+// URL: http://localhost:3001/ad_order/OR00005
+// ลบคำสั่งซื้อ
 router.delete("/ad_order/:id", (req, res) => {
     const idToDelete = req.params.id;
 
@@ -583,8 +707,6 @@ router.delete("/ad_order/:id", (req, res) => {
         res.json({ message: "Order deleted successfully" });
     });
 });
-
-
 
 /* backend หน้า product รวม */
 router.get("/v1/products", function (req, res) {
@@ -626,21 +748,42 @@ router.get("/v1/products", function (req, res) {
     })
 })
 
-router.get("/v1/products/:id", (req, res) => {
-    const id = req.params.id;
 
+// Test
+// method: get
+// URL: http://localhost:3001/products/AC00001
+
+// ดึงข้อมูลสินค้า 1 ชิ้น สำหรับหน้าซื้อของ
+router.get("/v1/products/:id", (req, res) => {
+    const id = req.params.id; // รับ Product ID จาก URL
+
+    // ใช้เทคนิค Pivot (MAX + CASE WHEN) เพื่อแปลงแถวของรูปภาพ (ProductPicture) ให้เป็นคอลัมน์ (Pic_f, Pic_b, Pic_s) 
+    // โดยเช็คจาก suffix ของ Pic_ID ('f'=หน้า, 'b'=หลัง, 's'=ข้าง)
     const sql = "SELECT Pro_ID, Pro_Name, Pro_Price, Pro_Type, Col_Name, Pro_Quantity, Pro_Description, MAX(CASE WHEN Pic_ID LIKE '%f' THEN Pro_Picture END) AS Pic_f, MAX(CASE WHEN Pic_ID LIKE '%b' THEN Pro_Picture END) AS Pic_b, MAX(CASE WHEN Pic_ID LIKE '%s' THEN Pro_Picture END) AS Pic_s FROM Product inner join ProductPicture on Pro_ID = Pic_ProID inner join Collection on Pro_ColID = Col_id Where Pro_ID = ? GROUP BY Pro_ID";
+
     connection.query(sql, [id], (err, result) => {
         if (err) return res.status(500).json(err);
 
+        // ถ้าไม่พบข้อมูล (Array ว่าง)
         if (result.length === 0) {
             return res.status(404).json({ message: "Product not found" });
         }
+        // ส่งคืนข้อมูลสินค้าตัวแรก (และตัวเดียว) ที่เจอ
         res.json(result[0]);
     });
 });
 
 
+// Test
+// method: put
+// URL: http://localhost:3001/products/AC00001
+// body: raw JSON
+/*{
+    "img1":"45654",
+    "img2":"56465",
+    "img3":sdfdsfd
+}*/
+// แก้ไขข้อมูลสินค้า (Update Product)
 router.put("/v1/products/:id", (req, res) => {
     const id = req.params.id;
     const {
@@ -653,13 +796,10 @@ router.put("/v1/products/:id", (req, res) => {
         img1,
         img2,
         img3
-    } = req.body;
+    } = req.body; // รับค่าทั้งหมดจาก Body
 
-
-    if (!name || !price || !type) {
-        return res.status(400).json({ message: "Missing required fields" });
-    }
-
+    // SQL 1: อัปเดตตาราง Product
+    // มีการ JOIN กับ Collection เพื่ออัปเดต Pro_ColID โดยอ้างอิงจาก Col_Name ที่ส่งมา
     const updateProductSQL = `
         UPDATE Product p
         INNER JOIN Collection c ON p.Pro_ColID = c.Col_ID
@@ -682,6 +822,9 @@ router.put("/v1/products/:id", (req, res) => {
                 return res.status(500).json({ message: "Database error updating product" });
             }
 
+            // SQL 2: อัปเดตตาราง ProductPicture
+            // ใช้ CASE WHEN ในการอัปเดตหลายแถวพร้อมกันในคำสั่งเดียว 
+            // โดยเช็ค Suffix ของ Pic_ID เพื่อลงรูปให้ถูกช่อง ('f', 's', 'b')
             const updatePicturesSQL = `
                 UPDATE ProductPicture
                 SET Pro_Picture = CASE
@@ -705,9 +848,14 @@ router.put("/v1/products/:id", (req, res) => {
     );
 });
 
+// Test
+// method: delete
+// URL: http://localhost:3001/products/AC00001
+// ลบสินค้า
 router.delete("/v1/products/:id", (req, res) => {
     const id = req.params.id;
 
+    //ลบรูปภาพในตาราง ProductPicture ก่อน (เพื่อป้องกัน Foreign Key constraint error หรือขยะตกค้าง)
     const deletePicsSQL = "DELETE FROM ProductPicture WHERE Pic_ProID = ?";
 
     connection.query(deletePicsSQL, [id], (picErr) => {
@@ -716,6 +864,7 @@ router.delete("/v1/products/:id", (req, res) => {
             return res.status(500).json({ message: "Error deleting product pictures" });
         }
 
+        // ลบข้อมูลสินค้าในตาราง Product
         const deleteProductSQL = "DELETE FROM Product WHERE Pro_ID = ?";
 
         connection.query(deleteProductSQL, [id], (prodErr, result) => {
@@ -734,14 +883,31 @@ router.delete("/v1/products/:id", (req, res) => {
     });
 });
 
-
+// Test
+// method: post
+// URL: http://localhost:3001/products
+// body: raw JSON
+/*{
+    "name":"New"
+    "price":562,
+    "type":"Doll",
+    "colname":"newcol",
+    "quantity":12,
+    "desc":"maibok",
+    "img1":"sdfds",
+    "img2":"sdfdf",
+    "img3":"sdfdsfdff"
+}*/
+// เพิ่มสินค้าใหม่
 router.post("/v1/products", (req, res) => {
     const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
 
+    // Validation
     if (!name || !price || !type || !colname) {
         return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // ตรวจสอบว่ามี Collection (หมวดหมู่) นี้อยู่แล้วหรือไม่
     connection.query(
         "SELECT Col_ID FROM Collection WHERE Col_Name = ?",
         [colname],
@@ -751,8 +917,12 @@ router.post("/v1/products", (req, res) => {
                 return res.status(500).json({ message: "Database error" });
             }
 
+            // ฟังก์ชันย่อย: ทำหน้าที่บันทึกสินค้าเมื่อได้ Col_ID แล้ว
             const handleInsertProduct = (colID) => {
+                // กำหนด Prefix ของ ID ตามประเภท (Doll -> DS, อื่นๆ -> AC)
                 const prefix = type === "Doll" ? "DS" : "AC";
+
+                // หา ID ล่าสุดเพื่อเจน ID ใหม่ (เช่น DS00005 -> DS00006)
                 const newIDSQL = `SELECT Pro_ID FROM Product WHERE Pro_ID LIKE '${prefix}%' ORDER BY Pro_ID DESC LIMIT 1`;
 
                 connection.query(newIDSQL, (idErr, idResults) => {
@@ -761,9 +931,12 @@ router.post("/v1/products", (req, res) => {
                     let nextNum = 1;
                     if (idResults.length > 0) {
                         const lastID = idResults[0].Pro_ID;
-                        nextNum = parseInt(lastID.substring(2)) + 1;
+                        nextNum = parseInt(lastID.substring(2)) + 1; // ตัด 2 ตัวหน้าออกแล้วบวก 1
                     }
+                    // สร้าง ID ใหม่ เติม 0 ด้านหน้าให้ครบ 5 หลัก
                     const newID = prefix + nextNum.toString().padStart(5, "0");
+
+                    // Insert ลงตาราง Product
                     const insertSQL = `
             INSERT INTO Product (Pro_ID, Pro_Name, Pro_Description, Pro_Price, Pro_Type, Pro_Quantity, Pro_ColID)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -776,6 +949,9 @@ router.post("/v1/products", (req, res) => {
                                 console.error(insertErr);
                                 return res.status(500).json({ message: "Error inserting product" });
                             }
+
+                            // Insert รูปภาพลงตาราง ProductPicture (3 รูปพร้อมกัน)
+                            // สร้าง ID รูปภาพโดยเอา ID สินค้า + suffix (f, s, b)
                             const insertPics = `INSERT INTO ProductPicture (Pic_id, Pic_ProID, Pro_Picture) VALUES (?, ?, ?), (?, ?, ?),(?, ?, ?)`;
                             connection.query(
                                 insertPics,
@@ -793,10 +969,13 @@ router.post("/v1/products", (req, res) => {
                 });
             };
 
+            // Logic การเลือก Collection
             if (colResults.length > 0) {
+                // กรณีมี Collection อยู่แล้ว -> ใช้ ID เดิม
                 handleInsertProduct(colResults[0].Col_ID);
             } else {
-                const newColID = "COL" + Date.now();
+                // กรณีไม่มี Collection -> สร้างใหม่ก่อน แล้วค่อยบันทึกสินค้า
+                const newColID = "COL" + Date.now(); // สร้าง ID แบบง่ายๆ ด้วย timestamp
                 connection.query(
                     "INSERT INTO Collection (Col_ID, Col_Name) VALUES (?, ?)",
                     [newColID, colname],
@@ -805,6 +984,7 @@ router.post("/v1/products", (req, res) => {
                             console.error(insertColErr);
                             return res.status(500).json({ message: "Error creating collection" });
                         }
+                        // สร้างเสร็จแล้วค่อยบันทึกสินค้า
                         handleInsertProduct(newColID);
                     }
                 );
@@ -813,8 +993,6 @@ router.post("/v1/products", (req, res) => {
         }
     );
 });
-
-
 
 //ดึง cart จาก db
 router.get("/v1/cart", authenticateToken, (req, res) => {
@@ -875,29 +1053,58 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const { productId, newQuantity } = req.body;
     //ส่ง productID, quantity ผ่าน body
 
+    // 1. ตรวจสอบการมีอยู่ของค่า
+    if (!productId || typeof newQuantity === 'undefined') {
+        return res.status(400).json({ error: "Invalid product ID or quantity: Missing fields." });
+    }
+
+    // 2. ตรวจสอบว่าเป็นตัวเลขที่ถูกต้องเท่านั้น
+    const quantityValue = Number(newQuantity);
+
+    // ตรวจสอบ:
+    // a) เป็น NaN (เกิดเมื่อแปลง 'hello' หรือ '500jfdj' ด้วย Number())
+    // b) ไม่เป็นจำนวนเต็ม
+    // c) เป็น 0 หรือติดลบ (ถ้าไม่ต้องการให้เป็น 0 หรือติดลบ)
+    if (isNaN(quantityValue) || !Number.isInteger(quantityValue) || quantityValue <= 0) {
+        return res.status(400).json({ error: "Quantity must be a positive integer value." });
+    }
+
+    // ถ้าผ่านการตรวจสอบทั้งหมด ให้ใช้ quantityValue ที่เป็น Number ใน Query
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [newQuantity, email, productId], (err) => {
-        if (err) return res.status(500).json({ error: "DB error" });
+    connection.query(sql, [quantityValue, email, productId], (err) => {
+        if (err) {
+             console.error("Database error during update:", err); // ควร log error ด้วย
+             return res.status(500).json({ error: "DB error" });
+        }
         res.json({ message: "Quantity updated" });
     });
 });
-
 //ลบของ
 router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId } = req.body;
+    
+    // 1. ตรวจสอบว่า productId ถูกส่งมาใน Body หรือไม่
+    //    และต้องไม่ใช่ค่าว่างเปล่า (Empty String) หลังจาก trim()
+    if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
+        return res.status(400).json({ 
+            error: "Invalid input: Product ID is required and must be a non-empty string." 
+        });
+    }
 
-    //  ลบของจาก cart จาก proID
+    
+    // ลบของจาก cart จาก proID
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    connection.query(sql, [email, productId], (err) => {
+    
+    // ใช้ productId.trim() เพื่อตัดช่องว่างหน้า/หลังออกก่อนใช้งาน
+    connection.query(sql, [email, productId.trim()], (err, result) => {
         if (err) {
-            console.error(err)
+            console.error("Database error during item removal:", err);
             return res.status(500).json({ error: "DB error" });
         }
-        res.json({ message: "Item removed" });
+        res.json({ message: "Item removed", result: result });
     });
 });
-
 //คำนวณราคา 
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
@@ -911,14 +1118,26 @@ router.post("/v1/cart/calculate", (req, res) => {
     res.json({ subtotal, shipping, total: subtotal + shipping });
 });
 
-
+/*
+Test
+method: post
+URL: http://localhost:3001/v1/payment
+body: raw JSON
+{
+    "price": 2025,
+    "name": "maibok",
+    "tell": "0123456789",
+    "address": "jrvjngjernj"
+}
+Token: นำ token มาใส่ที่ Auth
+*/
 router.post("/v1/payment", authenticateToken, (req, res) => {
     const { price, name, tel, address } = req.body;
     const email = req.user.email;
 
     //รวมข้อมูลที่อยู่    //สร้างsqlสำหรับorderใหม่ ที่มีorder numberไม่ซ้ำกัน
     const formattedAddress = `${name}\n${tel}\n${address}`;
-    
+
     //Query เพื่อหาหมายเลข Or_Num ล่าสุด
     const selectMaxSql = "SELECT MAX(Or_Num) as max_or_num FROM user_order WHERE Or_Num IS NOT NULL";
 
@@ -944,7 +1163,7 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
             //maxOrNum จะอยู่ในรูปแบบ "OR0000X"
             //ดึงเฉพาะตัวเลขออกมา (ส่วนหลัง 'OR')
             const currentNumber = parseInt(maxOrNum.replace('OR', ''));
-            
+
             //เพิ่มเลขลำดับ
             nextOrderNumber = currentNumber + 1;
         }
@@ -958,7 +1177,7 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
         connection.query(insertSql, [formattedOrNum, new Date(), price, email, formattedAddress], (insertErr) => {
             if (insertErr) {
                 console.error("DB Insert Error:", insertErr);
-                
+
                 return res.status(500).json({ error: "DB error on insert (Possible Race Condition)" });
             }
 
@@ -967,6 +1186,31 @@ router.post("/v1/payment", authenticateToken, (req, res) => {
         });
     });
 });
+
+
+// ดึงข้อมูลคำสั่งซื้อของผู้ใช้คนที่ล็อกอินอยู่
+router.get("/myorder", authenticateToken, (req, res) => {
+    const userEmail = req.user.email;
+    const selectMyOrder = ` SELECT 
+            Or_Num, 
+            DATE_FORMAT(Or_Time, '%Y/%m/%d %H:%i:%s') AS Or_Time, 
+            Or_Status, 
+            Or_Price,
+            Or_AccEmail,
+            Or_Address 
+        FROM User_Order WHERE Or_AccEmail= ?`;
+    // ดึงคำสั่งซื้อที่ตรงกับอีเมลของผู้ใช้ที่ล็อกอิน
+    connection.query(selectMyOrder, [userEmail], (err, result) => {
+        if (err) {
+            return res.status(500).json("GET ERROR")
+        }
+        return res.status(200).json({ result })
+    });
+});
+
+
+
+
 
 
 connection.connect(function (err) {
