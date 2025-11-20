@@ -210,8 +210,10 @@ router.post("/v1/login", function (req, res) {
     }
 });
 
-
-//ดึงข้อมูลประวัติการเข้าสู่ระบบ (Login Log)
+// Test
+// method: get
+// URL: http://localhost:3001/ad_log
+// ดึงข้อมูลประวัติการเข้าสู่ระบบ (Login Log)
 router.get("/ad_log", (req, res) => {
     try {
         // SQL: เลือก Email และเวลา Log จากตาราง Login_Log
@@ -235,7 +237,10 @@ router.get("/ad_log", (req, res) => {
 
 // Test
 // method: get
-// URL: http://localhost:3001/usertest@gmail.com
+// URL: http://localhost:3001/user_profile
+// Test
+// method: get
+// URL: http://localhost:3001/user_profile/usertest@gmail.com
 
 // ดึงข้อมูลโปรไฟล์ผู้ใช้รายบุคคล 
 router.get("/user_profile/:email", (req, res) => {
@@ -258,13 +263,20 @@ router.get("/user_profile/:email", (req, res) => {
 
 // Test
 // method: put
-// URL: http://localhost:3001/v1/payment
+// URL: http://localhost:3001/user_profile
+// body: raw JSON
+/*{
+    
+}*/
+// Test
+// method: put
+// URL: http://localhost:3001/user_profile
 // body: raw JSON
 /*{
     "email":"usertest@gmail.com",
     "fname":"Test",
     "lname":"data",
-    "phone":"01234567893"
+    "phone":"0123456789"
 }*/
 // อัปเดตข้อมูลโปรไฟล์ผู้ใช้
 router.put("/user_profile", async (req, res) => {
@@ -438,6 +450,17 @@ router.get("/ad_account", (req, res) => {
     })
 });
 
+// Test
+// method: post
+// URL: http://localhost:3001/v1/payment
+// body: raw JSON
+/*{
+    "email":"test1@gmail.com",
+    "fname":"Test",
+    "lname":"data",
+    "pass":"nothing",
+    "phone":"01234567893",
+}*/
 
 // Test
 // method: post
@@ -493,7 +516,11 @@ router.post("/ad_account", async (req, res) => {
 });
 
 // Test
-// method: put
+// method: delete
+// URL: http://localhost:3001/ad_account
+
+// Test
+// method: delete
 // URL: http://localhost:3001/ad_account/test1@gmail.com
 // ลบบัญชีผู้ใช้
 router.delete("/ad_account/:email", (req, res) => {
@@ -534,24 +561,63 @@ router.delete("/ad_account/:email", (req, res) => {
 }*/
 // แก้ไขบัญชีผู้ใช้ในส่วนของ Admin
 router.put("/ad_account", (req, res) => {
+    // ดึงค่าจาก req.body
     const { Acc_Email, Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type } = req.body;
 
-    const sql = `
-    UPDATE User_Account
-    SET Acc_FName = ?, Acc_LName = ?, Acc_PhoneNum = ?, Acc_Type = ?
-    WHERE Acc_Email = ?`;
+    // สร้างรายการฟิลด์ที่จะอัปเดตแบบไดนามิก
+    const updateFields = [];
+    const updateValues = [];
 
-    connection.query(sql, [Acc_FName, Acc_LName, Acc_PhoneNum, Acc_Type, Acc_Email], (err, result) => {
+    // ตรวจสอบแต่ละฟิลด์และเพิ่มเข้าในรายการถ้ามีค่า
+    if (Acc_FName !== undefined) {
+        updateFields.push("Acc_FName = ?");
+        updateValues.push(Acc_FName);
+    }
+    if (Acc_LName !== undefined) {
+        updateFields.push("Acc_LName = ?");
+        updateValues.push(Acc_LName);
+    }
+    if (Acc_PhoneNum !== undefined) {
+        updateFields.push("Acc_PhoneNum = ?");
+        updateValues.push(Acc_PhoneNum);
+    }
+    if (Acc_Type !== undefined) {
+        updateFields.push("Acc_Type = ?");
+        updateValues.push(Acc_Type);
+    }
+
+    // **ตรวจสอบว่ามีฟิลด์ที่จะอัปเดตหรือไม่**
+    if (updateFields.length === 0) {
+        return res.status(400).json({ message: "No fields to update" });
+    }
+
+    // สร้างคำสั่ง SQL แบบไดนามิก
+    const sql = `
+        UPDATE User_Account
+        SET ${updateFields.join(", ")}
+        WHERE Acc_Email = ?`;
+
+    // เพิ่ม Acc_Email เป็นค่าสุดท้ายใน updateValues สำหรับ WHERE clause
+    updateValues.push(Acc_Email);
+
+    // ดำเนินการ Query
+    connection.query(sql, updateValues, (err, result) => {
         if (err) {
             console.error("Error updating account:", err);
+            // ควรส่ง response กลับทันทีในกรณีเกิดข้อผิดพลาด
             return res.status(500).send("Database update error");
         }
-        res.sendStatus(200);
-    });
-    console.log(`Updated Acc_Email: ${Acc_Email}`);
-    res.json({ message: "Account updated successfully" });
-});
+        
+        // ตรวจสอบว่ามีแถวใดได้รับการอัปเดตหรือไม่ (ทางเลือกเพิ่มเติม)
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Account not found or no changes made" });
+        }
 
+        console.log(`Updated Acc_Email: ${Acc_Email}`);
+        // ใช้ res.json() เพื่อส่งข้อความสำเร็จพร้อม status 200
+        res.json({ message: "Account updated successfully" });
+    });
+});
 
 // Test
 // method: get
@@ -603,6 +669,13 @@ router.get("/ad_order", (req, res) => {
     });
 });
 
+// Test
+// method: post
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    "price":45
+}*/
 
 // Test
 // method: post
@@ -665,44 +738,81 @@ router.post("/ad_order", (req, res) => {
     });
 });
 
+// Test
+// method: put
+// URL: http://localhost:3001/ad_order
+// body: raw JSON
+/*{
+    
+}*/
 
 // Test
 // method: put
 // URL: http://localhost:3001/ad_order
 // body: raw JSON
 /*{
-    "Or_Num":OR00005,
+    "Or_Num":"OR00004",
     "Or_Status":"Prepared",
     "Or_Address":"Meow Meow"
 }*/
 // อัปเดตคำสั่งซื้อ
 router.put("/ad_order", (req, res) => {
-
+    // ดึงค่าจาก req.body
     const { Or_Num, Or_Status, Or_Address } = req.body;
 
-    if (!Or_Num || !Or_Status || !Or_Address) {
-        return res.status(400).json({ message: "Missing required fields (Or_Num, Or_Status, Or_Address)" });
+    // ตรวจสอบว่ามี Or_Num (ใช้สำหรับ WHERE clause) ถูกส่งมาหรือไม่
+    if (!Or_Num) {
+        return res.status(400).json({ message: "Missing required field: Or_Num" });
     }
 
+    // สร้างรายการฟิลด์และค่าที่จะอัปเดตแบบไดนามิก
+    const updateFields = [];
+    const updateValues = [];
+
+    if (Or_Status !== undefined) {
+        updateFields.push("Or_Status = ?");
+        updateValues.push(Or_Status);
+    }
+    if (Or_Address !== undefined) {
+        updateFields.push("Or_Address = ?");
+        updateValues.push(Or_Address);
+    }
+
+    // ตรวจสอบว่ามีฟิลด์ที่จะอัปเดตหรือไม่
+    if (updateFields.length === 0) {
+        // ใช้ logic เดียวกัน: หากไม่มีฟิลด์ใด ๆ ถูกระบุสำหรับการอัปเดต
+        return res.status(400).json({ message: "No fields to update (Or_Status or Or_Address)" });
+    }
+
+    // สร้างคำสั่ง SQL แบบไดนามิก
     const sql = `
         UPDATE User_Order 
-        SET Or_Status = ?, Or_Address = ?
+        SET ${updateFields.join(", ")}
         WHERE Or_Num = ?
     `;
-    const values = [Or_Status, Or_Address, Or_Num];
 
-    connection.query(sql, values, (err, result) => {
+    // เพิ่ม Or_Num เป็นค่าสุดท้ายใน updateValues สำหรับ WHERE clause
+    updateValues.push(Or_Num);
+
+    // ดำเนินการ Query
+    connection.query(sql, updateValues, (err, result) => {
         if (err) {
             console.error("Error updating order:", err);
             return res.status(500).json({ message: "Database error" });
         }
+        
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Order not found" });
+            return res.status(404).json({ message: "Order not found or no changes made" });
         }
+        
+        console.log(`Updated Order Number: ${Or_Num}`);
         res.json({ message: "Order updated successfully" });
     });
 });
 
+// Test
+// method: delete
+// URL: http://localhost:3001/ad_order
 // Test
 // method: delete
 // URL: http://localhost:3001/ad_order/OR00005
@@ -784,7 +894,9 @@ router.get("/v1/products", function (req, res) {
     })
 })
 
-
+// Test
+// method: get
+// URL: http://localhost:3001/products/Asdsdfds
 // Test
 // method: get
 // URL: http://localhost:3001/products/AC00001
@@ -809,84 +921,154 @@ router.get("/v1/products/:id", (req, res) => {
     });
 });
 
-
 // Test
 // method: put
-// URL: http://localhost:3001/products/AC00001
+// URL: http://localhost:3001/v1/products/AC00001
 // body: raw JSON
 /*{
-    "img1":"45654",
-    "img2":"56465",
-    "img3":sdfdsfd
+
+}*/
+// Test
+// method: put
+// URL: http://localhost:3001/v1/products/AC00001
+// body: raw JSON
+/*{
+    "name":"Maibok"
 }*/
 // แก้ไขข้อมูลสินค้า (Update Product)
 router.put("/v1/products/:id", (req, res) => {
-    const id = req.params.id;
-    const {
-        name,
-        price,
-        type,
-        quantity,
-        desc,
-        colname,
-        img1,
-        img2,
-        img3
-    } = req.body; // รับค่าทั้งหมดจาก Body
+    const id = req.params.id; // Product ID จาก URL Parameter
+    const { name, price, type, quantity, desc, colname, img1, img2, img3 } = req.body;
 
-    // SQL 1: อัปเดตตาราง Product
-    // มีการ JOIN กับ Collection เพื่ออัปเดต Pro_ColID โดยอ้างอิงจาก Col_Name ที่ส่งมา
-    const updateProductSQL = `
-        UPDATE Product p
-        INNER JOIN Collection c ON p.Pro_ColID = c.Col_ID
-        SET 
-            p.Pro_Name = ?,
-            p.Pro_Price = ?,
-            p.Pro_Type = ?,
-            p.Pro_Quantity = ?,
-            p.Pro_Description = ?,
-            p.Pro_ColID = c.Col_ID
-        WHERE p.Pro_ID = ? AND c.Col_Name = ?
-    `;
+    // สร้าง Logic สำหรับ Dynamic Product Update 
+    const productUpdateFields = [];
+    const productUpdateValues = [];
 
-    connection.query(
-        updateProductSQL,
-        [name, price, type, quantity, desc, id, colname],
-        (err, result) => {
-            if (err) {
-                console.error("Error updating Product:", err);
-                return res.status(500).json({ message: "Database error updating product" });
+    // Map fields จาก Body ไปยังชื่อคอลัมน์ใน DB
+    const fieldsMap = {
+        name: "Pro_Name", price: "Pro_Price", type: "Pro_Type",
+        quantity: "Pro_Quantity", desc: "Pro_Description"
+    };
+
+    for (const key in fieldsMap) {
+        // ตรวจสอบว่ามีการส่งฟิลด์นี้มาหรือไม่ (ไม่เป็น undefined)
+        if (req.body[key] !== undefined) {
+            productUpdateFields.push(`Product.${fieldsMap[key]} = ?`);
+            productUpdateValues.push(req.body[key]);
+        }
+    }
+
+    // กรณีพิเศษ: อัปเดต Collection โดยใช้ชื่อ Collection (colname)
+    if (colname !== undefined) {
+        // ใช้ Subquery เพื่อหา Pro_ColID จาก Col_Name
+        productUpdateFields.push(`Product.Pro_ColID = (SELECT Col_ID FROM Collection WHERE Col_Name = ?)`);
+        productUpdateValues.push(colname);
+    }
+    
+    // ตรวจสอบว่ามีข้อมูลที่จะอัปเดตหรือไม่
+    
+    const hasProductUpdates = productUpdateFields.length > 0;
+    const hasPictureUpdates = (img1 !== undefined || img2 !== undefined || img3 !== undefined);
+
+    // ตรวจสอบตาม Logic ที่ต้องการ: ถ้าไม่มีฟิลด์ใด ๆ ถูกส่งมาเลย
+    if (!hasProductUpdates && !hasPictureUpdates) {
+        return res.status(400).json({ message: "No fields to update in product or pictures" });
+    }
+
+    // ฟังก์ชันสำหรับดำเนินการ Picture Updates (ถ้าจำเป็น)
+
+    const executePictureUpdates = () => {
+        
+        // รวบรวมรูปภาพที่มีการส่งค่าเข้ามา
+        const picturesToUpdate = [];
+        if (img1 !== undefined) picturesToUpdate.push({ value: img1, suffix: 'f' }); // front
+        if (img2 !== undefined) picturesToUpdate.push({ value: img2, suffix: 's' }); // side
+        if (img3 !== undefined) picturesToUpdate.push({ value: img3, suffix: 'b' }); // back
+
+        if (picturesToUpdate.length === 0) {
+             // จบการทำงานด้วยข้อความสำเร็จ (ในกรณีที่ฟังก์ชันนี้ถูกเรียกจากการอัปเดต Product สำเร็จ)
+             return res.json({ message: "Product updated successfully" });
+        }
+
+        // ใช้การวนซ้ำแบบ Recursive เพื่อรัน query ทีละรูปภาพ (ปลอดภัยกว่าการสร้าง dynamic CASE WHEN)
+        let pictureIndex = 0;
+
+        function runNextPictureUpdate() {
+            if (pictureIndex >= picturesToUpdate.length) {
+                console.log(`Product ${id} and pictures updated successfully`);
+                return res.json({ message: "Product and pictures updated successfully" });
             }
 
-            // SQL 2: อัปเดตตาราง ProductPicture
-            // ใช้ CASE WHEN ในการอัปเดตหลายแถวพร้อมกันในคำสั่งเดียว 
-            // โดยเช็ค Suffix ของ Pic_ID เพื่อลงรูปให้ถูกช่อง ('f', 's', 'b')
-            const updatePicturesSQL = `
+            const pic = picturesToUpdate[pictureIndex];
+            
+            // SQL สำหรับอัปเดตรูปภาพเดียว
+            const updateSinglePictureSQL = `
                 UPDATE ProductPicture
-                SET Pro_Picture = CASE
-                    WHEN Pic_ID LIKE '%f' THEN ?
-                    WHEN Pic_ID LIKE '%s' THEN ?
-                    WHEN Pic_ID LIKE '%b' THEN ?
-                END
-                WHERE Pic_ProID = ?
+                SET Pro_Picture = ?
+                WHERE Pic_ProID = ? AND Pic_ID LIKE CONCAT('%', ?)
             `;
-
-            connection.query(updatePicturesSQL, [img1, img2, img3, id], (picErr) => {
+            
+            connection.query(updateSinglePictureSQL, [pic.value, id, pic.suffix], (picErr) => {
                 if (picErr) {
-                    console.error("Error updating ProductPicture:", picErr);
-                    return res.status(500).json({ message: "Error updating product pictures" });
+                    console.error(`Error updating picture with suffix '${pic.suffix}':`, picErr);
+                    return res.status(500).json({ message: `Error updating picture with suffix '${pic.suffix}'` });
                 }
 
-                console.log(`Product ${id} updated successfully`);
-                res.json({ message: "Product updated successfully" });
+                pictureIndex++;
+                runNextPictureUpdate(); // ไปต่อที่รูปภาพถัดไป
             });
         }
-    );
+        
+        runNextPictureUpdate();
+    };
+
+
+    // ดำเนินการอัปเดตตามลำดับ
+
+    if (hasProductUpdates) {
+        // สร้าง SQL สำหรับ Product
+        const updateProductSQL = `
+            UPDATE Product 
+            SET ${productUpdateFields.join(", ")}
+            WHERE Pro_ID = ?
+        `;
+
+        // เพิ่ม ID สำหรับ WHERE clause
+        productUpdateValues.push(id); 
+
+        // Execute Product UPDATE
+        connection.query(updateProductSQL, productUpdateValues, (err, result) => {
+            if (err) {
+                console.error("Error updating Product:", err);
+                // ดักจับ error กรณี Col_Name ไม่ถูกต้อง
+                if (colname !== undefined && err.code === 'ER_NO_REFERENCED_ROW_2') {
+                    return res.status(400).json({ message: "Invalid collection name provided" });
+                }
+                return res.status(500).json({ message: "Database error updating product" });
+            }
+            
+            // หลังจาก Product อัปเดตสำเร็จ ให้ดำเนินการอัปเดต Pictures ต่อ
+            if (hasPictureUpdates) {
+                executePictureUpdates();
+            } else {
+                // ถ้าไม่มีการอัปเดตรูปภาพ ให้จบการทำงานตรงนี้
+                console.log(`Product ${id} updated successfully (no picture changes requested)`);
+                res.json({ message: "Product updated successfully" });
+            }
+        });
+        
+    } else if (hasPictureUpdates) {
+        // กรณีที่อัปเดตแค่ Pictures เท่านั้น
+        executePictureUpdates();
+    }
 });
 
 // Test
 // method: delete
-// URL: http://localhost:3001/products/AC00001
+// URL: http://localhost:3001/v1/products
+// Test
+// method: delete
+// URL: http://localhost:3001/v1/products/AC00001
 // ลบสินค้า
 router.delete("/v1/products/:id", (req, res) => {
     const id = req.params.id;
@@ -918,7 +1100,20 @@ router.delete("/v1/products/:id", (req, res) => {
         });
     });
 });
-
+// Test
+// method: post
+// URL: http://localhost:3001/products
+// body: raw JSON
+/*{
+"name":"New"
+    "price":562,
+    "type":"Doll",
+    "colname":"newcol",
+    "quantity":12,
+    "desc":"maibok",
+    "img1":"sdfds",
+    "img3":"sdfdsfdff"
+} */
 // Test
 // method: post
 // URL: http://localhost:3001/products
