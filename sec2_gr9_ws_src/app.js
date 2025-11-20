@@ -47,6 +47,26 @@ const authenticateToken = (req, res, next) => {
 
 
 //signup
+// Test Sign Up
+// method: post
+// URL: http://localhost:3001/v1/signup
+// body: raw JSON
+//New User (passed case)
+/*{"firstName":"Tom", 
+    "LastName":"Holland", 
+    "email": "tommy-luvul@gmall.com", 
+    "phone":"0666666666", 
+    "password": "Nattanon12", 
+    "type": "Accessory"
+}*/
+// Exists User (failed case)
+/*{"firstName":"Kukkik", 
+    "lastName":"Holland", 
+    "email":"matsukos128@gmail.com", 
+    "phone": "0666666666", 
+    "password": "Nattanon12", 
+    "type": "Accessory"
+}*/
 router.post("/v1/signup", function (req, res) {
     console.log("Create the user")
     //เช็คก่อนว่า email ที่เราจะ signup มีในระบบแล้วยัง
@@ -709,6 +729,22 @@ router.delete("/ad_order/:id", (req, res) => {
 });
 
 /* backend หน้า product รวม */
+// Test Get Products 
+// method: get
+// URL: http://localhost:3001/v1/products
+// headers: none
+
+// 1. Search by Product Name
+// URL: http://localhost:3001/v1/products?name=Gryffindor
+// Description: ดึงรายการสินค้าที่มีชื่อ (Pro_Name) ที่มีคำว่า 'Gryffindor' อยู่
+
+// 2. Search by Product Type
+// URL: http://localhost:3001/v1/products?type=Accessory
+// Description: ดึงรายการสินค้าที่มีประเภท (Pro_Type) ที่มีคำว่า 'Accessory' อยู่
+
+// 3. Search by Collection Name
+// URL: http://localhost:3001/v1/products?collection=HarryPotter
+// Description: ดึงรายการสินค้าที่มีชื่อ Collection (Col_Name) ที่มีคำว่า 'HarryPotter' อยู่
 router.get("/v1/products", function (req, res) {
     let sql = "SELECT p.Pro_Name, p.Pro_ID, p.Pro_Type, p.Pro_Price, c.Col_Name, pp.Pro_Picture " +
         "FROM Product AS p " +
@@ -995,6 +1031,18 @@ router.post("/v1/products", (req, res) => {
 });
 
 //ดึง cart จาก db
+// Test Get Cart
+// method: get
+// URL: http://localhost:3001/v1/cart
+// headers: Authorization: Bearer <Auth Token>
+
+// Account has cart (Passed case: 200 OK)
+// Token obtained from logging in with email: matsukos128@gmail.com and password: maibok
+/* No body/parameters needed, uses Authorization header */
+
+// Account doesn't have cart (Passed case: 200 OK, returns empty or default structure)
+// Token obtained from logging in with email: usertest@gmail.com and password: maibok
+/* No body/parameters needed, uses Authorization header */
 router.get("/v1/cart", authenticateToken, (req, res) => {
     const userEmail = req.user.email; // ดึงจาก Token
     const sql = `
@@ -1020,6 +1068,30 @@ router.get("/v1/cart", authenticateToken, (req, res) => {
 });
 
 // เพิ่มของลงตะกร้า
+// Test Post Cart Add
+// method: post
+// URL: http://localhost:3001/v1/cart/add
+// body: raw JSON
+// headers: Authorization: Bearer <Auth Token>
+
+// Add new product (You don't have this product in cart - Passed case: 201 Created)
+// Token obtained from logging in with email: usertest@gmail.com and password: maibok
+/*
+{
+    "productId": "DS00001",
+    "quantity": 200
+}
+*/
+
+// Update existing product quantity (You already had this product in cart - Passed case: 201 Created)
+// Token obtained from logging in with email: matsukos128@gmail.com and password: maibok
+/*
+{
+    "productId": "DS00001",
+    "quantity": 200
+}
+*/
+
 router.post("/v1/cart/add", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, quantity } = req.body;
@@ -1048,6 +1120,28 @@ router.post("/v1/cart/add", authenticateToken, (req, res) => {
 });
 
 // อัปเดตจำนวน
+// Test Put Cart Update Quantity
+// method: put
+// URL: http://localhost:3001/v1/cart/update/quantity
+// body: raw JSON
+// headers: Authorization: Bearer <Auth Token>
+// Token obtained from logging in with email: matsukos128@gmail.com and password: maibok
+
+// Invalid Input (Failed case: 400 Bad Request, "Quantity must be a positive integer value.")
+/*
+{
+    "productId": "AC00010",
+    "newQuantity": "500jfdj"
+}
+*/
+
+// Valid Input (Passed case: 200 OK, "Quantity updated")
+/*
+{
+    "productId": "AC00010",
+    "newQuantity": 30
+}
+*/
 router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId, newQuantity } = req.body;
@@ -1073,29 +1167,49 @@ router.put("/v1/cart/update/quantity", authenticateToken, (req, res) => {
     const sql = "UPDATE CartItem SET Cart_Quantity = ? WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
     connection.query(sql, [quantityValue, email, productId], (err) => {
         if (err) {
-             console.error("Database error during update:", err); // ควร log error ด้วย
-             return res.status(500).json({ error: "DB error" });
+            console.error("Database error during update:", err); // ควร log error ด้วย
+            return res.status(500).json({ error: "DB error" });
         }
         res.json({ message: "Quantity updated" });
     });
 });
 //ลบของ
+// Test Delete Cart Remove
+// method: delete
+// URL: http://localhost:3001/v1/cart/remove
+// body: raw JSON
+// headers: Authorization: Bearer <Auth Token>
+// Token obtained from logging in with email: matsukos128@gmail.com and password: maibok
+
+// Invalid Input (Failed case: 400 Bad Request, "Invalid Input: Product ID is required and must be a non-empty string.")
+/*
+{
+    "productId": 100159
+}
+*/
+
+// Valid Input (Passed case: 200 OK, "Item removed")
+/*
+{
+    "productid": "AC00001"
+}
+*/
 router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     const email = req.user.email;
     const { productId } = req.body;
-    
+
     // 1. ตรวจสอบว่า productId ถูกส่งมาใน Body หรือไม่
     //    และต้องไม่ใช่ค่าว่างเปล่า (Empty String) หลังจาก trim()
     if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
-        return res.status(400).json({ 
-            error: "Invalid input: Product ID is required and must be a non-empty string." 
+        return res.status(400).json({
+            error: "Invalid input: Product ID is required and must be a non-empty string."
         });
     }
 
-    
+
     // ลบของจาก cart จาก proID
     const sql = "DELETE FROM CartItem WHERE Cart_AccEmail = ? AND Cart_ProID = ?";
-    
+
     // ใช้ productId.trim() เพื่อตัดช่องว่างหน้า/หลังออกก่อนใช้งาน
     connection.query(sql, [email, productId.trim()], (err, result) => {
         if (err) {
@@ -1106,6 +1220,34 @@ router.delete("/v1/cart/remove", authenticateToken, (req, res) => {
     });
 });
 //คำนวณราคา 
+// Test Post Cart Calculate
+// method: post
+// URL: http://localhost:3001/v1/cart/calculate
+// body: raw JSON
+
+// Invalid Input (Failed case: 400 Bad Request, "Invalid payload")
+/*
+    {
+        "id": 1,
+        "name": "Product A",
+        "price": 500,
+        "selectedItem": 2,
+        "check": true
+    }
+*/
+
+// Valid Input (Passed case: 200 OK, returns subtotal/shipping/total)
+/*
+[
+    {
+        "id": 3,
+        "name": "Product C",
+        "price": 258.50,
+        "selectedItem": 1,
+        "check": true
+    }
+]
+*/
 router.post("/v1/cart/calculate", (req, res) => {
     const items = req.body;
     if (!Array.isArray(items)) return res.status(400).json({ error: "Invalid payload" });
