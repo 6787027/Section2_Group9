@@ -1,4 +1,4 @@
-import QrPayment from "@/assets/QrPayment.png"
+import QrPayment from "@/assets/qrcode.svg"
 import Image from "next/image"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 

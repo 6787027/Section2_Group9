@@ -3,10 +3,11 @@ import { useContext, useEffect, useState } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { AuroraText } from "@/components/ui/aurora-text";
-import home from "@/assets/Home.svg";
+import home from "@/assets/Homepage.svg";
+import homeabout from "@/assets/HomeAbout.svg";
 import TarotModal from '@/components/built-components/tarotModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
- 
+
 // Define the TarotCard type based on the expected API response
 export type TarotCard = {
     name: string;
@@ -22,7 +23,7 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-// Function to handle fetching a random tarot card
+    // Function to handle fetching a random tarot card
     const handleRandomCard = async () => {
         setIsLoading(true);
         setError(null);
@@ -46,10 +47,16 @@ export default function Home() {
 
     return (
         <>
-         {/* Main container with background and centering */}
+            {/* Main container with background and centering */}
             <div className="bg-[#282151] min-h-screen text-center ">
                 <main>
                     <div className=" min-h-screen relative w-full h-screen">
+
+                        <div className='absolute inset-0 z-10 flex flex-col justify-end items-center p-8'>
+                            <Link href={"/product"}>
+                                <button className="text-lg h-14 w-40 text-[#975b0d] font-semibold bg-white/50 backdrop-blur-sm hover:bg-[#975b0d] hover:text-white active:bg-white rounded-4xl border-0 transition-all delay-200">Shop now</button>
+                            </Link>
+                        </div>
                         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${home.src})` }} > </div>
                     </div>
 
@@ -73,90 +80,97 @@ export default function Home() {
 
                     {/* Recommended Products Section */}
                     <div className="py-2">
-                        <div className="py-2"><AuroraText className="text-4xl font-bold" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"]} speed={2} >Recommended Products</AuroraText></div>
-                    {/* Product Cards Container */}
+                        <div className="py-8"><AuroraText className="text-4xl font-bold" colors={["#FFDFEF", "#EABDE6", "#D69ADE", "#AA60C8"]} speed={2} >Recommended Products</AuroraText></div>
+                        {/* Product Cards Container */}
                         <div className="flex overflow-x-scroll py-2 gap-8 mx-auto max-w-7xl">
-                        {/* Product Card 1 */}
-                            <Link href="http://localhost:3000/product/DS00003" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/57/24/7f/57247fb4206d5a5a209ccdb26f469462.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 1 */}
+                            <Link href="http://localhost:3000/product/DS00003" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/57/24/7f/57247fb4206d5a5a209ccdb26f469462.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Chang'e Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Chang'e Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
-                        {/* Product Card 2 */}
-                             <Link href="http://localhost:3000/product/DS00007" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/f0/ff/77/f0ff7791d1b75ef6d05c06bd396e55bd.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 2 */}
+                            <Link href="http://localhost:3000/product/DS00007" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/f0/ff/77/f0ff7791d1b75ef6d05c06bd396e55bd.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Isis Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Isis Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
-                        {/* Product Card 3 */}
-                             <Link href="http://localhost:3000/product/DS00006" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/4f/74/4f/4f744f6dab471c1ee10f596338d6d94b.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 3 */}
+                            <Link href="http://localhost:3000/product/DS00006" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/4f/74/4f/4f744f6dab471c1ee10f596338d6d94b.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Lakshmi Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Lakshmi Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
-                        {/* Product Card 4 */}
-                            <Link href="http://localhost:3000/product/DS00010" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/33/66/a6/3366a6d33472b8a6ad86d5c4cd5e1c05.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 4 */}
+                            <Link href="http://localhost:3000/product/DS00010" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/33/66/a6/3366a6d33472b8a6ad86d5c4cd5e1c05.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Inari Okami Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Inari Okami Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
-                        {/* Product Card 5 */}
-                            <Link href="http://localhost:3000/product/DS00009" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/9e/a6/82/9ea682c88a9b21c612453814777e39c7.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 5 */}
+                            <Link href="http://localhost:3000/product/DS00009" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/9e/a6/82/9ea682c88a9b21c612453814777e39c7.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Ganesha Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Ganesha Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
-                        {/* Product Card 6 */}
-                            <Link href="http://localhost:3000/product/DS000005" className="hover:text-[#A599ED] active:text-black text-2xl" > 
-                            <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
-                                <div>
-                                    <Image alt="logo" src={"https://i.pinimg.com/736x/fb/b0/95/fbb095e222842702e3eda5bd48d8109c.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                            {/* Product Card 6 */}
+                            <Link href="http://localhost:3000/product/DS000005" className="hover:text-[#A599ED] active:text-black text-2xl" >
+                                <div className="bg-white p-4 rounded-2xl shrink-0 w-72 h-110">
+                                    <div>
+                                        <Image alt="logo" src={"https://i.pinimg.com/736x/fb/b0/95/fbb095e222842702e3eda5bd48d8109c.jpg"} width={250} height={360} className=" rounded-2xl w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
+                                        <span className="font-semibold">Cupid Doll</span>
+                                        <span>฿ 590</span>
+                                    </div>
                                 </div>
-                                <div className="text-left flex flex-col pt-2 text-7469B6 text-lg">
-                                    <span className="font-semibold">Cupid Doll</span>
-                                    <span>฿ 590</span>
-                                </div>
-                            </div>
                             </Link>
 
                         </div>
 
+
                     </div>
-                    <div>
+                    {/* ปรับ background-size เป็น contain และเพิ่ม background-repeat: no-repeat */}
+                    <div className="pt-24 w-full  relative ">
+                        <div
+                            className="relative w-full min-h-screen bg-no-repeat bg-center bg-cover" 
+                style={{ backgroundImage: `url(${homeabout.src})` }} >
+                        
+                        </div>
                     </div>
                 </main>
             </div>
-            {/* Tarot Modal Component */}    
+            {/* Tarot Modal Component */}
             <TarotModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
